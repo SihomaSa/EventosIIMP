@@ -1,10 +1,14 @@
-import { Link } from "react-router-dom";
+import { useAuth } from "../Contexts/authContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
-    return (
-        <div>
-          <h1>Bienvenido</h1>
-          <Link to="/about">Ir a Acerca de</Link>
-        </div>
-      );
-  }
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <h1>Welcome, {user}!</h1>
+      <button onClick={() => { logout(); navigate("/login"); }}>Logout</button>
+    </div>
+  );
+}
