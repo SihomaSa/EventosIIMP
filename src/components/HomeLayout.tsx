@@ -19,10 +19,10 @@ export default function Home({ children }: { children: React.ReactNode }) {
         <nav className="space-y-2">
           <NavItem icon={<HomeIcon />} label="Inicio" ref="/home" />
           <NavItem icon={<Calendar size={20} />} label="Eventos" ref="/events" />
-          <NavItem icon={<Megaphone size={20} />} label="Publicidad" ref="#" />
+          {/* <NavItem icon={<Megaphone size={20} />} label="Publicidad" ref="#" />
           <NavItem icon={<Megaphone size={20} />} label="Boletines" ref="#" />
           <NavItem icon={<Megaphone size={20} />} label="Nota de Prensa" ref="#" />
-          <NavItem icon={<Megaphone size={20} />} label="Auspiciadores" ref="#" />
+          <NavItem icon={<Megaphone size={20} />} label="Auspiciadores" ref="#" /> */}
           <NavItem icon={<Settings size={20} />} label="Configuración" ref="#" />
         </nav>
       </div>
