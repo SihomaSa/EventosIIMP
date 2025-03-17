@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
-import EventDetail from "./components/events/EventDetailModal";
+import EventDetail from "./pages/EventDetail";
 import ProtectedRoute from "./utils/ProtectedRoute";
 
 function App() {
@@ -17,8 +17,8 @@ function App() {
 					<Routes>
 						<Route path="/login" element={<Login />} />
 						<Route element={<ProtectedRoute />}>
-							<Route path="/home" element={<Home />} />
 							<Route path="/events" element={<Events />} />
+							<Route path="/home" element={<Home />} />
 							<Route path="/events/:id" element={<EventDetail />} />
 						</Route>
 							<Route path="/about" element={<About />} />

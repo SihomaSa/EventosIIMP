@@ -13,12 +13,6 @@ export default function Login() {
 	const { login } = useAuth();
 	const navigate = useNavigate();
 
-	// const handleLogin = () => {
-	// 	if (username.trim()) {
-	// 		login(username);
-	// 		navigate("/home"); // Redirect to a protected page
-	// 	}
-	// };
 	const [formData, setFormData] = useState({ username: "", password: "" });
 	const [errors, setErrors] = useState<{
 		username?: string;
@@ -40,7 +34,7 @@ export default function Login() {
 
 
 			login(formData.username);
-			navigate("/home"); // Redirect to a protected page
+			navigate("/events"); // Redirect to a protected page
 
 	};
 
@@ -73,7 +67,6 @@ export default function Login() {
 
 					<button className="bg-[#C09054] text-white" type="submit">Iniciar sesión</button>
 				</form>
-				{/* <button className="" onClick={handleLogin}>Login</button> */}
 			</div>
 		</div>
 	);
