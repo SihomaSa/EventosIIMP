@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 // import { useEvents } from "../../stores/useEvents";
 import { fetchEvents } from "../../services/api";
 import { EventType } from "../../types/eventTypes";
+import { Button } from "../ui/button";
 
 // interface Event {
 // 	idEvent: string;
@@ -63,13 +64,13 @@ export default function EventList() {
 	// const { events, loading, error } = useEvents();
 	// const [eventsIn, setEventsIn] = useState<Event[]>(initialEvents);
 	// const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
-    const navigate = useNavigate();
+	const navigate = useNavigate();
 
 	// if (loading) return <p>Cargando eventos...</p>;
 	// if (error) return <p>Error: {error}</p>;
-    const [events, setEvents] = useState<EventType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+	const [events, setEvents] = useState<EventType[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	// const handleUpdate = (updatedEvent: Event) => {
 	// 	setEventsIn(
@@ -79,24 +80,24 @@ export default function EventList() {
 	// 	);
 	// };
 
-    useEffect(() => {
-        const loadEvents = async () => {
-          try {
-            const data = await fetchEvents();
-            setEvents(data);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (err) {
-            setError("Error al cargar los eventos");
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        loadEvents();
-      }, []);
-    
-      if (loading) return <p>Cargando eventos...</p>;
-      if (error) return <p className="text-red-500">{error}</p>;
+	useEffect(() => {
+		const loadEvents = async () => {
+			try {
+				const data = await fetchEvents();
+				setEvents(data);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (err) {
+				setError("Error al cargar los eventos");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadEvents();
+	}, []);
+
+	if (loading) return <p>Cargando eventos...</p>;
+	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
 		<div>
@@ -107,33 +108,36 @@ export default function EventList() {
 						key={event.idEvent}
 						className="bg-white shadow-md rounded-xl border border-amber-800 overflow-hidden w-full max-w-md"
 					>
-						<div className="relative overflow-hidden" style={{maxHeight: "200px"}}>
+						<div
+							className="relative overflow-hidden"
+							style={{ maxHeight: "200px" }}
+						>
 							<img
 								src={"/img/Banner (1).png"}
 								// src={"https://placehold.co/600x400"}
 								alt="Imagen de prueba"
 								className="w-full object-cover opacity-80"
 							/>
-							<div className="absolute inset-0 bg-black bg-black/30" />
+							<div className="absolute inset-0 bg-black/30" />
 						</div>
 						<div className="p-4 text-center">
 							<h3 className="text-lg font-semibold">{event.des_event}</h3>
-                            <div className="flex mt-2">
-              <span
-                className="w-6 h-6 rounded-full"
-                style={{ backgroundColor: event.color }}
-              ></span>
-              <span
-                className="w-6 h-6 rounded-full ml-2"
-                style={{ backgroundColor: event.subcolor }}
-              ></span>
-            </div>
-            <button
-              onClick={() => navigate(`/events/${event.idEvent}`)}
-              className="mt-4 px-4 py-2 bg-amber-800 text-white rounded hover:bg-amber-900"
-            >
-              Ver Detalles
-            </button>
+							<div className="flex mt-2">
+								<span
+									className="w-6 h-6 rounded-full"
+									style={{ backgroundColor: event.color }}
+								></span>
+								<span
+									className="w-6 h-6 rounded-full ml-2"
+									style={{ backgroundColor: event.subcolor }}
+								></span>
+							</div>
+							<Button 
+								onClick={() => navigate(`/events/${event.idEvent}`)}
+								className="mt-4 px-4 py-2 bg-amber-800 text-white rounded hover:bg-amber-900"
+							>
+								Ver Detalles
+								</Button>
 							{/* <p
 								className="mt-3 text-amber-800 cursor-pointer hover:underline"
 								onClick={() => setSelectedEvent(event)}

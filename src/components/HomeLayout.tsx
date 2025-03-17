@@ -1,7 +1,7 @@
 import { useAuth } from "../Contexts/authContext";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, Calendar, Megaphone, Settings, Home as HomeIcon } from "lucide-react";
-import { Children, useState } from "react";
+import { Menu, X, Calendar, Settings, Home as HomeIcon } from "lucide-react";
+import { useState } from "react";
 import NavItem from "./NavItem";
 
 export default function Home({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,7 @@ export default function Home({ children }: { children: React.ReactNode }) {
   // <button onClick={() => { logout(); navigate("/login"); }}>Logout</button>
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen max-h-screen">
       {/* Sidebar */}
       <div className={`bg-amber-900 text-white w-64 p-5 space-y-4 transition-all ${isOpen ? "translate-x-0" : "-translate-x-64"} sm:translate-x-0 fixed sm:relative h-full`}>
         <h2 className="text-lg font-bold h-[10vh]">Administrador</h2>

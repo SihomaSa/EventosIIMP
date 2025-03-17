@@ -1,136 +1,152 @@
 import { useState } from "react";
-import { EventType } from "../../types/eventTypes";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EventType } from "@/types/eventTypes";
+import { Label } from "../ui/label";
 
 interface EditEventModalProps {
+	section: string;
 	event: EventType;
 	onClose: () => void;
-	onSave: (updatedEvent: EventType) => void;
 }
 
-export default function EditEventModal({
+export default function EventEditModal({
+	section,
 	event,
 	onClose,
-	onSave,
 }: EditEventModalProps) {
 	const [formData, setFormData] = useState(event);
-	const [imagePreview, setImagePreview] = useState<string | null>(
-		event.foto || null
-	);
+	const [previewImage, setPreviewImage] = useState<string | null>(event.image);
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	  if (e.target.files && e.target.files[0]) {
+		const file = e.target.files[0];
+		const reader = new FileReader();
+		reader.onloadend = () => {
+		  setPreviewImage(reader.result as string);
+		};
+		reader.readAsDataURL(file);
+	  }
+	};
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
 		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: value });
-
-		// Actualiza el preview
-		if (name === "foto") {
-			setImagePreview(value);
-		}
+		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		onSave(formData);
+	const handleSave = () => {
+		console.log("Saving data:", formData);
+		onClose();
 	};
 
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-black/40">
-			<div className="bg-white p-6 rounded-lg shadow-lg w-96">
-				<h2 className="text-xl font-bold mb-4">Editar Evento</h2>
-				<form onSubmit={handleSubmit}>
-					<input
-						type="text"
-						name="des_event"
-						value={formData.des_event}
-						onChange={handleChange}
-						className="w-full p-2 border rounded mb-2"
-						placeholder="Título"
-					/>
-					<label className="w-full border border-gray-300 rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer bg-gray-100 hover:bg-gray-200 transition">
-						<svg
-							className="w-10 h-10 text-gray-500"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M12 4v16m8-8H4"
-							></path>
-						</svg>
-						<p className="text-gray-700 text-sm mt-2">Subir imagen</p>
-						<input
-							type="file"
-							accept="image/*"
-							onChange={(e) => {
-								const file = e.target.files?.[0];
-								if (file) {
-									const reader = new FileReader();
-									reader.onload = () =>
-										setImagePreview(reader.result as string);
-									reader.readAsDataURL(file);
-								}
-							}}
-							className="hidden"
+		<Dialog open={true} onOpenChange={onClose}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Editar {section}</DialogTitle>
+				</DialogHeader>
+
+				{section === "general" && (
+					<div className="space-y-4">
+						<Label htmlFor="des_event">Nombre</Label>
+						<Input
+							name="des_event"
+							value={formData.des_event}
+							onChange={handleChange}
 						/>
-					</label>
-
-					{imagePreview && (
-						<div className="mt-2">
-							<p className="text-sm text-gray-500">Vista previa:</p>
-							<img
-								src={imagePreview}
-								alt="Vista previa"
-								className="w-full h-40 object-cover border rounded"
-							/>
-						</div>
-					)}
-
-					<div className="flex flex-col w-1/2">
-						<label className="text-sm text-gray-600 mb-1">Color primario</label>
-						<input
-							type="color"
+						<Label htmlFor="color">Color primario</Label>
+						<Input
 							name="color"
 							value={formData.color}
 							onChange={handleChange}
-							className="w-full h-10 border rounded cursor-pointer"
-						/>
-					</div>
-
-					<div className="flex flex-col w-1/2">
-						<label className="text-sm text-gray-600 mb-1">
-							Color secundario
-						</label>
-						<input
 							type="color"
+						/>
+						<Label htmlFor="subcolor">Color secundario</Label>
+						<Input
 							name="subcolor"
 							value={formData.subcolor}
 							onChange={handleChange}
-							className="w-full h-10 border rounded cursor-pointer"
+							type="color"
+						/>
+						<img
+							src={previewImage || event.foto}
+							alt={event.des_event}
+							className="w-full h-60 object-cover rounded"
+						/>
+						<input
+							type="file"
+							accept="image/*"
+							onChange={handleImageChange}
+							className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200"
 						/>
 					</div>
+				)}
 
-					<div className="flex justify-between mt-4">
-						<button
-							type="button"
-							className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-							onClick={onClose}
-						>
-							Cancelar
-						</button>
-						<button
-							type="submit"
-							className="px-4 py-2 bg-green-800 text-white rounded-md hover:bg-green-900"
-						>
-							Guardar Cambios
-						</button>
+				{section === "ads" && (
+					<div className="space-y-4">
+						{formData.ads.map((pub, index) => (
+							<div key={index} className="space-y-2">
+								<Label htmlFor={`publicidades[${index}].image`}>Imagen</Label>
+								<Input
+									name={`publicidades[${index}].image`}
+									value={pub.image}
+									onChange={handleChange}
+								/>
+								<Label htmlFor={`publicidades[${index}].url`}>URL</Label>
+								<Input
+									name={`publicidades[${index}].url`}
+									value={pub.url}
+									onChange={handleChange}
+								/>
+							</div>
+						))}
 					</div>
-				</form>
-			</div>
-		</div>
+				)}
+
+				{section === "press" && (
+					<div className="space-y-4">
+						{formData.pressNotes.map((nota, index) => (
+							<div key={index} className="space-y-2">
+								<Label htmlFor={`notasPrensa[${index}].title`}>Título</Label>
+								<Input
+									name={`notasPrensa[${index}].title`}
+									value={nota.title}
+									onChange={handleChange}
+								/>
+								<Label htmlFor={`notasPrensa[${index}].date`}>Fecha</Label>
+								<Input
+									name={`notasPrensa[${index}].date`}
+									value={nota.date}
+									onChange={handleChange}
+									type="date"
+								/>
+								<Label htmlFor={`notasPrensa[${index}].url`}>URL</Label>
+								<Input
+									name={`notasPrensa[${index}].url`}
+									value={nota.url}
+									onChange={handleChange}
+								/>
+							</div>
+						))}
+					</div>
+				)}
+
+				<DialogFooter>
+					<Button onClick={onClose} variant="outline">
+						Cancelar
+					</Button>
+					<Button onClick={handleSave}>Guardar</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }

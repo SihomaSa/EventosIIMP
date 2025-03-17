@@ -9,7 +9,7 @@ export interface SponsorType {
 
   export type SponsorCategory =
   | "socio estratégico"
-  | "otro"
+  | "oro"
   | "plata"
   | "cobre"
   | "colaborador"

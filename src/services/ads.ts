@@ -3,7 +3,7 @@ import { AdType } from "../types/adTypes";
 export const mockAds: AdType[] = [
   {
     id: "1",
-    image: "/images/ad1.jpg",
+    image: "/img/Banner (1).png",
     url: "https://example.com/ad1",
   },
 ];
