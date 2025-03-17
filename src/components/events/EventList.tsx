@@ -122,7 +122,7 @@ export default function EventList() {
 						</div>
 						<div className="p-4 text-center">
 							<h3 className="text-lg font-semibold">{event.des_event}</h3>
-							<div className="flex mt-2">
+							<div className="flex justify-center mt-2">
 								<span
 									className="w-6 h-6 rounded-full"
 									style={{ backgroundColor: event.color }}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../Contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 
 const schema = z.object({
 	username: z.string().min(3, "El usuario debe tener al menos 3 caracteres"),
@@ -65,7 +66,7 @@ export default function Login() {
 					/>
 					{errors.password && <p>{errors.password}</p>}
 
-					<button className="bg-[#C09054] text-white" type="submit">Iniciar sesión</button>
+					<Button className="bg-[#C09054]" type="submit">Iniciar sesión</Button>
 				</form>
 			</div>
 		</div>

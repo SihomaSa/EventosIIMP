@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Menu, X, Calendar, Settings, Home as HomeIcon } from "lucide-react";
 import { useState } from "react";
 import NavItem from "./NavItem";
+import { Button } from "./ui/button";
 
 export default function Home({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
@@ -35,7 +36,7 @@ export default function Home({ children }: { children: React.ReactNode }) {
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <h1 className="text-xl font-semibold"> </h1>
-          <button className="bg-gray-200 rounded-full p-2" onClick={() => { logout(); navigate("/login"); }}>👤</button>
+          <Button className="p-2" variant={"secondary"} onClick={() => { logout(); navigate("/login"); }}>Cerrar Sesión</Button>
         </header>
 
         {/* Contenido dinámico aquí */}
