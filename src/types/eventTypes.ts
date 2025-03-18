@@ -3,6 +3,7 @@ import { PressNoteType } from "./pressNoteTypes";
 import { BulletinType } from "./bulletinTypes";
 import { AdType } from "./adTypes";
 import { ActivityType } from "./activityTypes";
+import { ExpositorType } from "./expositorTypes";
 
 export interface EventType {
   idEvent: string;
@@ -15,4 +16,5 @@ export interface EventType {
   bulletins: BulletinType[];
   ads: AdType[];
   activities: ActivityType[];
+  expositors: ExpositorType[];
 }

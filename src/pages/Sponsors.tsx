@@ -27,7 +27,7 @@ export default function Sponsors() {
       <Button className="mb-4">Agregar Sponsor</Button>
       <div className="space-x-4 space-y-2 flex flex-wrap py-4 justify-center">
         {sponsors.map((sponsor) => (
-          <div key={sponsor.id} className="w-20 h-20 border-3 rounded-lg flex items-center cursor-pointer hover:shadow-xl" onClick={() => window.open(sponsor.url, "_blank", "noopener,noreferrer")}>
+          <div key={sponsor.id} className="w-20 h-20 bg-white border-3 rounded-lg flex items-center cursor-pointer hover:shadow-xl" onClick={() => window.open(sponsor.url, "_blank", "noopener,noreferrer")}>
             <img src={sponsor.image} alt={sponsor.title} className="object-cover p-2 w-auto" />
           </div>
         ))}

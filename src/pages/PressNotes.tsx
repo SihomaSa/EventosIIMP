@@ -3,8 +3,11 @@ import { PressNoteType } from "../types/pressNoteTypes";
 import { fetchPressNotes } from "@/services/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function PressNotes() {
+	const navigate = useNavigate();
+
 	const [pressNotes, setPressNotes] = useState<PressNoteType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -12,7 +15,7 @@ export default function PressNotes() {
 	useEffect(() => {
 		const loadPressNotes = async () => {
 			try {
-				const data = await fetchPressNotes(); // Simula la llamada a la API
+				const data = await fetchPressNotes();
 				setPressNotes(data);
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
@@ -30,16 +33,14 @@ export default function PressNotes() {
 
 	return (
 		<div className="flex-1 p-6">
-			<h1 className="font-bold mb-4">Gestión de Boletines</h1>
-			<Button className="mb-4">Agregar Boletín</Button>
+			<h1 className="font-bold mb-4">Gestión de Notas de Prensa</h1>
+			<Button className="mb-4">Agregar Notas de Prensa</Button>
 			<div className="flex flex-wrap gap-4 justify-center">
 				{pressNotes.map((note) => (
 					<Card
 						key={note.id}
 						className="rounded-lg shadow-md overflow-hidden cursor-pointer p-2 w-65 max-w-65"
-						onClick={() =>
-							window.open(note.url, "_blank", "noopener,noreferrer")
-						}
+						onClick={() => navigate(`/pressnotes/${note.id}`)}
 					>
 						<img
 							src={note.image}

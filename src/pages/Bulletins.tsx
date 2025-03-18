@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { BulletinType } from "../types/bulletinTypes";
 import { fetchBullentins } from "@/services/api";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function Bulletins() {
+	const navigate = useNavigate();
 	const [bulletins, setBulletins] = useState<BulletinType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -14,6 +16,7 @@ export default function Bulletins() {
 			try {
 				const data = await fetchBullentins();
 				setBulletins(data);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al cargar los boletines");
 			} finally {
@@ -36,9 +39,7 @@ export default function Bulletins() {
                 <Card
                     key={bulletin.id}
                     className="shadow-md overflow-hidden cursor-pointer p-2"
-					onClick={() =>
-						window.open(bulletin.url, "_blank", "noopener,noreferrer")
-					}
+					onClick={() => navigate(`/bulletins/${bulletin.id}`)}
 				>
                     <CardContent>
                         <img

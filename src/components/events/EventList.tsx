@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useEventStore } from "@/stores/eventStore";
 import { fetchEvents } from "../../services/api";
 import { EventType } from "../../types/eventTypes";
@@ -10,7 +9,6 @@ import { NewEventType } from "@/types/createEvent";
 
 export default function EventList() {
 	const { selectEvent } = useEventStore();
-	const navigate = useNavigate();
 
 	const [events, setEvents] = useState<EventType[]>([]);
 	const [loading, setLoading] = useState(true);

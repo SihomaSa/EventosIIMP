@@ -33,19 +33,17 @@ export default function Login() {
 			return;
 		}
 
-
-			login(formData.username);
-			navigate("/events"); // Redirect to a protected page
-
+		login(formData.username);
+		navigate("/events"); // Redirect to a protected page
 	};
 
 	return (
 		<div className="h-screen w-screen bg-[#BDADAD] flex justify-center items-center">
 			<div className="bg-white rounded-lg p-10">
 				<form onSubmit={handleSubmit} className="flex flex-col gap-y-5">
-          <h1 className="text-gray-600 pb-3">Administrador</h1>
+					<h1 className="text-gray-600 pb-3">Administrador</h1>
 					<input
-            className="border border-gray-400 rounded-xl p-3"
+						className="border border-gray-400 rounded-xl p-3"
 						type="text"
 						placeholder="Usuario"
 						value={formData.username}
@@ -56,7 +54,7 @@ export default function Login() {
 					{errors.username && <p>{errors.username}</p>}
 
 					<input
-          className="border border-gray-400 rounded-xl p-3"
+						className="border border-gray-400 rounded-xl p-3"
 						type="password"
 						placeholder="Contraseña"
 						value={formData.password}
@@ -66,7 +64,9 @@ export default function Login() {
 					/>
 					{errors.password && <p>{errors.password}</p>}
 
-					<Button className="bg-[#C09054]" type="submit">Iniciar sesión</Button>
+					<Button className="bg-[#C09054]" type="submit">
+						Iniciar sesión
+					</Button>
 				</form>
 			</div>
 		</div>
