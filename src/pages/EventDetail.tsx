@@ -64,11 +64,21 @@ export default function EventDetail() {
 
 					<TabsContent value="general">
 						<div className="flex items-center justify-around py-4">
-							<img
+							{/* <img
 								src={event.foto}
 								alt={event.des_event}
 								className="h-60 object-cover rounded"
-							/>
+							/> */}
+
+							<div
+								className="w-20 border-3 rounded-lg flex items-center"
+                >
+								<img
+                  src={event.foto}
+                  alt={event.des_event}
+									className="object-cover p-2 w-auto"
+								/>
+							</div>
 							<div className="flex flex-col mt-2">
 								<h2>Colores</h2>
 								<div className="flex rounded-full">

@@ -10,6 +10,9 @@ import EventDetail from "./pages/EventDetail";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import EventNew from "./pages/EventNew";
 import { EventProvider } from "./stores/eventStore";
+import Sponsors from "./pages/Sponsors";
+import HomeLayout from "./components/HomeLayout";
+import Ads from "./pages/Ads";
 
 function App() {
 	return (
@@ -21,6 +24,10 @@ function App() {
 							<Route path="/login" element={<Login />} />
 							<Route element={<ProtectedRoute />}>
 								<Route path="/events" element={<Events />} />
+								<Route path="/home" element={<HomeLayout />}>
+									<Route path="sponsors" element={<Sponsors />} />
+									<Route path="ads" element={<Ads />} />
+								</Route>
 								<Route path="/newEvent" element={<EventNew />} />
 								<Route path="/home" element={<Home />} />
 								<Route path="/events/:id" element={<EventDetail />} />

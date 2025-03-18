@@ -8,7 +8,6 @@ import HomeLayout from "@/components/HomeLayout";
 export default function NewEvent() {
 	const { addEvent } = useEventStore();
 	const [formData, setFormData] = useState<NewEventType>({
-		des_event: "",
 		color: "",
 		subcolor: "",
 		image: "",
@@ -37,34 +36,32 @@ export default function NewEvent() {
 	};
 
 	return (
-		<HomeLayout>
-			<form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-md mx-auto">
-                <h1>Crear Evento</h1>
-				<Input
-					name="des_event"
-					placeholder="Nombre del evento"
-					value={formData.des_event}
-					onChange={handleChange}
-					required
-				/>
-				<Input
-					name="color"
-					type="color"
-					value={formData.color|| "#000000"}
-					onChange={handleChange}
-				/>
-				<Input
-					name="subcolor"
-					type="color"
-					value={formData.subcolor || "#000000"}
-					onChange={handleChange}
-				/>
-				<input type="file" accept="image/*" onChange={handleImageChange} />
-				{formData.image && (
-					<img src={formData.image} alt="Preview" className="w-32 h-32 mt-2" />
-				)}
-				<Button type="submit">Crear Evento</Button>
-			</form>
-		</HomeLayout>
+		<form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-md mx-auto">
+			<h1>Crear Evento</h1>
+			{/* <Input
+				name="des_event"
+				placeholder="Nombre del evento"
+				value={formData.des_event}
+				onChange={handleChange}
+				required
+			/> */}
+			<Input
+				name="color"
+				type="color"
+				value={formData.color || "#000000"}
+				onChange={handleChange}
+			/>
+			<Input
+				name="subcolor"
+				type="color"
+				value={formData.subcolor || "#000000"}
+				onChange={handleChange}
+			/>
+			<input type="file" accept="image/*" onChange={handleImageChange} />
+			{formData.image && (
+				<img src={formData.image} alt="Preview" className="w-32 h-32 mt-2" />
+			)}
+			<Button type="submit">Crear Evento</Button>
+		</form>
 	);
 }

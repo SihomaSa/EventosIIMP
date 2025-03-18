@@ -1,5 +1,5 @@
 export type NewEventType = {
-    des_event: string;
+    // des_event: string;
     color: string;
     subcolor: string;
     image?: string;

@@ -1,9 +1,12 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import { NewEventType } from "@/types/createEvent";
+import { EventType } from "@/types/eventTypes";
 
 const EventContext = createContext<{
   events: NewEventType[];
+  selectedEvent: EventType;
   addEvent: (event: NewEventType) => void;
+  selectEvent: (event: EventType) => void;
 } | null>(null);
 
 export function EventProvider({ children }: { children: React.ReactNode }) {
@@ -12,16 +15,26 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     return storedEvents ? JSON.parse(storedEvents) : [];
   });
 
+  const [selectedEvent, setSelectedEvent] = useState<EventType | null>(() => {
+    const storedSelectedEvent = localStorage.getItem("selectedEvent");
+    return storedSelectedEvent ? JSON.parse(storedSelectedEvent) : null;
+  });
+
   useEffect(() => {
     localStorage.setItem("events", JSON.stringify(events));
-  }, [events]);
+    localStorage.setItem("selectedEvent", JSON.stringify(selectedEvent));
+  }, [events, selectedEvent]);
 
   const addEvent = (event: NewEventType) => {
     setEvents((prev) => [...prev, event]);
   };
 
+const selectEvent = (event: EventType) => {
+    setSelectedEvent(event);
+  };
+  
   return (
-    <EventContext.Provider value={{ events, addEvent }}>
+    <EventContext.Provider value={{ events, addEvent, selectEvent, selectedEvent }}>
       {children}
     </EventContext.Provider>
   );
