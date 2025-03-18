@@ -23,9 +23,9 @@ export default function Home() {
           <NavItem icon={<Handshake size={20} />} label="Auspiciadores" ref="/home/sponsors" />
           <NavItem icon={<Megaphone size={20} />} label="Publicidad" ref="/home/ads" />
           <NavItem icon={<CalendarDays size={20} />} label="Programas" ref="#" />
-          <NavItem icon={<Newspaper size={20} />} label="Boletines" ref="#" />
-          <NavItem icon={<Megaphone size={20} />} label="Nota de Prensa" ref="#" />
-          <NavItem icon={<Users size={20} />} label="conferencistas" ref="#" />
+          <NavItem icon={<Newspaper size={20} />} label="Boletines" ref="/home/bulletins" />
+          <NavItem icon={<Megaphone size={20} />} label="Nota de Prensa" ref="/home/press" />
+          <NavItem icon={<Users size={20} />} label="Conferencistas" ref="/home/lecturers" />
           <NavItem icon={<Settings size={20} />} label="Configuración" ref="#" />
         </nav>
       </div>

@@ -13,6 +13,8 @@ import { EventProvider } from "./stores/eventStore";
 import Sponsors from "./pages/Sponsors";
 import HomeLayout from "./components/HomeLayout";
 import Ads from "./pages/Ads";
+import Bulletins from "./pages/Bulletins";
+import PressNotes from "./pages/PressNotes";
 
 function App() {
 	return (
@@ -26,6 +28,8 @@ function App() {
 								<Route path="/events" element={<Events />} />
 								<Route path="/home" element={<HomeLayout />}>
 									<Route path="sponsors" element={<Sponsors />} />
+									<Route path="bulletins" element={<Bulletins />} />
+									<Route path="press" element={<PressNotes />} />
 									<Route path="ads" element={<Ads />} />
 								</Route>
 								<Route path="/newEvent" element={<EventNew />} />
