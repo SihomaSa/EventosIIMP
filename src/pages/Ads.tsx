@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AdType } from "../types/adTypes";
 import { fetchAds } from "@/services/api";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export default function Ads() {
 	const [ads, setAds] = useState<AdType[]>([]);
@@ -24,7 +25,6 @@ export default function Ads() {
 		loadAds();
 	}, []);
 
-	if (loading) return <p>Cargando publicidades...</p>;
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
@@ -32,6 +32,7 @@ export default function Ads() {
 			<h1 className="text-2xl font-bold mb-4">Gestión de Publicidades</h1>
 			<Button className="mb-4">Agregar Publicidad</Button>
 			<div className="space-x-4 flex flex-col py-4 justify-center items-center">
+				{loading && <Loader2 className="animate-spin" />}
 				{ads.map((ad) => (
 					<div className=" flex justify-center items-center py-2 m-0">
 						<div

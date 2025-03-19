@@ -4,6 +4,7 @@ import { fetchPressNotes } from "@/services/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 export default function PressNotes() {
 	const navigate = useNavigate();
@@ -28,7 +29,6 @@ export default function PressNotes() {
 		loadPressNotes();
 	}, []);
 
-	if (loading) return <p>Cargando notas de prensa...</p>;
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
@@ -36,6 +36,9 @@ export default function PressNotes() {
 			<h1 className="font-bold mb-4">Gestión de Notas de Prensa</h1>
 			<Button className="mb-4">Agregar Notas de Prensa</Button>
 			<div className="flex flex-wrap gap-4 justify-center">
+			{loading && (
+          <Loader2 className="animate-spin" />
+        )}
 				{pressNotes.map((note) => (
 					<Card
 						key={note.id}

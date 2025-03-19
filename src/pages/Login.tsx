@@ -30,7 +30,7 @@ export default function Login() {
     }
 
     login(formData.username);
-    navigate("/home/sponsors/");
+    navigate("/events");
   };
 
   return (

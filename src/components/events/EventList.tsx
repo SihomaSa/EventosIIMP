@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useEventStore } from "@/stores/eventStore";
@@ -37,7 +37,13 @@ export default function EventList() {
 		loadEvents();
 	}, []);
 
-	if (loading) return <p>Cargando eventos...</p>;
+	if (loading)
+		return (
+			<div className="flex flex-col items-center justify-center">
+				<img src="/img/LOGOS_iimp 7.svg" alt="Logo de la empresa" className="max-w-md text-white py-2" />
+				<Loader2 className="animate-spin" />
+			</div>
+		);
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
@@ -48,7 +54,11 @@ export default function EventList() {
 
 			<div className="flex justify-center items-center gap-x-2 py-9">
 				{events.map((event, index) => (
-					<Link key={index} to={`/events/${event.idEvent}`} onClick={() => selectEvent(event)}>
+					<Link
+						key={index}
+						to={`/home/sponsors`}
+						onClick={() => selectEvent(event)}
+					>
 						<div
 							key={index}
 							className="w-20 h-20 border-3 border-[#C09054] rounded-lg shadow-xl flex items-center"
