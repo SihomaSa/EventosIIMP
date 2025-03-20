@@ -11,6 +11,7 @@ export interface EventType {
   foto: string;
   color: string;
   subcolor: string;
+  estado: string;
   sponsors: SponsorType[];
   pressNotes: PressNoteType[];
   bulletins: BulletinType[];

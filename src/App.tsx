@@ -18,36 +18,39 @@ import Expositors from "./pages/Expositors";
 import ExpositorDetail from "./pages/ExpositorDetail";
 import PressNoteDetail from "./pages/PressNoteDetail";
 import BulletinDetail from "./pages/BulletinDetail";
+import { ThemeProvider } from "./Contexts/themeContext";
 
 function App() {
 	return (
 		<>
-			<AuthProvider>
-				<EventProvider>
-					<Router>
-						<Routes>
-							<Route path="/login" element={<Login />} />
-							<Route element={<ProtectedRoute />}>
-								<Route path="/events" element={<Events />} />
-								<Route path="/home" element={<HomeLayout />}>
-									<Route path="sponsors" element={<Sponsors />} />
-									<Route path="bulletins" element={<Bulletins />} />
-									<Route path="press" element={<PressNotes />} />
-									<Route path="ads" element={<Ads />} />
-									<Route path="expositors" element={<Expositors />} />
+			<ThemeProvider>
+				<AuthProvider>
+					<EventProvider>
+						<Router>
+							<Routes>
+								<Route path="/login" element={<Login />} />
+								<Route element={<ProtectedRoute />}>
+									<Route path="/events" element={<Events />} />
+									<Route path="/home" element={<HomeLayout />}>
+										<Route path="sponsors" element={<Sponsors />} />
+										<Route path="bulletins" element={<Bulletins />} />
+										<Route path="press" element={<PressNotes />} />
+										<Route path="ads" element={<Ads />} />
+										<Route path="expositors" element={<Expositors />} />
+									</Route>
+									<Route path="/bulletins/:id" element={<BulletinDetail />} />
+									<Route path="/pressnotes/:id" element={<PressNoteDetail />} />
+									<Route path="/expositors/:id" element={<ExpositorDetail />} />
+									<Route path="/newEvent" element={<EventNew />} />
+									<Route path="/home" element={<Home />} />
 								</Route>
-								<Route path="/bulletins/:id" element={<BulletinDetail />} />
-								<Route path="/pressnotes/:id" element={<PressNoteDetail />} />
-								<Route path="/expositors/:id" element={<ExpositorDetail />} />
-								<Route path="/newEvent" element={<EventNew />} />
-								<Route path="/home" element={<Home />} />
-							</Route>
-							<Route path="/about" element={<About />} />
-							<Route path="*" element={<NotFound />} />
-						</Routes>
-					</Router>
-				</EventProvider>
-			</AuthProvider>
+								<Route path="/about" element={<About />} />
+								<Route path="*" element={<NotFound />} />
+							</Routes>
+						</Router>
+					</EventProvider>
+				</AuthProvider>
+			</ThemeProvider>
 		</>
 	);
 }

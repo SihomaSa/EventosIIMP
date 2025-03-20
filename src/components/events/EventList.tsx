@@ -6,9 +6,11 @@ import { fetchEvents } from "../../services/api";
 import { EventType } from "../../types/eventTypes";
 import { Button } from "../ui/button";
 import { NewEventType } from "@/types/createEvent";
+import { useTheme } from "@/Contexts/themeContext";
 
 export default function EventList() {
 	const { selectEvent } = useEventStore();
+	const { setTheme } = useTheme();
 
 	const [events, setEvents] = useState<EventType[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -40,7 +42,11 @@ export default function EventList() {
 	if (loading)
 		return (
 			<div className="flex flex-col items-center justify-center">
-				<img src="/img/LOGOS_iimp 7.svg" alt="Logo de la empresa" className="max-w-md text-white py-2" />
+				<img
+					src="/img/LOGOS_iimp 7.svg"
+					alt="Logo de la empresa"
+					className="max-w-md text-white py-2"
+				/>
 				<Loader2 className="animate-spin" />
 			</div>
 		);
@@ -49,27 +55,45 @@ export default function EventList() {
 	return (
 		<div className="h-screen w-screen py-9 px-9 max-w-md m-auto overflow-y-scroll overflow-x-hidden">
 			<h2 className="text-2xl font-bold mb-4">
-				Selecciona el evento que administrar
+				Selecciona el evento que desea ver
 			</h2>
 
 			<div className="flex justify-center items-center gap-x-2 py-9">
-				{events.map((event, index) => (
-					<Link
-						key={index}
-						to={`/home/sponsors`}
-						onClick={() => selectEvent(event)}
-					>
-						<div
+				{events.map((event, index) => {
+					if (event.estado === "0") {
+						return (
+							<div
+								key={index}
+								className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center"
+							>
+								<img
+									src={event.foto}
+									alt="evento logo"
+									className="object-cover p-2 w-full h-auto grayscale"
+								/>
+							</div>
+						);
+					}
+
+					// Si el estado no es 1, muestra el evento con enlace
+					return (
+						<Link
 							key={index}
-							className="w-20 h-20 border-3 border-[#C09054] rounded-lg shadow-xl flex items-center"
+							to={`/home/sponsors`}
+							onClick={() => {
+								selectEvent(event);
+								setTheme(`event${event.idEvent}`);
+							}}
 						>
-							<img
-								src={event.foto}
-								alt="evento logo"
-								className="object-cover p-2 w-full h-auto"
-							/>
-						</div>
-					</Link>
+							<div className="w-20 h-20 border-3 border-primary rounded-lg shadow-xl hover:shadow-2xl flex items-center transition delay-150 duration-300 ease-in-out hover:scale-110">
+								<img
+									src={event.foto}
+									alt="evento logo"
+									className="object-cover p-2 w-full h-auto"
+								/>
+							</div>
+						</Link>
+					);
 
 					// <div
 					// 	key={event.idEvent}
@@ -106,11 +130,11 @@ export default function EventList() {
 					// 		</Button>
 					// 	</div>
 					// </div>
-				))}
+				})}
 			</div>
 
 			<div
-				className="bg-white text-amber-900 rounded-lg p-4 border border-dashed border-amber-800 flex flex-col items-center justify-center cursor-pointer"
+				className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer"
 				onClick={() => setShowForm(!showForm)}
 			>
 				<h3 className="text-lg font-semibold">Agregar Evento</h3>
