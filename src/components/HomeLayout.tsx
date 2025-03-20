@@ -11,7 +11,7 @@ export default function Home() {
   const { resetTheme } = useTheme();
 
   return (
-    <div className="flex h-screen max-h-screen">
+    <div className="flex">
       <SidebarProvider>
       <AppSidebar />
 

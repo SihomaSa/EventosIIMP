@@ -2,7 +2,7 @@ import { Loader2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useEventStore } from "@/stores/eventStore";
-import { fetchEvents } from "../../services/api";
+// import { fetchEvents } from "../../services/api";
 import { EventType } from "@/types/eventTypes";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/Contexts/themeContext";
@@ -38,7 +38,10 @@ export default function EventList() {
 	useEffect(() => {
 		const loadEvents = async () => {
 			try {
-				const data = await fetchEvents();
+				const response = await fetch("https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/event"); // Reemplaza con tu URL real
+				if (!response.ok) throw new Error("Error al obtener eventos");
+				
+				const data: EventType[] = await response.json();
 				setEvents(data);
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
@@ -47,6 +50,7 @@ export default function EventList() {
 				setLoading(false);
 			}
 		};
+
 		loadEvents();
 	}, []);
 

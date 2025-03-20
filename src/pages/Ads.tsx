@@ -38,9 +38,6 @@ export default function Ads() {
 						<div
 							key={ad.id}
 							className="h-full border rounded-xl overflow-hidden cursor-pointer flex items-center justify-around mr-4"
-							onClick={() =>
-								window.open(ad.url, "_blank", "noopener,noreferrer")
-							}
 						>
 							<img
 								src={ad.image}
@@ -49,7 +46,6 @@ export default function Ads() {
 							/>
 						</div>
 						<a
-							href={ad.url}
 							className="border-2 border-amber-900 p-2 rounded-lg"
 							target="_blank"
 							rel="noopener noreferrer"
