@@ -1,9 +1,9 @@
 export type NewEventType = {
-    // des_event: string;
-    color: string;
-    subcolor: string;
-    image?: string;
-  };
+  color: string;
+  subcolor?: string;
+  foto?: FileList | null;
+};
+
 
 // export type NewEventType = {
 //     des_event: string;

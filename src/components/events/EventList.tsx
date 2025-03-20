@@ -3,10 +3,20 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useEventStore } from "@/stores/eventStore";
 import { fetchEvents } from "../../services/api";
-import { EventType } from "../../types/eventTypes";
-import { Button } from "../ui/button";
-import { NewEventType } from "@/types/createEvent";
+import { EventType } from "@/types/eventTypes";
+import { Button } from "@/components/ui/button";
 import { useTheme } from "@/Contexts/themeContext";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { NewEventType } from "@/types/createEvent";
+
+const eventSchema = z.object({
+	color: z.string().min(1, "El color es obligatorio"),
+	subcolor: z.string().optional(),
+	foto: z.instanceof(FileList).nullable().optional(),
+  });
+  
 
 export default function EventList() {
 	const { selectEvent } = useEventStore();
@@ -15,38 +25,47 @@ export default function EventList() {
 	const [events, setEvents] = useState<EventType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-
 	const [showForm, setShowForm] = useState(false);
-	const [newEvent, setNewEvent] = useState<NewEventType>({
-		color: "",
-		subcolor: "",
-		image: "",
-	});
+	const [preview, setPreview] = useState<string | null>(null);
+
+	const {
+		handleSubmit,
+		register,
+		setValue,
+		formState: { errors },
+	} = useForm<NewEventType>({ resolver: zodResolver(eventSchema) });
 
 	useEffect(() => {
 		const loadEvents = async () => {
 			try {
 				const data = await fetchEvents();
 				setEvents(data);
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al cargar los eventos");
 			} finally {
 				setLoading(false);
 			}
 		};
-
 		loadEvents();
 	}, []);
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			setPreview(URL.createObjectURL(file));
+			setValue("foto", e.target.files as unknown as FileList);
+		}
+	};
+
+	const onSubmit = (data: NewEventType) => {
+		console.log("Evento agregado:", data);
+	};
 
 	if (loading)
 		return (
 			<div className="flex flex-col items-center justify-center">
-				<img
-					src="/img/LOGOS_iimp 7.svg"
-					alt="Logo de la empresa"
-					className="max-w-md text-white py-2"
-				/>
+				<img src="/img/LOGOS_iimp 7.svg" alt="Logo de la empresa" className="max-w-md text-white py-2" />
 				<Loader2 className="animate-spin" />
 			</div>
 		);
@@ -54,135 +73,62 @@ export default function EventList() {
 
 	return (
 		<div className="h-screen w-screen py-9 px-9 max-w-md m-auto overflow-y-scroll overflow-x-hidden">
-			<h2 className="text-2xl font-bold mb-4">
-				Selecciona el evento que desea ver
-			</h2>
+			<h2 className="text-2xl font-bold mb-4">Selecciona el evento que desea ver</h2>
 
 			<div className="flex justify-center items-center gap-x-2 py-9">
 				{events.map((event, index) => {
 					if (event.estado === "0") {
 						return (
-							<div
-								key={index}
-								className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center"
-							>
-								<img
-									src={event.foto}
-									alt="evento logo"
-									className="object-cover p-2 w-full h-auto grayscale"
-								/>
+							<div key={index} className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center">
+								<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto grayscale" />
 							</div>
 						);
 					}
-
-					// Si el estado no es 1, muestra el evento con enlace
 					return (
-						<Link
-							key={index}
-							to={`/home/sponsors`}
-							onClick={() => {
-								selectEvent(event);
-								setTheme(`event${event.idEvent}`);
-							}}
-						>
+						<Link key={index} to={`/home/sponsors`} onClick={() => { selectEvent(event); setTheme(`event${event.idEvent}`); }}>
 							<div className="w-20 h-20 border-3 border-primary rounded-lg shadow-xl hover:shadow-2xl flex items-center transition delay-150 duration-300 ease-in-out hover:scale-110">
-								<img
-									src={event.foto}
-									alt="evento logo"
-									className="object-cover p-2 w-full h-auto"
-								/>
+								<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto" />
 							</div>
 						</Link>
 					);
-
-					// <div
-					// 	key={event.idEvent}
-					// 	className="bg-white shadow-md rounded-xl border border-amber-800 overflow-hidden w-full max-w-md"
-					// >
-					// 	<div
-					// 		className="relative overflow-hidden"
-					// 		style={{ maxHeight: "200px" }}
-					// 	>
-					// 		<img
-					// 			src={event.foto}
-					// 			// src={"https://placehold.co/600x400"}
-					// 			alt="Imagen de prueba"
-					// 			className="w-full object-cover opacity-80"
-					// 		/>
-					// 	</div>
-					// 	<div className="p-4 text-center">
-					// 		<h3 className="text-lg font-semibold">{event.des_event}</h3>
-					// 		<div className="flex justify-center mt-2">
-					// 			<span
-					// 				className="w-6 h-6 rounded-full"
-					// 				style={{ backgroundColor: event.color }}
-					// 			></span>
-					// 			<span
-					// 				className="w-6 h-6 rounded-full ml-2"
-					// 				style={{ backgroundColor: event.subcolor }}
-					// 			></span>
-					// 		</div>
-					// 		<Button
-					// 			onClick={() => navigate(`/events/${event.idEvent}`)}
-					// 			className="mt-4 px-4 py-2 bg-amber-800 text-white rounded hover:bg-amber-900"
-					// 		>
-					// 			Ver Detalles
-					// 		</Button>
-					// 	</div>
-					// </div>
 				})}
 			</div>
 
-			<div
-				className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer"
-				onClick={() => setShowForm(!showForm)}
-			>
+			<div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" onClick={() => setShowForm(!showForm)}>
 				<h3 className="text-lg font-semibold">Agregar Evento</h3>
 				<Plus size={50} />
 			</div>
 
 			{showForm && (
-				<div className="mt-4 p-4 border rounded-lg shadow-lg">
-					<h3 className="text-lg font-semibold mb-2">Nuevo Evento</h3>
-					<input
-						type="text"
-						placeholder="Color principal"
-						value={newEvent.color}
-						onChange={(e) =>
-							setNewEvent({ ...newEvent, color: e.target.value })
-						}
-						className="w-full p-2 border rounded mb-2"
-					/>
-					<input
-						type="text"
-						placeholder="Color secundario"
-						value={newEvent.subcolor}
-						onChange={(e) =>
-							setNewEvent({ ...newEvent, subcolor: e.target.value })
-						}
-						className="w-full p-2 border rounded mb-2"
-					/>
-					<input
-						type="text"
-						placeholder="URL de la imagen"
-						value={newEvent.image}
-						onChange={(e) =>
-							setNewEvent({ ...newEvent, image: e.target.value })
-						}
-						className="w-full p-2 border rounded mb-2"
-					/>
-					<div className="flex justify-center mt-2">
-						<span
-							className="w-6 h-6 rounded-full"
-							style={{ backgroundColor: newEvent.color }}
-						></span>
-						<span
-							className="w-6 h-6 rounded-full ml-2"
-							style={{ backgroundColor: newEvent.subcolor }}
-						></span>
+				<form onSubmit={handleSubmit(onSubmit)} className="mt-4 p-6 border rounded-lg shadow-lg space-y-4">
+					<h3 className="text-lg font-semibold">Nuevo Evento</h3>
+
+					<div className="w-full flex items-center justify-between">
+						<label className="text-sm font-medium">Color Principal</label>
+						<div className="flex items-center gap-2">
+							<input type="color" {...register("color")} className="w-20 h-12 rounded-xl" />
+							{errors.color && <p className="text-red-500">{errors.color.message}</p>}
+						</div>
 					</div>
-					<Button className="w-full">Guardar Evento</Button>
-				</div>
+
+					<div className="w-full flex items-center justify-between">
+						<label className="text-sm font-medium">Color Secundario (Opcional)</label>
+						<div className="flex items-center gap-2">
+							<input type="color" {...register("subcolor")} className="w-20 h-12 rounded-xl" />
+						</div>
+					</div>
+
+					<div className="w-full flex items-center justify-between">
+						<label className="text-sm text-left font-medium py-2">Subir Imagen</label>
+						<input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="file-upload" />
+						<label htmlFor="file-upload" className="cursor-pointer bg-accent text-accent-foreground px-4 py-2 rounded-md text-center">Seleccionar Archivo</label>
+						{errors.foto && <p className="text-red-500">{errors.foto.message}</p>}
+					</div>
+
+					{preview && <img src={preview} alt="Preview" className="w-full h-32 object-cover rounded" />}
+
+					<Button type="submit" className="w-full">Guardar Evento</Button>
+				</form>
 			)}
 		</div>
 	);
