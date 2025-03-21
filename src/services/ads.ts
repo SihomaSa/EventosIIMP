@@ -2,19 +2,31 @@ import { AdType } from "../types/adTypes";
 
 export const mockAds: AdType[] = [
   {
-    id: "1",
-    image: "/img/Banner (1).png",
-    url: "https://example.com/ad1",
+    idPublicidad: 1,
+    idEvento: 1,
+    foto: "/img/Banner (1).png",
+    estado: 1,
+    url: "https://proexplo.com.pe/proexplo2023/front/public/es/cursos-cortos",
+    descripcionIdioma: "INGLES",
+    prefijoIdioma: "EN",
   },
   {
-    id: "2",
-    image: "/img/Banner (1).png",
-    url: "https://example.com/ad1",
+    idPublicidad: 2,
+    idEvento: 1,
+    foto: "/img/Banner (1).png",
+    estado: 1,
+    url: "https://proexplo.com.pe/proexplo2023/front/public/es/cursos-cortos",
+    descripcionIdioma: "INGLES",
+    prefijoIdioma: "EN",
   },
   {
-    id: "3",
-    image: "/img/Banner (1).png",
-    url: "https://example.com/ad1",
+    idPublicidad: 3,
+    idEvento: 1,
+    foto: "/img/Banner (1).png",
+    estado: 1,
+    url: "https://proexplo.com.pe/proexplo2023/front/public/es/cursos-cortos",
+    descripcionIdioma: "INGLES",
+    prefijoIdioma: "EN",
   },
 ];
 export default mockAds;
