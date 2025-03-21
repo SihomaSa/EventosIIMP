@@ -40,9 +40,9 @@ export default function Sponsors() {
 					// <div key={sponsor.id} className="w-20 h-20 bg-white border-3 rounded-lg flex items-center cursor-pointer hover:shadow-xl">
 					//   <img src={sponsor.image} alt={sponsor.title} className="object-cover p-2 w-auto" />
 					// </div>
-					<div className="w-full grid grid-cols-[auto_auto] gap-4 items-center justify-center py-2">
+					<div key={sponsor.id} className="w-full grid grid-cols-[auto_auto] gap-4 items-center justify-center py-2 border-0">
 						<div
-							key={sponsor.id}
+							
 							className="w-20 h-20 border rounded-xl overflow-hidden cursor-pointer flex items-center justify-center p-2"
 						>
 							<img

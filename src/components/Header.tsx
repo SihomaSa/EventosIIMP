@@ -14,7 +14,7 @@ export default function Header() {
 				variant={"secondary"}
 				onClick={() => {
 					logout();
-					navigate("/login");
+					navigate("/");
 				}}
 			>
 				Cerrar Sesión

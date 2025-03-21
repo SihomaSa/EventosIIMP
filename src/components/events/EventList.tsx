@@ -79,7 +79,7 @@ export default function EventList() {
 		<div className="h-screen w-screen py-9 px-9 max-w-md m-auto overflow-y-scroll overflow-x-hidden">
 			<h2 className="text-2xl font-bold mb-4">Selecciona el evento que desea ver</h2>
 
-			<div className="flex justify-center items-center gap-x-2 py-9">
+			<div className="flex flex-wrap justify-center items-center gap-2 py-9">
 				{events.map((event, index) => {
 					if (event.estado === "0") {
 						return (

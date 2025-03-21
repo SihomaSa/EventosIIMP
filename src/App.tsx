@@ -28,7 +28,7 @@ function App() {
 					<EventProvider>
 						<Router>
 							<Routes>
-								<Route path="/login" element={<Login />} />
+								<Route path="/" element={<Login />} />
 								<Route element={<ProtectedRoute />}>
 									<Route path="/events" element={<Events />} />
 									<Route path="/home" element={<HomeLayout />}>
