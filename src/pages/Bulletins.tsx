@@ -49,9 +49,7 @@ export default function Bulletins() {
 				setBulletinsMock(data);
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
-				setError("Error al cargar las notas de prensa");
-			} finally {
-				setLoading(false);
+				setError("Error al cargar las mocks de boletines");
 			}
 		};
 
@@ -84,17 +82,6 @@ export default function Bulletins() {
 		}
 	};
 
-	if (loading)
-		return (
-			<div className="flex flex-col items-center justify-center">
-				<img
-					src="/img/LOGOS_iimp 7.svg"
-					alt="Logo de la empresa"
-					className="max-w-md text-white py-2"
-				/>
-				<Loader2 className="animate-spin" />
-			</div>
-		);
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
@@ -124,6 +111,17 @@ export default function Bulletins() {
 					</NavigationMenuItem>
 				</NavigationMenuList>
 			</NavigationMenu>
+
+			{loading && (
+							<div className="flex flex-col items-center justify-center">
+							<img
+								src="/img/LOGOS_iimp 7.svg"
+								alt="Logo de la empresa"
+								className="max-w-md text-white py-2"
+							/>
+							<Loader2 className="animate-spin" />
+						</div>
+			)}
 
 			{/* Vista en dos columnas cuando se está actualizando */}
 			<div
