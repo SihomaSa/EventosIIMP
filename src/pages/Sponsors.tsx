@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
-import { getSponsors } from "@/stores/eventDataStore";
 import { SponsorType } from "../types/sponsorTypes";
 import { useEventStore } from "@/stores/eventStore";
 import { fetchSponsors } from "@/services/api";

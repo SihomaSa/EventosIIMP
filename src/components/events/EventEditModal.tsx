@@ -23,7 +23,7 @@ export default function EventEditModal({
 	onClose,
 }: EditEventModalProps) {
 	const [formData, setFormData] = useState(event);
-	const [previewImage, setPreviewImage] = useState<string | null>(event.image);
+	const [previewImage, setPreviewImage] = useState<string | null>(event.foto);
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 	  if (e.target.files && e.target.files[0]) {
@@ -98,7 +98,7 @@ export default function EventEditModal({
 								<Label htmlFor={`publicidades[${index}].image`}>Imagen</Label>
 								<Input
 									name={`publicidades[${index}].image`}
-									value={pub.image}
+									value={pub.foto}
 									onChange={handleChange}
 								/>
 								<Label htmlFor={`publicidades[${index}].url`}>URL</Label>

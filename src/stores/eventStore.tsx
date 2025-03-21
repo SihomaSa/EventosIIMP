@@ -4,7 +4,7 @@ import { EventType } from "@/types/eventTypes";
 
 const EventContext = createContext<{
   events: NewEventType[];
-  selectedEvent: EventType;
+  selectedEvent: EventType | null;
   addEvent: (event: NewEventType) => void;
   selectEvent: (event: EventType) => void;
 } | null>(null);
@@ -40,6 +40,7 @@ const selectEvent = (event: EventType) => {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useEventStore() {
   const context = useContext(EventContext);
   if (!context) {

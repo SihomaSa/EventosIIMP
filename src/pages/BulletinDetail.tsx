@@ -14,7 +14,7 @@ export default function BulletinDetail() {
 		const loadBulletin = async () => {
 			try {
 				const data = await fetchBullentins();
-				const foundBulletin = data.find((b) => b.id === id);
+				const foundBulletin = data.find((b) => b.idTipPre === id);
 
 				if (!foundBulletin) {
 					setError("Boletín no encontrado");
@@ -40,11 +40,11 @@ export default function BulletinDetail() {
 		<div className="h-screen bg-orange-50 overflow-hidden">
 			<Header />
 			<div className="flex flex-col items-center p-6">
-				<h1 className="text-3xl font-bold">{bulletin?.title}</h1>
-				<p className="text-gray-500">{bulletin?.date}</p>
+				<h1 className="text-3xl font-bold">{bulletin?.titulo}</h1>
+				<p className="text-gray-500">{bulletin?.descripcionIdioma}</p>
 				<img
-					src={bulletin?.image}
-					alt={bulletin?.title}
+					src={bulletin?.foto}
+					alt={bulletin?.titulo}
 					className="mt-4 w-full max-w-lg"
 				/>
 			</div>

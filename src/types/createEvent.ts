@@ -1,7 +1,7 @@
 export type NewEventType = {
   color: string;
   subcolor?: string;
-  foto?: FileList | null;
+  foto?: string;
 };
 
 

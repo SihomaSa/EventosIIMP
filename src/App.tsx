@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
 import ProtectedRoute from "./utils/ProtectedRoute";
-import EventNew from "./pages/EventNew";
+// import EventNew from "./pages/EventNew";
 import { EventProvider } from "./stores/eventStore";
 import Sponsors from "./pages/Sponsors";
 import HomeLayout from "./components/HomeLayout";
@@ -41,8 +41,8 @@ function App() {
 									<Route path="/bulletins/:id" element={<BulletinDetail />} />
 									<Route path="/pressnotes/:id" element={<PressNoteDetail />} />
 									<Route path="/expositors/:id" element={<ExpositorDetail />} />
-									<Route path="/newEvent" element={<EventNew />} />
-									<Route path="/home" element={<Home />} />
+									{/* <Route path="/newEvent" element={<EventNew />} /> */}
+									<Route path="/home" element={<Home children={undefined} />} />
 								</Route>
 								<Route path="/about" element={<About />} />
 								<Route path="*" element={<NotFound />} />

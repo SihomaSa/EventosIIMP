@@ -1,15 +1,9 @@
-import HomeLayout from "../components/HomeLayout";
-// import { useAuth } from "../Contexts/authContext";
-// import { useNavigate } from "react-router-dom";
+import { ReactNode } from "react";
 
-export default function Home() {
-  // const { user, logout } = useAuth();
-  // const navigate = useNavigate();
+interface HomeLayoutProps {
+  children: ReactNode;
+}
 
-  return (
-    <HomeLayout>
-      {/* <Event label="proExplo intro" /> */}
-      <h2 className="text-2xl font-bold">Bienvenido</h2>
-    </HomeLayout>
-  );
+export default function HomeLayout({ children }: HomeLayoutProps) {
+  return <div className="layout-container">{children}</div>;
 }

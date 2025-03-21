@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { useEventStore } from "@/stores/eventStore";
 import { fetchEvents } from "@/services/api";
 import { EventType } from "@/types/eventTypes";
 import { NewEventType } from "@/types/createEvent";
 import { Button } from "../ui/button";
 
 export default function EventList() {
-  const { selectEvent } = useEventStore();
-  const navigate = useNavigate();
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +14,7 @@ export default function EventList() {
   const [newEvent, setNewEvent] = useState<NewEventType>({
     color: "",
     subcolor: "",
-    image: ""
+    foto: ""
   });
 
   useEffect(() => {
@@ -81,8 +77,8 @@ export default function EventList() {
           <input
             type="text"
             placeholder="URL de la imagen"
-            value={newEvent.image}
-            onChange={(e) => setNewEvent({ ...newEvent, image: e.target.value })}
+            value={newEvent.foto}
+            onChange={(e) => setNewEvent({ ...newEvent, foto: e.target.value })}
             className="w-full p-2 border rounded mb-2"
           />
           <Button className="w-full">Guardar Evento</Button>

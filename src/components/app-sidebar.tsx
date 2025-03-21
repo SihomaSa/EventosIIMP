@@ -1,4 +1,4 @@
-import { Calendar, CalendarDays, Handshake, Home, Inbox, Megaphone, Newspaper, Search, Settings, Users } from "lucide-react"
+import { CalendarDays, Handshake, Home, Megaphone, Newspaper, Settings, Users } from "lucide-react"
 
 import {
   Sidebar,

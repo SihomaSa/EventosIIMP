@@ -36,5 +36,5 @@ export function useEvents() {
           
 	}, []);
 
-	return { events, loading, error };
+	return { events, loading, error, setEvents, setLoading, setError };
 }

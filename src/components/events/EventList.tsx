@@ -9,7 +9,7 @@ import { useTheme } from "@/Contexts/themeContext";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NewEventType } from "@/types/createEvent";
+// import { NewEventType } from "@/types/createEvent";
 
 const eventSchema = z.object({
 	color: z.string().min(1, "El color es obligatorio"),
@@ -17,6 +17,11 @@ const eventSchema = z.object({
 	foto: z.instanceof(FileList).nullable().optional(),
   });
   
+interface NewEventType {
+	color: string;
+	subcolor?: string;
+	foto?: FileList | null;
+}
 
 export default function EventList() {
 	const { selectEvent } = useEventStore();
