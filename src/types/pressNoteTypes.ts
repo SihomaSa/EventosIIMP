@@ -1,7 +1,11 @@
 export interface PressNoteType {
-  id: string;
-  title: string;
-  image: string;
-  date: string; // Fecha sin hora
+  idTipPre: string;
+  titulo: string;
+  foto: string;
+  descripcion_prensa: string;
+  descripcionIdioma: string;
+  prefijoIdioma: string;
+  descripcion: string;
+  subtitulo: string;
   url: string;
 }
