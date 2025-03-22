@@ -1,5 +1,5 @@
 export interface ExpositorType {
-	idautor: number;
+	idautor: string;
 	nombres: string;
 	apellidos: string;
 	especialidad: string;

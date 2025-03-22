@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NewExpositorType } from "@/types/expositorTypes";
+import { ExpositorType } from "@/types/expositorTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ const expositorSchema = z.object({
 type expositorFormValues = z.infer<typeof expositorSchema>;
 
 export default function EditExpositorsModal({ onAdd, open, onClose }: { 
-    onAdd: (newExpositor: NewExpositorType) => void;
+    onAdd: (newExpositor: ExpositorType) => void;
     open: boolean;
     onClose: () => void;
 }) {
@@ -38,7 +38,8 @@ export default function EditExpositorsModal({ onAdd, open, onClose }: {
 
     const onSubmit = (data: expositorFormValues) => {
 
-        const newExpositor: NewExpositorType = {
+        const newExpositor: ExpositorType = {
+            idautor: crypto.randomUUID(),
             image: data.image,
             nombres: data.nombres,
             apellidos: data.apellidos,
