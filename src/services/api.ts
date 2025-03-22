@@ -21,5 +21,5 @@ export const fetchExpositors = () =>
 	simulateFetch(import("./expositors").then((m) => m.default));
 export const fetchExpositorById = async (id: string) => {
 	const expositors = await fetchExpositors();
-	return expositors.find((expo) => expo.id === id) || null;
+	return expositors.find((expo) => expo.idautor === id) || null;
 };

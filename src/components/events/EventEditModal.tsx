@@ -119,13 +119,13 @@ export default function EventEditModal({
 								<Label htmlFor={`notasPrensa[${index}].title`}>Título</Label>
 								<Input
 									name={`notasPrensa[${index}].title`}
-									value={nota.title}
+									value={nota.titulo}
 									onChange={handleChange}
 								/>
-								<Label htmlFor={`notasPrensa[${index}].date`}>Fecha</Label>
+								<Label htmlFor={`notasPrensa[${index}].date`}>Idioma</Label>
 								<Input
 									name={`notasPrensa[${index}].date`}
-									value={nota.date}
+									value={nota.descripcionIdioma}
 									onChange={handleChange}
 									type="date"
 								/>

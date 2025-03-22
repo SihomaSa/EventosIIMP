@@ -1,7 +1,16 @@
 export interface ExpositorType {
-	id: string;
-	name: string;
-	phrase: string;
-	cv: string;
-	image: string;
+	idautor: number;
+	nombres: string;
+	apellidos: string;
+	especialidad: string;
+	hojavida: string;
+	image?: string;
+}
+
+export interface NewExpositorType {
+	nombres: string;
+	apellidos: string;
+	especialidad: string;
+	hojavida: string;
+	image?: string;
 }

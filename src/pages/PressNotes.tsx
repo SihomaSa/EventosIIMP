@@ -87,7 +87,7 @@ export default function PressNotes() {
 
 	return (
 		<div className="p-6 flex flex-col items-center">
-			<h1 className="text-2xl font-bold mb-4">Gestión de Boletines</h1>
+			<h1 className="text-2xl font-bold mb-4">Gestión de Notas de Prensa</h1>
 
 			{/* Menú de navegación */}
 			<NavigationMenu className="p-1 m-3 self-end bg-white rounded-xl">
