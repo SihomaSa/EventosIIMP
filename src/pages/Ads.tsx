@@ -151,48 +151,7 @@ export default function Ads() {
 							: "flex flex-wrap gap-4 justify-center"
 					}`}
 				>
-					{ads.map((ad) => {
-						if (formMode !== "view") {
-							return (
-								<Card
-									key={ad.idPublicidad}
-									className={`shadow-md overflow-hidden cursor-pointer p-2 w-xs
-								${
-									formMode === "update"
-										? selectedAd?.idPublicidad === ad.idPublicidad
-											? "flex w-full border-2 border-primary"
-											: "flex w-full grayscale"
-										: ""
-								}
-							  `}
-									onClick={() => {
-										if (formMode === "update") {
-											setSelectedAd(ad);
-										}
-									}}
-								>
-									<CardContent className="overflow-hidden max-w-full">
-										<img
-											src={adsMock[0].foto}
-											alt={`publicidad ${ad.idPublicidad}`}
-											className="object-cover h-auto rounded"
-										/>
-										<div className="p-2 text-center">
-											<p className="text-gray-500">
-												URL: {ad.url}
-											</p>
-											<p className="text-gray-500">
-												Idioma: {ad.descripcionIdioma}
-											</p>
-											<p className="text-gray-500">
-												Estado: {ad.estado == 0 ? "Inactivo" : "Activo"}
-											</p>
-										</div>
-									</CardContent>
-								</Card>
-							);
-						} else {
-							return (
+					{ads.map((ad) => (
 								<Card key={ad.idPublicidad} className="shadow-md overflow-hidden p-4 w-80">
 								<CardContent>
 								  <img
@@ -216,9 +175,9 @@ export default function Ads() {
 								  </form>
 								</CardContent>
 							  </Card>
-							);
-						}
-					})}
+							
+				
+					))}
 				</div>
 			{/* Formulario de actualización */}
 			{formMode === "update" && selectedAd && (
