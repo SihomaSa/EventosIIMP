@@ -159,7 +159,7 @@ export default function Bulletins() {
 								>
 									<CardContent className="overflow-hidden">
 										<img
-											src={bulletinsMock[0].foto}
+											src={bulletin.foto}
 											alt={bulletin.titulo}
 											className="object-cover w-full h-auto rounded"
 										/>
@@ -177,7 +177,7 @@ export default function Bulletins() {
 								<Card key={bulletin.idTipPre} className="shadow-md overflow-hidden p-4 w-80">
 								<CardContent>
 								  <img
-									src={bulletinsMock[0].foto}
+									src={bulletin.foto}
 									alt={bulletin.titulo}
 									className="object-cover w-full h-40 rounded-md"
 								  />
