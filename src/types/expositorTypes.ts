@@ -1,5 +1,5 @@
 export interface ExpositorType {
-	idautor: string;
+	idautor: number;
 	nombres: string;
 	apellidos: string;
 	especialidad: string;
@@ -8,7 +8,7 @@ export interface ExpositorType {
 }
 
 export interface NewExpositorType {
-	nombres: string;
+	nombres: number;
 	apellidos: string;
 	especialidad: string;
 	hojavida: string;
