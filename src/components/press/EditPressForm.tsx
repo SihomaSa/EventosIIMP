@@ -1,101 +1,143 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { PressNoteType } from "@/types/bulletinTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { PressNoteType } from '@/types/pressNoteTypes';
+import { Card } from "../ui/card";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { PressNoteType } from "@/types/pressNoteTypes";
 
-// ✅ Definimos el esquema de validación con Zod
-const pressSchema = z.object({
-    titulo: z.string().min(3, "El título debe tener al menos 3 caracteres"),
-    foto: z.string().url("Debe ser una URL válida"),
-    url: z.string().url("Debe ser una URL válida"),
-    descripcionIdioma: z.enum(["ES", "EN"], { message: "Selecciona un idioma válido" }),
+// ✅ Esquema de validación con Zod
+const PressNoteSchema = z.object({
+  descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
+  descripcionIdioma: z.enum(["ES", "EN"], {
+    message: "Selecciona un idioma válido",
+  }),
+  descripcion: z.string().min(1, "La descripción es obligatoria"),
+  prefijoIdioma: z.enum(["ES", "EN"], {
+    message: "Selecciona un prefijo de idioma válido",
+  }),
+  idTipPre: z.number().int().positive(),
+  url: z.string().url("Debe ser una URL válida"),
+  titulo: z.string().min(1, "El título es obligatorio"),
+  foto: z.string().url("Debe ser una URL válida"),
+  subtitulo: z.string().min(1, "El subtítulo es obligatorio"),
 });
 
 // ✅ Tipo basado en Zod
-type PressFormValues = z.infer<typeof pressSchema>;
+type PressNoteFormValues = z.infer<typeof PressNoteSchema>;
 
-export default function EditPressModal({ onAdd, open, onClose }: { 
-    onAdd: (newPressNote: PressNoteType) => void; 
-    open: boolean;
-    onClose: () => void;
+export default function EditPressNoteForm({
+  onAdd,
+  onClose,
+}: {
+  onAdd: (newPressNote: PressNoteType) => void;
+  onClose: () => void;
 }) {
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<PressFormValues>({
-        resolver: zodResolver(pressSchema),
-        defaultValues: {
-            titulo: "",
-            foto: "",
-            url: "",
-            descripcionIdioma: "ES",
-        },
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<PressNoteFormValues>({
+    resolver: zodResolver(PressNoteSchema),
+    defaultValues: {
+      descripcion_prensa: "",
+      descripcionIdioma: "ES",
+      descripcion: "",
+      prefijoIdioma: "ES",
+      idTipPre: 1, // Valor por defecto válido para un número
+      url: "",
+      titulo: "",
+      foto: "",
+      subtitulo: "",
+    },
+  });
 
-    const date = format(new Date(), "yyyy-MM-dd"); // Fecha actual
+  // Verificar el idioma seleccionado
+  const selectedLanguage = watch("prefijoIdioma");
 
-    const onSubmit = (data: PressFormValues) => {
-        const newPressNote: PressNoteType = {
-            idTipPre: crypto.randomUUID(), // Genera un ID único
-            titulo: data.titulo,
-            foto: data.foto,
-            url: data.url,
-            descripcion_prensa: "", // Puedes ajustarlo
-            descripcionIdioma: data.descripcionIdioma,
-            prefijoIdioma: data.descripcionIdioma.toLowerCase(),
-            descripcion: "",
-            subtitulo: "",
-        };
-        onAdd(newPressNote);
-        reset(); // Resetea el formulario
-        onClose(); // Cierra el modal
+  const onSubmit = (data: PressNoteFormValues) => {
+    const newPressNote: PressNoteType = {
+      descripcion_prensa: data.descripcion_prensa,
+      descripcionIdioma: data.descripcionIdioma,
+      descripcion: data.descripcion,
+      prefijoIdioma: data.prefijoIdioma,
+      idTipPre: data.idTipPre,
+      url: data.url,
+      titulo: data.titulo,
+      foto: data.foto,
+      subtitulo: data.subtitulo,
     };
+    onAdd(newPressNote);
+    reset();
+    onClose();
+  };
 
-    return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Agregar Nota de Prensa</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div>
-                        <Label htmlFor="titulo">Título</Label>
-                        <Input id="titulo" {...register("titulo")} />
-                        {errors.titulo && <p className="text-red-500 text-sm">{errors.titulo.message}</p>}
-                    </div>
+  return (
+    <Card>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+        <h2 className="text-xl">Nueva Nota de Prensa</h2>
 
-                    <div>
-                        <Label htmlFor="foto">Imagen (URL)</Label>
-                        <Input id="foto" {...register("foto")} />
-                        {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
-                    </div>
+        <div>
+          <Label htmlFor="titulo" className="mb-2">Título</Label>
+          <Input id="titulo" {...register("titulo")} />
+          {errors.titulo && <p className="text-red-500 text-sm">{errors.titulo.message}</p>}
+        </div>
 
-                    <div>
-                        <Label htmlFor="url">Enlace</Label>
-                        <Input id="url" {...register("url")} />
-                        {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
-                    </div>
+        <div>
+          <Label htmlFor="subtitulo" className="mb-2">Subtítulo</Label>
+          <Input id="subtitulo" {...register("subtitulo")} />
+          {errors.subtitulo && <p className="text-red-500 text-sm">{errors.subtitulo.message}</p>}
+        </div>
 
-                    <div>
-                        <Label htmlFor="descripcionIdioma">Idioma</Label>
-                        <select id="descripcionIdioma" {...register("descripcionIdioma")} className="w-full border p-2 rounded-md">
-                            <option value="ES">Español</option>
-                            <option value="EN">Inglés</option>
-                        </select>
-                        {errors.descripcionIdioma && <p className="text-red-500 text-sm">{errors.descripcionIdioma.message}</p>}
-                    </div>
+        <div>
+          <Label htmlFor="descripcion_prensa" className="mb-2">Descripción de prensa</Label>
+          <Input id="descripcion_prensa" {...register("descripcion_prensa")} />
+          {errors.descripcion_prensa && <p className="text-red-500 text-sm">{errors.descripcion_prensa.message}</p>}
+        </div>
 
-                    <p className="text-sm text-gray-500">Fecha de creación: {date}</p>
+        <div>
+          <Label htmlFor="descripcion" className="mb-2">Descripción</Label>
+          <Input id="descripcion" {...register("descripcion")} />
+          {errors.descripcion && <p className="text-red-500 text-sm">{errors.descripcion.message}</p>}
+        </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-                        <Button type="submit">Guardar</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
+        <div>
+          <Label htmlFor="url" className="mb-2">Enlace</Label>
+          <Input id="url" {...register("url")} />
+          {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
+        </div>
+
+        <div>
+          <Label htmlFor="foto" className="mb-2">Imagen (URL)</Label>
+          <Input id="foto" {...register("foto")} />
+          {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
+        </div>
+
+        {/* Selector de idioma */}
+        <div>
+          <Label className="mb-2">Idioma</Label>
+          <RadioGroup {...register("prefijoIdioma")}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "ES"} />
+              <Label htmlFor="ES">Español</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="EN" id="EN" checked={selectedLanguage === "EN"} />
+              <Label htmlFor="EN">Inglés</Label>
+            </div>
+          </RadioGroup>
+          {errors.prefijoIdioma && <p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>}
+        </div>
+
+        <div className="flex justify-between">
+          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit">Guardar</Button>
+        </div>
+      </form>
+    </Card>
+  );
 }

@@ -1,7 +1,7 @@
 export interface SponsorType {
-	idSponsor: string;
+	idSponsor: number;
 	nombre: string;
-	image?: string;
+	foto?: string;
 	prefijoIdioma: string;
 	descripcionIdioma: string;
 	url: string;
@@ -18,7 +18,7 @@ export type SponsorCategory =
 
 export interface NewSponsorType {
 	nombre: string;
-	image?: string;
+	foto?: string;
 	prefijoIdioma: string;
 	descripcionIdioma: string;
 	url: string;

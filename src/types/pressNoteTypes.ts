@@ -1,5 +1,5 @@
 export interface PressNoteType {
-  idTipPre: string;
+  idTipPre: number;
   titulo: string;
   foto: string;
   descripcion_prensa: string;
