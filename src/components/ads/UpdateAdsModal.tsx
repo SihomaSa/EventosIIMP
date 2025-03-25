@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { useState } from "react";
 
 const adSchema = z.object({
-	foto: z.string().url({ message: "Debe ser una URL válida" }),
+	foto: z.instanceof(File).optional(),
 	url: z.string().url({ message: "Debe ser una URL válida" }),
-	prefijoIdioma: z.enum(["ES", "EN"], {
+	prefijoIdioma: z.enum(["SP", "EN"], {
 		message: "Seleccione un idioma válido",
 	}),
 	estado: z
@@ -38,20 +39,30 @@ export default function UpdateAdsModal({
 	onUpdate,
 	open,
 }: UpdateAdsModalProps) {
+	const [imagePreview, setImagePreview] = useState<string | null>(ad.foto || null);
+
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 		reset,
+		watch,
 	} = useForm<AdFormValues>({
 		resolver: zodResolver(adSchema),
 		defaultValues: {
-			foto: ad.foto,
+			foto: undefined,
 			url: ad.url,
-			prefijoIdioma: ad.prefijoIdioma as "ES" | "EN",
+			prefijoIdioma: ad.prefijoIdioma as "SP" | "EN",
 			estado: ad.estado,
 		},
 	});
+
+	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			setImagePreview(URL.createObjectURL(file));
+		}
+	};
 
 	const onSubmit = (data: AdFormValues) => {
 		const updatedAd = { ...ad, ...data };
@@ -70,19 +81,19 @@ export default function UpdateAdsModal({
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
 						<h2 className="text-xl">Editar Publicación</h2>
 						<div>
-							<Label htmlFor="foto" className="mb-2">
-								Imagen (URL)
-							</Label>
-							<Input id="foto" {...register("foto")} />
-							{errors.foto && (
-								<p className="text-red-500 text-sm">{errors.foto.message}</p>
+							<Label htmlFor="foto" className="mb-2">Imagen</Label>
+							<Input id="foto" type="file" accept="image/*" onChange={onFileChange} />
+							{imagePreview && (
+								<img
+									src={imagePreview}
+									alt="Vista previa"
+									className="mt-2 max-w-xs rounded"
+								/>
 							)}
 						</div>
 
 						<div>
-							<Label htmlFor="url" className="mb-2">
-								Enlace
-							</Label>
+							<Label htmlFor="url" className="mb-2">Enlace</Label>
 							<Input id="url" {...register("url")} />
 							{errors.url && (
 								<p className="text-red-500 text-sm">{errors.url.message}</p>
@@ -91,10 +102,7 @@ export default function UpdateAdsModal({
 
 						<div>
 							<Label className="mb-2">Idioma</Label>
-							<RadioGroup
-								defaultValue={ad.prefijoIdioma}
-								{...register("prefijoIdioma")}
-							>
+							<RadioGroup defaultValue={ad.prefijoIdioma} {...register("prefijoIdioma")}>
 								<div className="flex items-center space-x-2">
 									<RadioGroupItem value="SP" id="SP" />
 									<Label htmlFor="SP">Español</Label>
@@ -105,9 +113,7 @@ export default function UpdateAdsModal({
 								</div>
 							</RadioGroup>
 							{errors.prefijoIdioma && (
-								<p className="text-red-500 text-sm">
-									{errors.prefijoIdioma.message}
-								</p>
+								<p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>
 							)}
 						</div>
 

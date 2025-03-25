@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { PressNoteType } from "@/types/pressNoteTypes";
+import { useState } from "react";
 
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
@@ -21,7 +22,7 @@ const PressNoteSchema = z.object({
   idTipPre: z.number().int().positive(),
   url: z.string().url("Debe ser una URL válida"),
   titulo: z.string().min(1, "El título es obligatorio"),
-  foto: z.string().url("Debe ser una URL válida"),
+  foto: z.instanceof(File).optional(),
   subtitulo: z.string().min(1, "El subtítulo es obligatorio"),
 });
 
@@ -35,6 +36,8 @@ export default function EditPressNoteForm({
   onAdd: (newPressNote: PressNoteType) => void;
   onClose: () => void;
 }) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -48,28 +51,27 @@ export default function EditPressNoteForm({
       descripcionIdioma: "ES",
       descripcion: "",
       prefijoIdioma: "ES",
-      idTipPre: 1, // Valor por defecto válido para un número
+      idTipPre: 1,
       url: "",
       titulo: "",
-      foto: "",
+      foto: undefined,
       subtitulo: "",
     },
   });
 
-  // Verificar el idioma seleccionado
   const selectedLanguage = watch("prefijoIdioma");
+
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   const onSubmit = (data: PressNoteFormValues) => {
     const newPressNote: PressNoteType = {
-      descripcion_prensa: data.descripcion_prensa,
-      descripcionIdioma: data.descripcionIdioma,
-      descripcion: data.descripcion,
-      prefijoIdioma: data.prefijoIdioma,
-      idTipPre: data.idTipPre,
-      url: data.url,
-      titulo: data.titulo,
-      foto: data.foto,
-      subtitulo: data.subtitulo,
+      ...data,
+      foto: data.foto ? URL.createObjectURL(data.foto) : "",
     };
     onAdd(newPressNote);
     reset();
@@ -112,12 +114,13 @@ export default function EditPressNoteForm({
         </div>
 
         <div>
-          <Label htmlFor="foto" className="mb-2">Imagen (URL)</Label>
-          <Input id="foto" {...register("foto")} />
-          {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
+          <Label htmlFor="foto" className="mb-2">Imagen</Label>
+          <Input id="foto" type="file" accept="image/*" onChange={onFileChange} />
+          {imagePreview && (
+            <img src={imagePreview} alt="Vista previa" className="mt-2 max-w-xs rounded" />
+          )}
         </div>
 
-        {/* Selector de idioma */}
         <div>
           <Label className="mb-2">Idioma</Label>
           <RadioGroup {...register("prefijoIdioma")}>
