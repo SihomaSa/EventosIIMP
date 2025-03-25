@@ -39,7 +39,10 @@ export default function UpdateAdsModal({
 	onUpdate,
 	open,
 }: UpdateAdsModalProps) {
-	const [imagePreview, setImagePreview] = useState<string | null>(ad.foto || null);
+	const [imagePreview, setImagePreview] = useState<string | null>(
+		typeof ad.foto === "string" ? ad.foto : null
+	  );
+	  
 
 	const {
 		register,
@@ -49,7 +52,7 @@ export default function UpdateAdsModal({
 	} = useForm<AdFormValues>({
 		resolver: zodResolver(adSchema),
 		defaultValues: {
-			foto: undefined,
+			foto: ad.foto instanceof File ? ad.foto : undefined,
 			url: ad.url,
 			prefijoIdioma: ad.prefijoIdioma as "SP" | "EN",
 			estado: ad.estado,

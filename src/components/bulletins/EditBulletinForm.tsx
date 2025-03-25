@@ -11,11 +11,11 @@ import { BulletinType } from "@/types/bulletinTypes";
 // ✅ Esquema de validación con Zod
 const BulletinSchema = z.object({
   descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
-  descripcionIdioma: z.enum(["ES", "EN"], {
+  descripcionIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un idioma válido",
   }),
   descripcion: z.string().min(1, "La descripción es obligatoria"),
-  prefijoIdioma: z.enum(["ES", "EN"], {
+  prefijoIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un prefijo de idioma válido",
   }),
   idTipPre: z.string().min(1, "El ID del tipo de prensa es obligatorio"),
@@ -45,9 +45,9 @@ export default function EditBulletinForm({
     resolver: zodResolver(BulletinSchema),
     defaultValues: {
       descripcion_prensa: "",
-      descripcionIdioma: "ES",
+      descripcionIdioma: "SP",
       descripcion: "",
-      prefijoIdioma: "ES",
+      prefijoIdioma: "SP",
       idTipPre: "",
       url: "",
       titulo: "",
@@ -136,7 +136,7 @@ export default function EditBulletinForm({
           <Label className="mb-2">Idioma</Label>
           <RadioGroup {...register("prefijoIdioma")}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "ES"} />
+              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "SP"} />
               <Label htmlFor="ES">Español</Label>
             </div>
             <div className="flex items-center space-x-2">

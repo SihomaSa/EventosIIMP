@@ -1,4 +1,4 @@
-import { CalendarDays, Handshake, Megaphone, Newspaper, Settings, Users } from "lucide-react"
+import { Handshake, Megaphone, Newspaper, Settings, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -13,26 +13,11 @@ import {
 
 // Menu items.
 const items = [
-  // {
-  //   title: "Inicio",
-  //   url: "/home",
-  //   icon: Home,
-  // },
   {
     title: "Publicidad",
     url: "/home/ads",
     icon: Megaphone,
   },
-  // {
-  //   title: "Actividades",
-  //   url: "/home/sponsors",
-  //   icon: Handshake,
-  // },
-  // {
-  //   title: "Programas",
-  //   url: "#",
-  //   icon: CalendarDays,
-  // },
   {
     title: "Nota de Prensa",
     url: "/home/press",

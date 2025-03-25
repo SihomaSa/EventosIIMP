@@ -8,7 +8,7 @@ export interface ExpositorType {
 }
 
 export interface NewExpositorType {
-	nombres: number;
+	nombres: string;
 	apellidos: string;
 	especialidad: string;
 	hojavida: string;

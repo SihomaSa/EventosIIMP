@@ -11,11 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 const bulletinSchema = z.object({
   descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
-  descripcionIdioma: z.enum(["ES", "EN"], {
+  descripcionIdioma: z.enum(["SP", "EN"], {
     message: "Seleccione un idioma válido",
   }),
   descripcion: z.string().min(1, "La descripción es obligatoria"),
-  prefijoIdioma: z.enum(["ES", "EN"], {
+  prefijoIdioma: z.enum(["SP", "EN"], {
     message: "Seleccione un prefijo de idioma válido",
   }),
   idTipPre: z.string().min(1, "El ID del tipo de prensa es obligatorio"),
@@ -100,8 +100,8 @@ export default function UpdateBulletinModal({ onClose, bulletin, onUpdate, open 
               <Label className="mb-2">Idioma</Label>
               <RadioGroup defaultValue={bulletin.prefijoIdioma} {...register("prefijoIdioma")}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ES" id="ES" />
-                  <Label htmlFor="ES">Español</Label>
+                  <RadioGroupItem value="SP" id="SP" />
+                  <Label htmlFor="SP">Español</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="EN" id="EN" />

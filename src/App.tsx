@@ -7,7 +7,6 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
 import ProtectedRoute from "./utils/ProtectedRoute";
-// import EventNew from "./pages/EventNew";
 import { EventProvider } from "./stores/eventStore";
 import Sponsors from "./pages/Sponsors";
 import HomeLayout from "./components/HomeLayout";
@@ -35,7 +34,6 @@ function App() {
 										<Route path="ads" element={<Ads />} />
 										<Route path="expositors" element={<Expositors />} />
 									</Route>
-									{/* <Route path="/newEvent" element={<EventNew />} /> */}
 									<Route path="/home" element={<Home children={undefined} />} />
 								</Route>
 								<Route path="/about" element={<About />} />
