@@ -25,6 +25,7 @@ export default function PressNotes() {
 
         const data: PressNoteType[] = await response.json();
         setPressNotes(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("Error al cargar las notas de prensa");
       } finally {
@@ -80,9 +81,9 @@ export default function PressNotes() {
               ))}
             </div>
           )}
-          {pressNotes.map((pressNote) => (
+          {pressNotes.map((pressNote, index) => (
             <PressCard
-              key={pressNote.idTipPre}
+              key={index}
               pressNote={pressNote}
               openUpdateModal={() => openUpdateModal(pressNote)}
             />

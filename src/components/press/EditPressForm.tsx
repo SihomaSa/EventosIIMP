@@ -7,22 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { PressNoteType } from "@/types/pressNoteTypes";
-import { useState } from "react";
 
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
   descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
-  descripcionIdioma: z.enum(["ES", "EN"], {
+  descripcionIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un idioma válido",
   }),
   descripcion: z.string().min(1, "La descripción es obligatoria"),
-  prefijoIdioma: z.enum(["ES", "EN"], {
+  prefijoIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un prefijo de idioma válido",
   }),
   idTipPre: z.number().int().positive(),
   url: z.string().url("Debe ser una URL válida"),
   titulo: z.string().min(1, "El título es obligatorio"),
-  foto: z.instanceof(File).optional(),
+  foto: z.string().url("Debe ser una URL válida"),
   subtitulo: z.string().min(1, "El subtítulo es obligatorio"),
 });
 
@@ -30,14 +29,14 @@ const PressNoteSchema = z.object({
 type PressNoteFormValues = z.infer<typeof PressNoteSchema>;
 
 export default function EditPressNoteForm({
+  open,
   onAdd,
   onClose,
 }: {
+  open: boolean;
   onAdd: (newPressNote: PressNoteType) => void;
   onClose: () => void;
 }) {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const {
     register,
     handleSubmit,
@@ -48,35 +47,37 @@ export default function EditPressNoteForm({
     resolver: zodResolver(PressNoteSchema),
     defaultValues: {
       descripcion_prensa: "",
-      descripcionIdioma: "ES",
+      descripcionIdioma: "SP",
       descripcion: "",
-      prefijoIdioma: "ES",
-      idTipPre: 1,
+      prefijoIdioma: "SP",
+      idTipPre: 1, // Valor por defecto válido para un número
       url: "",
       titulo: "",
-      foto: undefined,
+      foto: "",
       subtitulo: "",
     },
   });
 
+  // Verificar el idioma seleccionado
   const selectedLanguage = watch("prefijoIdioma");
-
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
 
   const onSubmit = (data: PressNoteFormValues) => {
     const newPressNote: PressNoteType = {
-      ...data,
-      foto: data.foto ? URL.createObjectURL(data.foto) : "",
+      descripcion_prensa: data.descripcion_prensa,
+      descripcionIdioma: data.descripcionIdioma,
+      descripcion: data.descripcion,
+      prefijoIdioma: data.prefijoIdioma,
+      idTipPre: data.idTipPre,
+      url: data.url,
+      titulo: data.titulo,
+      foto: data.foto,
+      subtitulo: data.subtitulo,
     };
     onAdd(newPressNote);
     reset();
     onClose();
   };
+  if (!open) return null;
 
   return (
     <Card>
@@ -114,18 +115,17 @@ export default function EditPressNoteForm({
         </div>
 
         <div>
-          <Label htmlFor="foto" className="mb-2">Imagen</Label>
-          <Input id="foto" type="file" accept="image/*" onChange={onFileChange} />
-          {imagePreview && (
-            <img src={imagePreview} alt="Vista previa" className="mt-2 max-w-xs rounded" />
-          )}
+          <Label htmlFor="foto" className="mb-2">Imagen (URL)</Label>
+          <Input id="foto" {...register("foto")} />
+          {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
         </div>
 
+        {/* Selector de idioma */}
         <div>
           <Label className="mb-2">Idioma</Label>
           <RadioGroup {...register("prefijoIdioma")}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "ES"} />
+              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "SP"} />
               <Label htmlFor="ES">Español</Label>
             </div>
             <div className="flex items-center space-x-2">

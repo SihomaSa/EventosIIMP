@@ -3,8 +3,8 @@ export interface PressNoteType {
   titulo: string;
   foto: string;
   descripcion_prensa: string;
-  descripcionIdioma: string;
-  prefijoIdioma: string;
+  descripcionIdioma: "SP" | "EN";
+  prefijoIdioma: "SP" | "EN";
   descripcion: string;
   subtitulo: string;
   url: string;

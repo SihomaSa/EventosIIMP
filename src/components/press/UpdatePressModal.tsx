@@ -12,11 +12,11 @@ import { useState } from "react";
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
   descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
-  descripcionIdioma: z.enum(["ES", "EN"], {
+  descripcionIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un idioma válido",
   }),
   descripcion: z.string().min(1, "La descripción es obligatoria"),
-  prefijoIdioma: z.enum(["ES", "EN"], {
+  prefijoIdioma: z.enum(["SP", "EN"], {
     message: "Selecciona un prefijo de idioma válido",
   }),
   idTipPre: z.number().int().positive(),
@@ -33,7 +33,6 @@ export default function UpdatePressModal({
   onUpdate,
   onClose,
   pressNote,
-  open,
 }: {
   onUpdate: (updated: PressNoteType) => void;
   onClose: () => void;
@@ -124,7 +123,7 @@ export default function UpdatePressModal({
           <Label className="mb-2">Idioma</Label>
           <RadioGroup {...register("prefijoIdioma")}>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem key="ES" value="ES" id="radio-ES" checked={selectedLanguage === "ES"} />
+              <RadioGroupItem key="SP" value="SP" id="radio-ES" checked={selectedLanguage === "SP"} />
               <Label htmlFor="radio-ES">Español</Label>
             </div>
             <div className="flex items-center space-x-2">
