@@ -15,9 +15,6 @@ import Ads from "./pages/Ads";
 import Bulletins from "./pages/Bulletins";
 import PressNotes from "./pages/PressNotes";
 import Expositors from "./pages/Expositors";
-import ExpositorDetail from "./pages/ExpositorDetail";
-import PressNoteDetail from "./pages/PressNoteDetail";
-import BulletinDetail from "./pages/BulletinDetail";
 import { ThemeProvider } from "./Contexts/themeContext";
 
 function App() {
@@ -38,9 +35,6 @@ function App() {
 										<Route path="ads" element={<Ads />} />
 										<Route path="expositors" element={<Expositors />} />
 									</Route>
-									<Route path="/bulletins/:id" element={<BulletinDetail />} />
-									<Route path="/pressnotes/:id" element={<PressNoteDetail />} />
-									<Route path="/expositors/:id" element={<ExpositorDetail />} />
 									{/* <Route path="/newEvent" element={<EventNew />} /> */}
 									<Route path="/home" element={<Home children={undefined} />} />
 								</Route>

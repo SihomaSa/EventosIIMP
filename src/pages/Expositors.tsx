@@ -26,6 +26,7 @@ export default function Expositors() {
 
 				const data: ExpositorType[] = await response.json();
 				setExpositors(data);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al cargar los expositores");
 			} finally {

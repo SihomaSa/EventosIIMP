@@ -46,7 +46,6 @@ export default function UpdateAdsModal({
 		handleSubmit,
 		formState: { errors },
 		reset,
-		watch,
 	} = useForm<AdFormValues>({
 		resolver: zodResolver(adSchema),
 		defaultValues: {
