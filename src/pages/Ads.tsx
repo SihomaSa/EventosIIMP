@@ -16,6 +16,7 @@ export default function Ads() {
 	const [selectedAd, setSelectedAd] = useState<AdType | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+	const [adsUpdated, setAdsUpdated] = useState(0);
 
 	useEffect(() => {
 		const fetchAds = async () => {
@@ -31,10 +32,10 @@ export default function Ads() {
 		};
 
 		fetchAds();
-	}, []);
+	}, [adsUpdated]);
 
-	const handleAddAd = (newAd: AdType) => {
-		setAds((prev) => [...prev, newAd]);
+	const handleAddAd = () => {
+		setAdsUpdated((prev) => prev + 1); // Cambia el estado para volver a ejecutar useEffect
 		setIsAddModalOpen(false);
 	};
 

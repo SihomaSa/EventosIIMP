@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LanguageType, NewAdRequestType, NewAdType } from "@/types/adTypes";
+import { LanguageType, NewAdRequestType } from "@/types/adTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,10 +25,10 @@ const adSchema = z.object({
 type AdFormValues = z.infer<typeof adSchema>;
 
 export default function EditAdsModal({
-	// onAdd,
+	onAdd,
 	onClose,
 }: {
-	onAdd: (newAd: NewAdType) => void;
+	onAdd: () => void;
 	open: boolean;
 	onClose: () => void;
 }) {
@@ -77,7 +77,7 @@ export default function EditAdsModal({
 
 				await createAd(newAd);
 				alert("Ad creado exitosamente"); // TODO cambiar por un toast
-				// onAdd(newAd); TODO arreglar el refresh de ads.tsx
+				onAdd();
 				reset(); // Resetea el formulario
 				onClose(); // Cierra el modal
 				setPreview(null);
