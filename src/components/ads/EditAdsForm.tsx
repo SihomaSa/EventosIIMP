@@ -64,7 +64,7 @@ export default function EditAdsModal({
 	};
 
 	const onSubmit = async (data: AdFormValues) => {
-        console.log("Datos enviados:", data);
+        // console.log("Datos enviados:", data); cambiar por toast
 		if (selectedEvent) {
 			try {
 				const base64Image = await fileToBase64(data.foto);

@@ -1,4 +1,4 @@
-import { AdType, NewAdRequestType, NewAdType } from "@/types/adTypes";
+import { AdType, NewAdRequestType, UpdateAdRequestType } from "@/types/adTypes";
 
 const API_GET_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
 const API_POST_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
@@ -21,7 +21,7 @@ export const createAd = async (newAd: NewAdRequestType): Promise<AdType> => {
   return response.json();
 };
 
-export const updateAd = async (id: string, updatedAd: Partial<NewAdType>): Promise<AdType> => {
+export const updateAd = async (updatedAd: UpdateAdRequestType): Promise<AdType> => {
   const response = await fetch(API_PUT_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

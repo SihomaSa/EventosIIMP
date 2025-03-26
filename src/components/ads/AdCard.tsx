@@ -41,7 +41,7 @@ export default function AdCard({
 							className="bg-gray-100"
 						/>
 					</div>
-					<div className="flex justify-between">
+					<div className="flex justify-between py-3">
 						<Button variant={"outline"} disabled>
 							<Trash2 /> Eliminar
 						</Button>

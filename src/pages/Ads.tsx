@@ -39,12 +39,8 @@ export default function Ads() {
 		setIsAddModalOpen(false);
 	};
 
-	const handleUpdateAd = (updatedAd: AdType) => {
-		setAds((prev) =>
-			prev.map((ad) =>
-				ad.idPublicidad === updatedAd.idPublicidad ? updatedAd : ad
-			)
-		);
+	const handleUpdateAd = () => {
+		setAdsUpdated((prev) => prev + 1);
 		setSelectedAd(null);
 		setIsUpdateModalOpen(false);
 	};

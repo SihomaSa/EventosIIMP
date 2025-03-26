@@ -1,35 +1,36 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AdType } from "@/types/adTypes";
+import { AdType, LanguageType, UpdateAdRequestType } from "@/types/adTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { useState, useEffect } from 'react';
+import { fileToBase64 } from "@/utils/fileToBase64";
+import { updateAd } from "../services/adsService";
 
 const adSchema = z.object({
 	foto: z.instanceof(File).optional(),
 	url: z.string().url({ message: "Debe ser una URL válida" }),
-	prefijoIdioma: z.enum(["SP", "EN"], {
-		message: "Seleccione un idioma válido",
+	idioma: z.enum(["1", "2"], {
+		message: "Selecciona un idioma válido",
 	}),
 	estado: z
 		.number()
 		.int()
 		.min(0)
-		.max(1, { message: "El estado debe ser 0 (inactivo) o 1 (activo)" }),
+		.max(1, { message: "El estado debe ser inactivo o activo" }),
 });
 
 type AdFormValues = z.infer<typeof adSchema>;
 
 interface UpdateAdsModalProps {
-	onAdd: (newAd: AdType) => void;
+	onAdd: () => void;
 	onClose: () => void;
 	ad: AdType;
-	onUpdate: (updated: AdType) => void;
+	onUpdate: () => void;
 	open: boolean;
 }
 
@@ -41,36 +42,68 @@ export default function UpdateAdsModal({
 }: UpdateAdsModalProps) {
 	const [imagePreview, setImagePreview] = useState<string | null>(
 		typeof ad.foto === "string" ? ad.foto : null
-	  );
-	  
+	);
+
+	const [fotoUpdated, setFotoUpdated] = useState(0);
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors },
 		reset,
+		setValue,
+		watch,
 	} = useForm<AdFormValues>({
 		resolver: zodResolver(adSchema),
 		defaultValues: {
-			foto: ad.foto instanceof File ? ad.foto : undefined,
+			foto: undefined,
 			url: ad.url,
-			prefijoIdioma: ad.prefijoIdioma as "SP" | "EN",
+			idioma: ad.prefijoIdioma === "EN" ? "1" : "2",
 			estado: ad.estado,
 		},
 	});
+
+	useEffect(() => {
+	  console.log("idioma", ad.prefijoIdioma)
+	}, [ad.prefijoIdioma]);
+	
 
 	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
 			setImagePreview(URL.createObjectURL(file));
 		}
+		setFotoUpdated((prev) => prev + 1);
+	};
+	const handleLanguageChange = (value: LanguageType) => {
+		setValue("idioma", value, { shouldValidate: true });
 	};
 
-	const onSubmit = (data: AdFormValues) => {
-		const updatedAd = { ...ad, ...data };
-		onUpdate(updatedAd);
-		reset();
-		onClose();
+	const onSubmit = async (data: AdFormValues) => {
+		try {
+			const formFoto =
+				fotoUpdated !== 0 && data.foto
+					? await fileToBase64(data.foto)
+					: ad.foto;
+
+			const editAd: UpdateAdRequestType = {
+				foto: formFoto,
+				url: data.url,
+				idioma: data.idioma,
+				evento: String(ad.idEvento),
+				estado: String(data.estado),
+				idPublicidad: String(ad.idPublicidad),
+			};
+
+			await updateAd(editAd);
+			alert("Ad creado exitosamente"); // TODO cambiar por un toast
+			onUpdate();
+			reset(); // Resetea el formulario
+			onClose(); // Cierra el modal
+			setImagePreview(null);
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	return (
@@ -78,13 +111,30 @@ export default function UpdateAdsModal({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Editar Publicidad</DialogTitle>
+					<DialogDescription>
+					Actualiza los detalles de la publicidad y guarda los cambios.
+					</DialogDescription>
 				</DialogHeader>
-				<Card>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-						<h2 className="text-xl">Editar Publicación</h2>
+								<div>
+									<Label htmlFor="url" className="mb-2 font-bold">
+										Enlace
+									</Label>
+									<Input id="url" {...register("url")} />
+									{errors.url && (
+										<p className="text-red-500 text-sm">{errors.url.message}</p>
+									)}
+								</div>
 						<div>
-							<Label htmlFor="foto" className="mb-2">Imagen</Label>
-							<Input id="foto" type="file" accept="image/*" onChange={onFileChange} />
+							<Label htmlFor="foto" className="mb-2 font-bold">
+								Imagen
+							</Label>
+							<Input
+								id="foto"
+								type="file"
+								accept="image/*"
+								onChange={onFileChange}
+							/>
 							{imagePreview && (
 								<img
 									src={imagePreview}
@@ -94,28 +144,24 @@ export default function UpdateAdsModal({
 							)}
 						</div>
 
-						<div>
-							<Label htmlFor="url" className="mb-2">Enlace</Label>
-							<Input id="url" {...register("url")} />
-							{errors.url && (
-								<p className="text-red-500 text-sm">{errors.url.message}</p>
-							)}
-						</div>
 
 						<div>
-							<Label className="mb-2">Idioma</Label>
-							<RadioGroup defaultValue={ad.prefijoIdioma} {...register("prefijoIdioma")}>
+							<Label className="mb-2 font-bold">Idioma</Label>
+							<RadioGroup
+								onValueChange={handleLanguageChange}
+								value={watch("idioma")}
+							>
 								<div className="flex items-center space-x-2">
-									<RadioGroupItem value="SP" id="SP" />
-									<Label htmlFor="SP">Español</Label>
-								</div>
-								<div className="flex items-center space-x-2">
-									<RadioGroupItem value="EN" id="EN" />
+									<RadioGroupItem value="1" id="EN" />
 									<Label htmlFor="EN">Inglés</Label>
 								</div>
+								<div className="flex items-center space-x-2">
+									<RadioGroupItem value="2" id="SP" />
+									<Label htmlFor="SP">Español</Label>
+								</div>
 							</RadioGroup>
-							{errors.prefijoIdioma && (
-								<p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>
+							{errors.idioma && (
+								<p className="text-red-500 text-sm">{errors.idioma.message}</p>
 							)}
 						</div>
 
@@ -126,7 +172,6 @@ export default function UpdateAdsModal({
 							<Button type="submit">Guardar</Button>
 						</div>
 					</form>
-				</Card>
 			</DialogContent>
 		</Dialog>
 	);
