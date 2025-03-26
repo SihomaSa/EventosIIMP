@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { AdType } from "../types/adTypes";
 import { Plus } from "lucide-react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import AdCard from "@/components/ads/AdCard";
 import UpdateAdsModal from "@/components/ads/UpdateAdsModal";
 import EditAdsForm from "@/components/ads/EditAdsForm";
+
+import { getAds } from "@/components/services/adsService";
 
 export default function Ads() {
 	const [ads, setAds] = useState<AdType[]>([]);
@@ -14,28 +15,22 @@ export default function Ads() {
 
 	const [selectedAd, setSelectedAd] = useState<AdType | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [showForm, setShowForm] = useState(false);
 	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
 	useEffect(() => {
-		const loadAds = async () => {
+		const fetchAds = async () => {
 			try {
-				const response = await fetch(
-					"https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event/1"
-				);
-				if (!response.ok) throw new Error("Error al obtener eventos");
-
-				const data: AdType[] = await response.json();
+				const data = await getAds();
 				setAds(data);
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
-				setError("Error al cargar los eventos");
+				setError("Error al obtener los publicidades");
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		loadAds();
+		fetchAds();
 	}, []);
 
 	const handleAddAd = (newAd: AdType) => {
@@ -83,9 +78,9 @@ export default function Ads() {
 							))}
 						</div>
 					)}
-					{ads.map((ad) => (
+					{ads.map((ad, index) => (
 						<AdCard
-							key={ad.idPublicidad}
+							key={index}
 							id={ad.idPublicidad}
 							foto={ad.foto}
 							url={ad.url}
@@ -98,12 +93,12 @@ export default function Ads() {
 				<div className="w-1/3 flex flex-col gap-y-4 mx-4">
 					<div
 						className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
-						onClick={() => setShowForm(!showForm)}
+						onClick={() => setIsAddModalOpen(!isAddModalOpen)}
 					>
 						<h3 className="text-lg font-semibold">Agregar Publicación</h3>
 						<Plus size={50} />
 					</div>
-					{showForm && (
+					{isAddModalOpen && (
 						<EditAdsForm
 							open={isAddModalOpen}
 							onClose={() => setIsAddModalOpen(false)}

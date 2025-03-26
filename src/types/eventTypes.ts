@@ -6,7 +6,7 @@ import { ActivityType } from "./activityTypes";
 import { ExpositorType } from "./expositorTypes";
 
 export interface EventType {
-  idEvent: string;
+  idEvent: number;
   des_event: string;
   foto: string;
   color: string;

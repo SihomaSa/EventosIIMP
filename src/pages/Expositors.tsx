@@ -21,7 +21,7 @@ export default function Expositors() {
 	useEffect(() => {
 		const loadExpositors = async () => {
 			try {
-				const response = await fetch("https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/author/1"); // Reemplaza con tu URL real
+				const response = await fetch("https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/author/1"); 
 				if (!response.ok) throw new Error("Error al obtener expositores");
 
 				const data: ExpositorType[] = await response.json();
