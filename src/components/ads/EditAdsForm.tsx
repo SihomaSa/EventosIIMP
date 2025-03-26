@@ -7,18 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createAd } from "../services/adsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
+import { ImagePlus } from "lucide-react";
 
 // ✅ Esquema de validación con Zod
 const adSchema = z.object({
-    foto: z.instanceof(File, { message: "Debe seleccionar una imagen válida" }),
-    url: z.string().url("Debe ser una URL válida"),
-    idioma: z.enum(["1", "2"], {
-        message: "Selecciona un idioma válido",
-    }),
+	foto: z.instanceof(File, { message: "Debe seleccionar una imagen válida" }),
+	url: z.string().url("Debe ser una URL válida"),
+	idioma: z.enum(["1", "2"], {
+		message: "Selecciona un idioma válido",
+	}),
 });
 
 // ✅ Tipo basado en Zod
@@ -38,25 +39,28 @@ export default function EditAdsModal({
 		handleSubmit,
 		formState: { errors },
 		reset,
-        setValue,
-        watch
+		setValue,
+		watch,
 	} = useForm<AdFormValues>({
 		resolver: zodResolver(adSchema),
 		defaultValues: {
-            foto: undefined,
+			foto: undefined,
 			url: "",
 			idioma: "2",
 		},
 	});
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
 	const [preview, setPreview] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string | null>(null);
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
-        console.log("Archivo seleccionado:", file);
+		console.log("Archivo seleccionado:", file);
 		if (file) {
 			setPreview(URL.createObjectURL(file));
-            setValue("foto", file, { shouldValidate: true });
+            setFileName(file ? file.name : null);
+			setValue("foto", file, { shouldValidate: true });
 		}
 	};
 	const handleLanguageChange = (value: LanguageType) => {
@@ -64,7 +68,7 @@ export default function EditAdsModal({
 	};
 
 	const onSubmit = async (data: AdFormValues) => {
-        // console.log("Datos enviados:", data); cambiar por toast
+		// console.log("Datos enviados:", data); cambiar por toast
 		if (selectedEvent) {
 			try {
 				const base64Image = await fileToBase64(data.foto);
@@ -91,17 +95,43 @@ export default function EditAdsModal({
 		<Card>
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
 				<h2 className="text-xl">Nueva publicidad</h2>
+				<div>
+					<Label htmlFor="url" className="mb-2">
+						Enlace
+					</Label>
+					<Input id="url" {...register("url")} />
+					{errors.url && (
+						<p className="text-red-500 text-sm">{errors.url.message}</p>
+					)}
+				</div>
 
 				<div>
 					<Label htmlFor="foto" className="mb-2">
 						Imagen
 					</Label>
 					<Input
+                        ref={fileInputRef}
 						id="foto"
 						type="file"
 						accept="image/*"
+						className="hidden"
 						onChange={handleImageChange}
 					/>
+					{/* Botón personalizado */}
+					<Label htmlFor="foto" className="cursor-pointer w-full">
+						<Button variant="outline" size="icon" className="w-full flex justify-around" onClick={() => fileInputRef.current?.click()}>
+                            <span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
+							    <ImagePlus className="" />
+
+                            </span>
+                            <span className="w-full h-full flex items-center justify-center px-2 ">
+                                {fileName ? fileName : "Seleccione un archivo"}
+
+                            </span>
+						</Button>
+					</Label>
+				</div>
+				<div>
 					{preview && (
 						<img
 							src={preview}
@@ -115,20 +145,13 @@ export default function EditAdsModal({
 				</div>
 
 				<div>
-					<Label htmlFor="url" className="mb-2">
-						Enlace
-					</Label>
-					<Input id="url" {...register("url")} />
-					{errors.url && (
-						<p className="text-red-500 text-sm">{errors.url.message}</p>
-					)}
-				</div>
-
-				<div>
 					<Label htmlFor="idioma" className="mb-2">
 						Idioma
 					</Label>
-					<RadioGroup onValueChange={handleLanguageChange} value={watch("idioma")}>
+					<RadioGroup
+						onValueChange={handleLanguageChange}
+						value={watch("idioma")}
+					>
 						<div className="flex items-center space-x-2">
 							<RadioGroupItem value="1" id="EN" />
 							<Label htmlFor="EN">Inglés</Label>
@@ -139,9 +162,7 @@ export default function EditAdsModal({
 						</div>
 					</RadioGroup>
 					{errors.idioma && (
-						<p className="text-red-500 text-sm">
-							{errors.idioma.message}
-						</p>
+						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
 					)}
 				</div>
 

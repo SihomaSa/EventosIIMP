@@ -53,11 +53,11 @@ export default function Ads() {
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
-		<div className="p-6 flex flex-col items-center">
+		<div className="p-3 md:p-6 flex flex-col items-center">
 			<h1 className="text-2xl font-bold mb-7">Gestión de Publicidades</h1>
 
-			<div className="flex w-full h-full ">
-				<div className="flex flex-wrap gap-4 justify-center w-2/3">
+			<div className=" flex flex-col-reverse md:flex-row w-full h-full">
+				<div className="flex flex-wrap gap-4 justify-center  md:w-2/3">
 					{loading && (
 						<div className="flex gap-4 space-y-3">
 							{[...Array(3)].map((_, index) => (
@@ -87,7 +87,7 @@ export default function Ads() {
 					))}
 				</div>
 
-				<div className="w-1/3 flex flex-col gap-y-4 mx-4">
+				<div className=" md:w-1/3 flex flex-col gap-y-4 mx-4 mb-4">
 					<div
 						className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
 						onClick={() => setIsAddModalOpen(!isAddModalOpen)}

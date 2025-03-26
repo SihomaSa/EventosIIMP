@@ -25,7 +25,7 @@ export default function Home() {
         </header>
 
         {/* Contenido dinámico */}
-        <main className="p-6">
+        <main className="p-3 md:p-6">
           <Outlet /> 
         </main>
       </div>
