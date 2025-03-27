@@ -52,7 +52,7 @@ export default function EditAdsModal({
 	});
 
 	const [preview, setPreview] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string | null>(null);
+	const [fileName, setFileName] = useState<string | null>(null);
 
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
@@ -97,49 +97,12 @@ export default function EditAdsModal({
 				</div>
 
 				<ImageInput
-				onChange={(file) => setValue("foto", file, { shouldValidate: true })}
-				preview={preview}
-				fileName={fileName}
-				setPreview={setPreview}
-				setFileName={setFileName}
+					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+					preview={preview}
+					fileName={fileName}
+					setPreview={setPreview}
+					setFileName={setFileName}
 				/>
-				{/* <div>
-					<Label htmlFor="foto" className="mb-2">
-						Imagen
-					</Label>
-					<Input
-                        ref={fileInputRef}
-						id="foto"
-						type="file"
-						accept="image/*"
-						className="hidden"
-						onChange={handleImageChange}
-					/>
-					<Label htmlFor="foto" className="cursor-pointer max-w-50 w-full">
-						<Button variant="outline" size="icon" className="w-full flex" onClick={() => fileInputRef.current?.click()}>
-                            <span className="bg-primary-foreground rounded-l-lg w-full h-full flex items-center justify-center">
-							    <ImagePlus className="" />
-
-                            </span>
-                            <span className="w-full h-full flex items-center justify-center pr-2">
-                                {fileName ? fileName : "Seleccione un archivo"}
-
-                            </span>
-						</Button>
-					</Label>
-				</div>
-				<div>
-					{preview && (
-						<img
-							src={preview}
-							alt="Vista previa"
-							className="mt-2 w-full h-auto rounded"
-						/>
-					)}
-					{errors.foto && (
-						<p className="text-red-500 text-sm">{errors.foto.message}</p>
-					)}
-				</div>*/}
 
 				<div>
 					<Label htmlFor="idioma" className="mb-2">
@@ -161,7 +124,7 @@ export default function EditAdsModal({
 					{errors.idioma && (
 						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
 					)}
-				</div> 
+				</div>
 
 				<div className="flex justify-between">
 					<Button type="button" variant="outline" onClick={onClose}>

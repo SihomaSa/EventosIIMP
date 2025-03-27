@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { NewExpositorType } from "@/types/expositorTypes";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { createExpositor } from "../services/expositorsService";
 import { fileToBase64 } from "@/utils/fileToBase64";
-import { ImagePlus } from "lucide-react";
 import { Textarea } from "../ui/textarea";
+import { ImageInput } from "../ImageInput";
 
 // ✅ Esquema de validación con Zod
 const ExpositorSchema = z.object({
@@ -48,19 +48,9 @@ export default function EditExpositorForm({
 		},
 	});
 
-	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [preview, setPreview] = useState<string | null>(null);
 	const [fileName, setFileName] = useState<string | null>(null);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		console.log("Archivo seleccionado:", file);
-		if (file) {
-			setPreview(URL.createObjectURL(file));
-			setFileName(file ? file.name : null);
-			setValue("foto", file, { shouldValidate: true });
-		}
-	};
 
 	const onSubmit = async (data: ExpositorFormValues) => {
 		try {
@@ -130,47 +120,13 @@ export default function EditExpositorForm({
 					)}
 				</div>
 
-				<div>
-					<Label htmlFor="foto" className="mb-2">
-						Imagen
-					</Label>
-					<Input
-						ref={fileInputRef}
-						id="foto"
-						type="file"
-						accept="image/*"
-						className="hidden"
-						onChange={handleImageChange}
-					/>
-					{/* Botón personalizado */}
-					<Label htmlFor="foto" className="cursor-pointer w-full">
-						<Button
-							variant="outline"
-							size="icon"
-							className="w-full flex justify-around"
-							onClick={() => fileInputRef.current?.click()}
-						>
-							<span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
-								<ImagePlus className="" />
-							</span>
-							<span className="w-full h-full flex items-center justify-center px-2 ">
-								{fileName ? fileName : "Seleccione un archivo"}
-							</span>
-						</Button>
-					</Label>
-				</div>
-				<div>
-					{preview && (
-						<img
-							src={preview}
-							alt="Vista previa"
-							className="mt-2 w-full h-auto rounded"
-						/>
-					)}
-					{errors.foto && (
-						<p className="text-red-500 text-sm">{errors.foto.message}</p>
-					)}
-				</div>
+				<ImageInput
+					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+					preview={preview}
+					fileName={fileName}
+					setPreview={setPreview}
+					setFileName={setFileName}
+				/>
 
 				<div className="flex justify-between">
 					<Button type="button" variant="outline" onClick={onClose}>

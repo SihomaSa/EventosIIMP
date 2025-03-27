@@ -8,12 +8,12 @@ import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { NewBulletinRequestType } from "@/types/bulletinTypes";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { createBulletin } from "../services/bulletinsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
-import { ImagePlus } from "lucide-react";
 import { LanguageType } from "@/types/languageTypes";
+import { ImageInput } from "../ImageInput";
 
 // ✅ Esquema de validación con Zod
 const BulletinSchema = z.object({
@@ -55,20 +55,9 @@ export default function EditBulletinForm({
 		},
 	});
 
-	// Verificar el idioma seleccionado
-	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [preview, setPreview] = useState<string | null>(null);
 	const [fileName, setFileName] = useState<string | null>(null);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		console.log("Archivo seleccionado:", file);
-		if (file) {
-			setPreview(URL.createObjectURL(file));
-			setFileName(file ? file.name : null);
-			setValue("foto", file, { shouldValidate: true });
-		}
-	};
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
 	};
@@ -144,47 +133,13 @@ export default function EditBulletinForm({
 					)}
 				</div>
 
-				<div>
-					<Label htmlFor="foto" className="mb-2">
-						Imagen
-					</Label>
-					<Input
-						ref={fileInputRef}
-						id="foto"
-						type="file"
-						accept="image/*"
-						className="hidden"
-						onChange={handleImageChange}
-					/>
-					{/* Botón personalizado */}
-					<Label htmlFor="foto" className="cursor-pointer w-full">
-						<Button
-							variant="outline"
-							size="icon"
-							className="w-full flex justify-around"
-							onClick={() => fileInputRef.current?.click()}
-						>
-							<span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
-								<ImagePlus className="" />
-							</span>
-							<span className="w-full h-full flex items-center justify-center px-2 ">
-								{fileName ? fileName : "Seleccione un archivo"}
-							</span>
-						</Button>
-					</Label>
-				</div>
-				<div>
-					{preview && (
-						<img
-							src={preview}
-							alt="Vista previa"
-							className="mt-2 w-full h-auto rounded"
-						/>
-					)}
-					{errors.foto && (
-						<p className="text-red-500 text-sm">{errors.foto.message}</p>
-					)}
-				</div>
+				<ImageInput
+					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+					preview={preview}
+					fileName={fileName}
+					setPreview={setPreview}
+					setFileName={setFileName}
+				/>
 
 				{/* Selector de idioma */}
 				<div>
