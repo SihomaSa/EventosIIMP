@@ -4,13 +4,13 @@ export interface ExpositorType {
 	apellidos: string;
 	especialidad: string;
 	hojavida: string;
-	image?: string;
+	foto: string;
 }
 
 export interface NewExpositorType {
 	nombres: string;
 	apellidos: string;
 	especialidad: string;
-	hojavida: string;
-	image?: string;
+	hojaDeVida: string;
+	foto: string;
 }
