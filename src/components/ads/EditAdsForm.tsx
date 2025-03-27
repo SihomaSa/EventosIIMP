@@ -119,13 +119,13 @@ export default function EditAdsModal({
 						onChange={handleImageChange}
 					/>
 					{/* Botón personalizado */}
-					<Label htmlFor="foto" className="cursor-pointer w-full">
-						<Button variant="outline" size="icon" className="w-full flex justify-around" onClick={() => fileInputRef.current?.click()}>
-                            <span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
+					<Label htmlFor="foto" className="cursor-pointer max-w-50 w-full">
+						<Button variant="outline" size="icon" className="w-full flex" onClick={() => fileInputRef.current?.click()}>
+                            <span className="bg-primary-foreground rounded-l-lg w-full h-full flex items-center justify-center">
 							    <ImagePlus className="" />
 
                             </span>
-                            <span className="w-full h-full flex items-center justify-center px-2 ">
+                            <span className="w-full h-full flex items-center justify-center pr-2">
                                 {fileName ? fileName : "Seleccione un archivo"}
 
                             </span>
