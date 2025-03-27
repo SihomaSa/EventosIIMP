@@ -42,7 +42,7 @@ export function ImageInput({ onChange, preview, fileName, setPreview, setFileNam
           <span className="bg-primary-foreground rounded-l-lg w-full h-full flex items-center justify-center">
             <ImagePlus />
           </span>
-          <span className={`w-full h-full flex items-center justify-center pr-2 ${fileName && "truncate"}`}>
+          <span className={`w-full h-full text-stone-500 flex items-center justify-center pr-2 ${fileName && "truncate"}`}>
             {fileName ? fileName : "Seleccione un archivo"}
           </span>
         </Button>
