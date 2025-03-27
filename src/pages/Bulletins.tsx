@@ -7,6 +7,8 @@ import EditBulletinForm from "@/components/bulletins/EditBulletinForm";
 import BulletinCard from "@/components/bulletins/BulletinCard";
 import { BulletinType } from "@/types/bulletinTypes";
 
+import { getBulletins } from "@/components/services/bulletinsService";
+
 export default function Bulletins() {
 	const [bulletins, setBulletins] = useState<BulletinType[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -14,40 +16,32 @@ export default function Bulletins() {
 
 	const [selectedBulletin, setSelectedBulletin] = useState<BulletinType | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [showForm, setShowForm] = useState(false);
 	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+	const [bulletinsUpdated, setBulletinsUpdated] = useState(0);
 
 	useEffect(() => {
-		const loadBulletins = async () => {
+		const fetchBulletins = async () => {
 			try {
-				const response = await fetch(
-					"https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/news/event/1"
-				); // Reemplaza con tu URL real
-				if (!response.ok) throw new Error("Error al obtener eventos");
-
-				const data: BulletinType[] = await response.json();
+				const data = await getBulletins();
 				setBulletins(data);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
-				setError("Error al cargar los eventos");
+				setError("Error al obtener los boletines");
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		loadBulletins();
-	}, []);
+		fetchBulletins();
+	}, [bulletinsUpdated]);
 
-	const handleAddBulletin = (newBulletin: BulletinType) => {
-		setBulletins((prev) => [...prev, newBulletin]);
+	const handleAddBulletin = () => {
+		setBulletinsUpdated((prev) => prev + 1);
 		setIsAddModalOpen(false);
 	};
 
-	const handleUpdateBulletin = (updatedBulletin: BulletinType) => {
-		setBulletins((prev) =>
-			prev.map((bulletin) =>
-				bulletin.idTipPre === updatedBulletin.idTipPre ? updatedBulletin : bulletin
-			)
-		);
+	const handleUpdateBulletin = () => {
+		setBulletinsUpdated((prev) => prev + 1);
 		setSelectedBulletin(null);
 		setIsUpdateModalOpen(false);
 	};
@@ -60,11 +54,11 @@ export default function Bulletins() {
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
-		<div className="p-6 flex flex-col items-center">
+		<div className="p-3 md:p-6 flex flex-col items-center">
 			<h1 className="text-2xl font-bold mb-7">Gestión de Boletines</h1>
 
-			<div className="flex w-full h-full ">
-				<div className="flex flex-wrap gap-4 justify-center w-2/3">
+			<div className="flex flex-col-reverse md:flex-row w-full h-full">
+				<div className="flex flex-wrap gap-4 justify-center  md:w-2/3">
 					{loading && (
 						<div className="flex gap-4 space-y-3">
 							{[...Array(3)].map((_, index) => (
@@ -82,30 +76,34 @@ export default function Bulletins() {
 							))}
 						</div>
 					)}
-					{bulletins.map((bulletin) => (
+					{bulletins?.length ? (
+					bulletins.map((bulletin) => (
 						<BulletinCard
-							key={bulletin.idTipPre}
-							foto={bulletin.foto}
-							titulo={bulletin.titulo}
-							subtitulo={bulletin.subtitulo}
-							descripcion={bulletin.descripcion}
-							idioma={bulletin.descripcionIdioma}
-							openUpdateModal={() => openUpdateModal(bulletin)}
+						key={bulletin.idTipPre}
+						foto={bulletin.foto}
+						titulo={bulletin.titulo}
+						subtitulo={bulletin.subtitulo}
+						descripcion={bulletin.descripcion}
+						idioma={bulletin.descripcionIdioma}
+						openUpdateModal={() => openUpdateModal(bulletin)}
 						/>
-					))}
+					))
+					) : (
+					<p className="text-gray-500">No hay boletines disponibles</p>
+					)}
+
 				</div>
 
-				<div className="w-1/3 flex flex-col gap-y-4 mx-4">
+				<div className="md:w-1/3 flex flex-col gap-y-4 mx-4 mb-4">
 					<div
 						className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
-						onClick={() => setShowForm(!showForm)}
+						onClick={() => setIsAddModalOpen(!isAddModalOpen)}
 					>
 						<h3 className="text-lg font-semibold">Agregar Boletín</h3>
 						<Plus size={50} />
 					</div>
-					{showForm && (
+					{isAddModalOpen && (
 						<EditBulletinForm
-							open={isAddModalOpen}
 							onClose={() => setIsAddModalOpen(false)}
 							onAdd={handleAddBulletin}
 						/>
