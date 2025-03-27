@@ -6,141 +6,213 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { PressNoteType } from "@/types/pressNoteTypes";
+import { NewPressNoteRequestType } from "@/types/pressNoteTypes";
+
+import { useRef, useState } from "react";
+import { createPressNote } from "../services/pressNotesService";
+import { useEventStore } from "@/stores/eventStore";
+import { fileToBase64 } from "@/utils/fileToBase64";
+import { ImagePlus } from "lucide-react";
+import { LanguageType } from "@/types/languageTypes";
 
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
-  descripcion_prensa: z.string().min(1, "La descripción de prensa es obligatoria"),
-  descripcionIdioma: z.enum(["SP", "EN"], {
-    message: "Selecciona un idioma válido",
-  }),
-  descripcion: z.string().min(1, "La descripción es obligatoria"),
-  prefijoIdioma: z.enum(["SP", "EN"], {
-    message: "Selecciona un prefijo de idioma válido",
-  }),
-  idTipPre: z.number().int().positive(),
-  url: z.string().url("Debe ser una URL válida"),
-  titulo: z.string().min(1, "El título es obligatorio"),
-  foto: z.string().url("Debe ser una URL válida"),
-  subtitulo: z.string().min(1, "El subtítulo es obligatorio"),
+	titulo: z.string().min(1, "El título es obligatorio"),
+	descripcion: z.string().min(1, "La descripción es obligatoria"),
+	url: z.string().url("Debe ser una URL válida"),
+	foto: z.instanceof(File, { message: "Debe seleccionar una imagen válida" }),
+	idioma: z.enum(["1", "2"], {
+		message: "Selecciona un idioma válido",
+	}),
 });
 
 // ✅ Tipo basado en Zod
 type PressNoteFormValues = z.infer<typeof PressNoteSchema>;
 
 export default function EditPressNoteForm({
-  open,
-  onAdd,
-  onClose,
+	onAdd,
+	onClose,
 }: {
-  open: boolean;
-  onAdd: (newPressNote: PressNoteType) => void;
-  onClose: () => void;
+	onAdd: () => void;
+	onClose: () => void;
 }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-  } = useForm<PressNoteFormValues>({
-    resolver: zodResolver(PressNoteSchema),
-    defaultValues: {
-      descripcion_prensa: "",
-      descripcionIdioma: "SP",
-      descripcion: "",
-      prefijoIdioma: "SP",
-      idTipPre: 1, // Valor por defecto válido para un número
-      url: "",
-      titulo: "",
-      foto: "",
-      subtitulo: "",
-    },
-  });
+	const { selectedEvent } = useEventStore();
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+		setValue,
+		watch,
+	} = useForm<PressNoteFormValues>({
+		resolver: zodResolver(PressNoteSchema),
+		defaultValues: {
+			titulo: "",
+			descripcion: "",
+			url: "",
+			foto: undefined,
+			idioma: "2",
+		},
+	});
 
-  // Verificar el idioma seleccionado
-  const selectedLanguage = watch("prefijoIdioma");
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [preview, setPreview] = useState<string | null>(null);
+	const [fileName, setFileName] = useState<string | null>(null);
 
-  const onSubmit = (data: PressNoteFormValues) => {
-    const newPressNote: PressNoteType = {
-      descripcion_prensa: data.descripcion_prensa,
-      descripcionIdioma: data.descripcionIdioma,
-      descripcion: data.descripcion,
-      prefijoIdioma: data.prefijoIdioma,
-      idTipPre: data.idTipPre,
-      url: data.url,
-      titulo: data.titulo,
-      foto: data.foto,
-      subtitulo: data.subtitulo,
-    };
-    onAdd(newPressNote);
-    reset();
-    onClose();
-  };
-  if (!open) return null;
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		console.log("Archivo seleccionado:", file);
+		if (file) {
+			setPreview(URL.createObjectURL(file));
+			setFileName(file ? file.name : null);
+			setValue("foto", file, { shouldValidate: true });
+		}
+	};
+	const handleLanguageChange = (value: LanguageType) => {
+		setValue("idioma", value, { shouldValidate: true });
+	};
 
-  return (
-    <Card>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-        <h2 className="text-xl">Nueva Nota de Prensa</h2>
+	const onSubmit = async (data: PressNoteFormValues) => {
+		if (selectedEvent) {
+			try {
+				const base64Image = await fileToBase64(data.foto);
+				const newPressNote: NewPressNoteRequestType = {
+					titulo: data.titulo,
+					descripcion: data.descripcion,
+					url: data.url,
+					evento: String(selectedEvent.idEvent),
+					tipoprensa: "2",
+					foto: base64Image,
+					idioma: data.idioma,
+				};
+				await createPressNote(newPressNote);
+				alert("Nota de prensa creada exitosamente"); // TODO cambiar por un toast
+				onAdd();
+				reset();
+				onClose();
+			} catch (error) {
+				console.error("Error al convertir imagen", error);
+			}
+		}
+	};
 
-        <div>
-          <Label htmlFor="titulo" className="mb-2">Título</Label>
-          <Input id="titulo" {...register("titulo")} />
-          {errors.titulo && <p className="text-red-500 text-sm">{errors.titulo.message}</p>}
-        </div>
+	return (
+		<Card>
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+				<h2 className="text-xl">Nueva Nota de Prensa</h2>
 
-        <div>
-          <Label htmlFor="subtitulo" className="mb-2">Subtítulo</Label>
-          <Input id="subtitulo" {...register("subtitulo")} />
-          {errors.subtitulo && <p className="text-red-500 text-sm">{errors.subtitulo.message}</p>}
-        </div>
+				<div>
+					<Label htmlFor="titulo" className="mb-2">
+						Título
+					</Label>
+					<Input id="titulo" {...register("titulo")} />
+					{errors.titulo && (
+						<p className="text-red-500 text-sm">{errors.titulo.message}</p>
+					)}
+				</div>
 
-        <div>
-          <Label htmlFor="descripcion_prensa" className="mb-2">Descripción de prensa</Label>
-          <Input id="descripcion_prensa" {...register("descripcion_prensa")} />
-          {errors.descripcion_prensa && <p className="text-red-500 text-sm">{errors.descripcion_prensa.message}</p>}
-        </div>
+				<div>
+					<Label htmlFor="subtitulo" className="mb-2">
+						Subtítulo
+					</Label>
+					<Input id="subtitulo" {...register("descripcion")} />
+					{errors.descripcion && (
+						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
+					)}
+				</div>
 
-        <div>
-          <Label htmlFor="descripcion" className="mb-2">Descripción</Label>
-          <Input id="descripcion" {...register("descripcion")} />
-          {errors.descripcion && <p className="text-red-500 text-sm">{errors.descripcion.message}</p>}
-        </div>
+				<div>
+					<Label htmlFor="descripcion" className="mb-2">
+						Descripción
+					</Label>
+					<Input id="descripcion" {...register("descripcion")} />
+					{errors.descripcion && (
+						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
+					)}
+				</div>
 
-        <div>
-          <Label htmlFor="url" className="mb-2">Enlace</Label>
-          <Input id="url" {...register("url")} />
-          {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
-        </div>
+				<div>
+					<Label htmlFor="url" className="mb-2">
+						Enlace
+					</Label>
+					<Input id="url" {...register("url")} />
+					{errors.url && (
+						<p className="text-red-500 text-sm">{errors.url.message}</p>
+					)}
+				</div>
 
-        <div>
-          <Label htmlFor="foto" className="mb-2">Imagen (URL)</Label>
-          <Input id="foto" {...register("foto")} />
-          {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
-        </div>
+				<div>
+					<Label htmlFor="foto" className="mb-2">
+						Imagen
+					</Label>
+					<Input
+						ref={fileInputRef}
+						id="foto"
+						type="file"
+						accept="image/*"
+						className="hidden"
+						onChange={handleImageChange}
+					/>
+					{/* Botón personalizado */}
+					<Label htmlFor="foto" className="cursor-pointer w-full">
+						<Button
+							variant="outline"
+							size="icon"
+							className="w-full flex justify-around"
+							onClick={() => fileInputRef.current?.click()}
+						>
+							<span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
+								<ImagePlus className="" />
+							</span>
+							<span className="w-full h-full flex items-center justify-center px-2 ">
+								{fileName ? fileName : "Seleccione un archivo"}
+							</span>
+						</Button>
+					</Label>
+				</div>
+				<div>
+					{preview && (
+						<img
+							src={preview}
+							alt="Vista previa"
+							className="mt-2 w-full h-auto rounded"
+						/>
+					)}
+					{errors.foto && (
+						<p className="text-red-500 text-sm">{errors.foto.message}</p>
+					)}
+				</div>
 
-        {/* Selector de idioma */}
-        <div>
-          <Label className="mb-2">Idioma</Label>
-          <RadioGroup {...register("prefijoIdioma")}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="ES" id="ES" checked={selectedLanguage === "SP"} />
-              <Label htmlFor="ES">Español</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="EN" id="EN" checked={selectedLanguage === "EN"} />
-              <Label htmlFor="EN">Inglés</Label>
-            </div>
-          </RadioGroup>
-          {errors.prefijoIdioma && <p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>}
-        </div>
+				{/* Selector de idioma */}
+				<div>
+					<Label htmlFor="idioma" className="mb-2">
+						Idioma
+					</Label>
+					<RadioGroup
+						onValueChange={handleLanguageChange}
+						value={watch("idioma")}
+					>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="1" id="EN" />
+							<Label htmlFor="EN">Inglés</Label>
+						</div>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="2" id="SP" />
+							<Label htmlFor="SP">Español</Label>
+						</div>
+					</RadioGroup>
+					{errors.idioma && (
+						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
+					)}
+				</div>
 
-        <div className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button type="submit">Guardar</Button>
-        </div>
-      </form>
-    </Card>
-  );
+				<div className="flex justify-between">
+					<Button type="button" variant="outline" onClick={onClose}>
+						Cancelar
+					</Button>
+					<Button type="submit">Guardar</Button>
+				</div>
+			</form>
+		</Card>
+	);
 }

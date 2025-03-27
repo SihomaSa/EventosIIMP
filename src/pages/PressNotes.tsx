@@ -7,6 +7,8 @@ import EditPressForm from "@/components/press/EditPressForm";
 import PressCard from "@/components/press/PressCard";
 import { PressNoteType } from "@/types/pressNoteTypes";
 
+import { getPressNotes } from "@/components/services/pressNotesService";
+
 export default function PressNotes() {
   const [pressNotes, setPressNotes] = useState<PressNoteType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,39 +16,32 @@ export default function PressNotes() {
 
   const [selectedPressNote, setSelectedPressNote] = useState<PressNoteType | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [pressnotesUpdated, setPressnotesUpdated] = useState(0);
 
   useEffect(() => {
-    const loadPressNotes = async () => {
-      try {
-        const response = await fetch("https://xl4i85oqze.execute-api.us-east-1.amazonaws.com/web/news/event/1");
-        if (!response.ok) throw new Error("Error al obtener notas de prensa");
+    const fetchPressNotes = async () => {
+			try {
+				const data = await getPressNotes();
+				setPressNotes(data);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (err) {
+				setError("Error al obtener los boletines");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-        const data: PressNoteType[] = await response.json();
-        setPressNotes(data);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
-        setError("Error al cargar las notas de prensa");
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchPressNotes();
+  }, [pressnotesUpdated]);
 
-    loadPressNotes();
-  }, []);
-
-  const handleAddPressNote = (newPressNote: PressNoteType) => {
-    setPressNotes((prev) => [...prev, newPressNote]);
+  const handleAddPressNote = () => {
+    setPressnotesUpdated((prev) => prev + 1);
     setIsAddModalOpen(false);
   };
-
-  const handleUpdatePressNote = (updatedPressNote: PressNoteType) => {
-    setPressNotes((prev) =>
-      prev.map((pressNote) =>
-        pressNote.idTipPre === updatedPressNote.idTipPre ? updatedPressNote : pressNote
-      )
-    );
+  
+  const handleUpdatePressNote = () => {
+    setPressnotesUpdated((prev) => prev + 1);
     setSelectedPressNote(null);
     setIsUpdateModalOpen(false);
   };
@@ -93,14 +88,13 @@ export default function PressNotes() {
         <div className="w-1/3 flex flex-col gap-y-4 mx-4">
           <div
             className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setIsAddModalOpen(!isAddModalOpen)}
           >
             <h3 className="text-lg font-semibold">Agregar Nota de Prensa</h3>
             <Plus size={50} />
           </div>
-          {showForm && (
+          {isAddModalOpen && (
             <EditPressForm
-              open={isAddModalOpen}
               onClose={() => setIsAddModalOpen(false)}
               onAdd={handleAddPressNote}
             />
