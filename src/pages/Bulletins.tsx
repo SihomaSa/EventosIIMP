@@ -82,7 +82,6 @@ export default function Bulletins() {
 						key={bulletin.idTipPre}
 						foto={bulletin.foto}
 						titulo={bulletin.titulo}
-						subtitulo={bulletin.subtitulo}
 						descripcion={bulletin.descripcion}
 						idioma={bulletin.descripcionIdioma}
 						openUpdateModal={() => openUpdateModal(bulletin)}

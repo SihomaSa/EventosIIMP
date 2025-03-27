@@ -25,10 +25,6 @@ export default function PressCard({ pressNote, openUpdateModal }: BulletinCardPr
             <Input id="titulo" value={pressNote.titulo} disabled className="bg-gray-100" />
           </div>
           <div>
-            <Label htmlFor="subtitulo">Subtítulo</Label>
-            <Input id="subtitulo" value={pressNote.subtitulo} disabled className="bg-gray-100" />
-          </div>
-          <div>
             <Label htmlFor="descripcion">Descripción</Label>
             <Input id="descripcion" value={pressNote.descripcion} disabled className="bg-gray-100" />
           </div>

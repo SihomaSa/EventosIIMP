@@ -7,7 +7,6 @@ import { Label } from "../ui/label";
 interface BulletinCardProps {
 	foto: string;
 	titulo: string;
-	subtitulo: string;
 	descripcion: string;
 	idioma: string;
 	openUpdateModal: () => void;
@@ -16,7 +15,6 @@ interface BulletinCardProps {
 export default function BulletinCard({
 	foto,
 	titulo,
-	subtitulo,
 	descripcion,
 	idioma,
 	openUpdateModal,
@@ -33,10 +31,6 @@ export default function BulletinCard({
 			<div>
 			  <Label htmlFor="titulo">Título</Label>
 			  <Input id="titulo" value={titulo} disabled className="bg-gray-100" />
-			</div>
-			<div>
-			  <Label htmlFor="subtitulo">Subtítulo</Label>
-			  <Input id="subtitulo" value={subtitulo} disabled className="bg-gray-100" />
 			</div>
 			<div>
 			  <Label htmlFor="descripcion">Descripción</Label>

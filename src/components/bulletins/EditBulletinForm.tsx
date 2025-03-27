@@ -14,6 +14,7 @@ import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { LanguageType } from "@/types/languageTypes";
 import { ImageInput } from "../ImageInput";
+import { Textarea } from "../ui/textarea";
 
 // ✅ Esquema de validación con Zod
 const BulletinSchema = z.object({
@@ -104,26 +105,6 @@ export default function EditBulletinForm({
 				</div>
 
 				<div>
-					<Label htmlFor="subtitulo" className="mb-2">
-						Subtítulo
-					</Label>
-					<Input id="subtitulo" {...register("descripcion")} />
-					{errors.descripcion && (
-						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
-					)}
-				</div>
-
-				<div>
-					<Label htmlFor="descripcion" className="mb-2">
-						Descripción
-					</Label>
-					<Input id="descripcion" {...register("descripcion")} />
-					{errors.descripcion && (
-						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
-					)}
-				</div>
-
-				<div>
 					<Label htmlFor="url" className="mb-2">
 						Enlace
 					</Label>
@@ -132,6 +113,16 @@ export default function EditBulletinForm({
 						<p className="text-red-500 text-sm">{errors.url.message}</p>
 					)}
 				</div>
+				<div>
+					<Label htmlFor="descripcion" className="mb-2">
+						Descripción
+					</Label>
+          <Textarea id="descripcion" {...register("descripcion")} />
+					{errors.descripcion && (
+						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
+					)}
+				</div>
+
 
 				<ImageInput
 					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
