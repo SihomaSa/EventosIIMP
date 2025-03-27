@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { getSponsorCategories } from "../services/sponsorCategoriesService";
 import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
 import { ImageInput } from "../ImageInput";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
 
 // ✅ Esquema de validación con Zod
 const SponsorSchema = z.object({
@@ -128,7 +129,6 @@ export default function EditSponsorForm({
 					)}
 				</div>
 
-
 				<div>
 					<Label htmlFor="url" className="mb-2">
 						Enlace
@@ -171,31 +171,33 @@ export default function EditSponsorForm({
 
 				{/* Selector de categoría */}
 				<div>
-					<Label htmlFor="categoria" className="mb-2">
-						Categoría
-					</Label>
-					<select
-						id="categoria"
+					<div className="flex justify-between">
+						<Label htmlFor="categoria" className="mb-2">
+							Categoría
+						</Label>
+						{loading && (
+							<div>
+								<Loader2 className="animate-spin inline-block mr-2" />
+								Cargando caterogías...
+							</div>
+						)}
+					</div>
+					<Select
 						{...register("categoria")}
-						className="w-full border p-2 rounded"
 						disabled={loading}
 					>
-						{loading ? (
-							<option value="">
-								<Loader2 className="animate-spin inline-block mr-2" />
-								Cargando...
-							</option>
-						) : (
-							<>
-								<option value="">Seleccione una categoría</option>
+						<SelectTrigger className="w-55">
+							<SelectValue placeholder="Seleccione una categoría" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Categoría</SelectLabel>
 								{sponsorCategories?.map(({ idCategoriaAus, descripcion }) => (
-									<option key={idCategoriaAus} value={idCategoriaAus}>
-										{descripcion}
-									</option>
-								))}
-							</>
-						)}
-					</select>
+								<SelectItem key={idCategoriaAus} value={String(idCategoriaAus)}>{descripcion}</SelectItem>
+						))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
 					{errors.categoria && (
 						<p className="text-red-500 text-sm">{errors.categoria.message}</p>
 					)}
