@@ -1,26 +1,25 @@
 export interface SponsorType {
 	idSponsor: number;
-	nombre: string;
-	foto?: string;
-	prefijoIdioma: string;
-	descripcionIdioma: string;
 	url: string;
-	categoria: SponsorCategory;
+	descripcionIdioma: string;
+	categoria: string;
+	nombre: string;
+	foto: string;
+	prefijoIdioma: string;
 }
 
-export type SponsorCategory =
-	| "socio estratégico"
-	| "oro"
-	| "plata"
-	| "cobre"
-	| "colaborador"
-	| "agradecimiento";
-
 export interface NewSponsorType {
-	nombre: string;
-	foto?: string;
-	prefijoIdioma: string;
-	descripcionIdioma: string;
+	descripcion: string;
+	foto: string;
 	url: string;
-	categoria: SponsorCategory;
+	categoria: string;
+	idioma: string;
+}
+export interface NewSponsorRequestType {
+	descripcion: string;
+	foto: string;
+	url: string;
+	idEvento: string;
+	categoria: string;
+	idioma: string;
 }

@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LanguageType, NewAdRequestType } from "@/types/adTypes";
+import { NewAdRequestType } from "@/types/adTypes";
+import { LanguageType } from "@/types/languageTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

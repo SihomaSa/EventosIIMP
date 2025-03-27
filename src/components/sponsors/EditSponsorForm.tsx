@@ -6,127 +6,251 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { SponsorType } from "@/types/sponsorTypes";
+import { NewSponsorRequestType } from "@/types/sponsorTypes";
+import { createSponsor } from "../services/sponsorsService";
+import { useEventStore } from "@/stores/eventStore";
+import { fileToBase64 } from "@/utils/fileToBase64";
+import { ImagePlus, Loader2 } from "lucide-react";
+import { LanguageType } from "@/types/languageTypes";
+import { useEffect, useRef, useState } from "react";
+import { getSponsorCategories } from "../services/sponsorCategoriesService";
+import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
 
 // ✅ Esquema de validación con Zod
 const SponsorSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio"),
-  foto: z.string().url("Debe ser una URL válida").optional(),
-  prefijoIdioma: z.enum(["SP", "EN"], {
-    message: "Selecciona un prefijo de idioma válido",
-  }),
-  descripcionIdioma: z.enum(["ESPAÑOL", "INGLÉS"], {
-    message: "Selecciona un idioma válido",
-  }),
-  url: z.string().url("Debe ser una URL válida"),
-  categoria: z.enum(["socio estratégico", "oro", "plata", "cobre", "colaborador", "agradecimiento"], {
-    message: "Selecciona una categoría válida",
-  }),
+	descripcion: z.string().min(1, "El nombre es obligatorio"),
+	foto: z.instanceof(File, { message: "Debe seleccionar una imagen válida" }),
+	url: z.string().url("Debe ser una URL válida"),
+	categoria: z.string().min(1, "Selecciona una categoría válida"),
+	idioma: z.enum(["1", "2"], {
+		message: "Selecciona un idioma válido",
+	}),
 });
 
 // ✅ Tipo basado en Zod
 type SponsorFormValues = z.infer<typeof SponsorSchema>;
 
 export default function EditSponsorForm({
-  onSave,
-  onClose,
-  sponsor,
+	onAdd,
+	onClose,
 }: {
-  onSave: (updatedSponsor: SponsorType) => void;
-  onClose: () => void;
-  sponsor?: SponsorType;
+	onAdd: () => void;
+	onClose: () => void;
 }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-  } = useForm<SponsorFormValues>({
-    resolver: zodResolver(SponsorSchema),
-    defaultValues: {
-      nombre: "",
-      foto: "",
-      prefijoIdioma: "SP",
-      descripcionIdioma: "ESPAÑOL",
-      url: "",
-      categoria: "colaborador",
-    },
-  });
+	const { selectedEvent } = useEventStore();
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+		setValue,
+		watch,
+	} = useForm<SponsorFormValues>({
+		resolver: zodResolver(SponsorSchema),
+		defaultValues: {
+			descripcion: "",
+			foto: undefined,
+			url: "",
+			categoria: "colaborador",
+			idioma: "2",
+		},
+	});
 
-  const selectedLanguage = watch("prefijoIdioma");
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [preview, setPreview] = useState<string | null>(null);
+	const [fileName, setFileName] = useState<string | null>(null);
+	const [sponsorCategories, setSponsorCategories] = useState<
+		SponsorCategoryType[] | null
+	>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (data: SponsorFormValues) => {
-    const updatedSponsor: SponsorType = {
-      idSponsor: sponsor?.idSponsor || Date.now(),
-      ...data,
-    };
-    onSave(updatedSponsor);
-    reset();
-    onClose();
-  };
+	useEffect(() => {
+		const fetchSponsorCategories = async () => {
+			try {
+				const data = await getSponsorCategories();
+				setSponsorCategories(data);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			} catch (err) {
+				setError("Error al obtener los auspiciadores");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-  return (
-    <Card>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-        <h2 className="text-xl">Editar Auspiciador</h2>
+		fetchSponsorCategories();
+	}, []);
 
-        <div>
-          <Label htmlFor="nombre">Nombre</Label>
-          <Input id="nombre" {...register("nombre")} />
-          {errors.nombre && <p className="text-red-500 text-sm">{errors.nombre.message}</p>}
-        </div>
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		console.log("Archivo seleccionado:", file);
+		if (file) {
+			setPreview(URL.createObjectURL(file));
+			setFileName(file ? file.name : null);
+			setValue("foto", file, { shouldValidate: true });
+		}
+	};
+	const handleLanguageChange = (value: LanguageType) => {
+		setValue("idioma", value, { shouldValidate: true });
+	};
 
-        <div>
-          <Label htmlFor="foto">Imagen (URL)</Label>
-          <Input id="foto" {...register("foto")} />
-          {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
-        </div>
+	const onSubmit = async (data: SponsorFormValues) => {
+		if (selectedEvent) {
+			try {
+				const base64Image = await fileToBase64(data.foto);
+				const newSponsor: NewSponsorRequestType = {
+					descripcion: data.descripcion,
+					foto: base64Image,
+					url: data.url,
+					idEvento: String(selectedEvent.idEvent),
+					categoria: String(data.categoria),
+					idioma: data.idioma,
+				};
 
-        <div>
-          <Label htmlFor="url">Enlace</Label>
-          <Input id="url" {...register("url")} />
-          {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
-        </div>
+				await createSponsor(newSponsor);
+				alert("Sponsor creado exitosamente"); // TODO cambiar por un toast
+				onAdd();
+				reset(); // Resetea el formulario
+				onClose(); // Cierra el modal
+				setPreview(null);
+			} catch (error) {
+				console.error("Error al convertir imagen", error);
+			}
+		}
+	};
 
-        {/* Selector de idioma */}
-        <div>
-          <Label>Idioma</Label>
-          <RadioGroup {...register("prefijoIdioma")}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="SP" id="SP" checked={selectedLanguage === "SP"} />
-              <Label htmlFor="SP">Español</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="EN" id="EN" checked={selectedLanguage === "EN"} />
-              <Label htmlFor="EN">Inglés</Label>
-            </div>
-          </RadioGroup>
-          {errors.prefijoIdioma && (
-            <p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>
-          )}
-        </div>
+	// ERROR al cargar categorias
+	if (error) return <p className="text-red-500">{error}</p>;
 
-        {/* Selector de categoría */}
-        <div>
-          <Label htmlFor="categoria">Categoría</Label>
-          <select id="categoria" {...register("categoria")} className="w-full border p-2 rounded">
-            {["socio estratégico", "oro", "plata", "cobre", "colaborador", "agradecimiento"].map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-          {errors.categoria && <p className="text-red-500 text-sm">{errors.categoria.message}</p>}
-        </div>
+	return (
+		<Card>
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+				<h2 className="text-xl">Editar Auspiciador</h2>
 
-        <div className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit">Guardar</Button>
-        </div>
-      </form>
-    </Card>
-  );
+				<div>
+					<Label htmlFor="nombre" className="mb-2">
+						Nombre
+					</Label>
+					<Input id="nombre" {...register("descripcion")} />
+					{errors.descripcion && (
+						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
+					)}
+				</div>
+
+				<div>
+					<Label htmlFor="foto" className="mb-2">
+						Imagen
+					</Label>
+					<Input
+						ref={fileInputRef}
+						id="foto"
+						type="file"
+						accept="image/*"
+						className="hidden"
+						onChange={handleImageChange}
+					/>
+					{/* Botón personalizado */}
+					<Label htmlFor="foto" className="cursor-pointer w-full">
+						<Button
+							variant="outline"
+							size="icon"
+							className="w-full flex justify-around"
+							onClick={() => fileInputRef.current?.click()}
+						>
+							<span className="bg-primary-foreground rounded-l-lg w-1/5 h-full flex items-center justify-center">
+								<ImagePlus className="" />
+							</span>
+							<span className="w-full h-full flex items-center justify-center px-2 ">
+								{fileName ? fileName : "Seleccione un archivo"}
+							</span>
+						</Button>
+					</Label>
+				</div>
+				<div>
+					{preview && (
+						<img
+							src={preview}
+							alt="Vista previa"
+							className="mt-2 w-full h-auto rounded"
+						/>
+					)}
+					{errors.foto && (
+						<p className="text-red-500 text-sm">{errors.foto.message}</p>
+					)}
+				</div>
+
+				<div>
+					<Label htmlFor="url" className="mb-2">
+						Enlace
+					</Label>
+					<Input id="url" {...register("url")} />
+					{errors.url && (
+						<p className="text-red-500 text-sm">{errors.url.message}</p>
+					)}
+				</div>
+
+				{/* Selector de idioma */}
+				<div>
+					<Label htmlFor="idioma" className="mb-2">
+						Idioma
+					</Label>
+					<RadioGroup
+						onValueChange={handleLanguageChange}
+						value={watch("idioma")}
+					>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="1" id="EN" />
+							<Label htmlFor="EN">Inglés</Label>
+						</div>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="2" id="SP" />
+							<Label htmlFor="SP">Español</Label>
+						</div>
+					</RadioGroup>
+					{errors.idioma && (
+						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
+					)}
+				</div>
+
+				{/* Selector de categoría */}
+				<div>
+					<Label htmlFor="categoria" className="mb-2">
+						Categoría
+					</Label>
+					<select
+						id="categoria"
+						{...register("categoria")}
+						className="w-full border p-2 rounded"
+						disabled={loading}
+					>
+						{loading ? (
+							<option value="">
+								<Loader2 className="animate-spin inline-block mr-2" />
+								Cargando...
+							</option>
+						) : (
+							<>
+								<option value="">Seleccione una categoría</option>
+								{sponsorCategories?.map(({ idCategoriaAus, descripcion }) => (
+									<option key={idCategoriaAus} value={idCategoriaAus}>
+										{descripcion}
+									</option>
+								))}
+							</>
+						)}
+					</select>
+					{errors.categoria && (
+						<p className="text-red-500 text-sm">{errors.categoria.message}</p>
+					)}
+				</div>
+
+				<div className="flex justify-between">
+					<Button type="button" variant="outline" onClick={onClose}>
+						Cancelar
+					</Button>
+					<Button type="submit">Guardar</Button>
+				</div>
+			</form>
+		</Card>
+	);
 }

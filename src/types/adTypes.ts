@@ -1,3 +1,5 @@
+import { LanguageType } from "./languageTypes";
+
 export interface AdType {
     idPublicidad: number;
     idEvento: number;
@@ -31,4 +33,3 @@ export interface AdType {
     estado: string;
     idPublicidad: string;
   }
-  export type LanguageType = "1" | "2";
