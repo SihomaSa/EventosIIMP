@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { createAd } from "../services/adsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
-import { ImagePlus } from "lucide-react";
+import { ImageInput } from "../ImageInput";
 
 // ✅ Esquema de validación con Zod
 const adSchema = z.object({
@@ -51,19 +51,9 @@ export default function EditAdsModal({
 		},
 	});
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
 	const [preview, setPreview] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string | null>(null);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		console.log("Archivo seleccionado:", file);
-		if (file) {
-			setPreview(URL.createObjectURL(file));
-            setFileName(file ? file.name : null);
-			setValue("foto", file, { shouldValidate: true });
-		}
-	};
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
 	};
@@ -106,7 +96,14 @@ export default function EditAdsModal({
 					)}
 				</div>
 
-				<div>
+				<ImageInput
+				onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+				preview={preview}
+				fileName={fileName}
+				setPreview={setPreview}
+				setFileName={setFileName}
+				/>
+				{/* <div>
 					<Label htmlFor="foto" className="mb-2">
 						Imagen
 					</Label>
@@ -118,7 +115,6 @@ export default function EditAdsModal({
 						className="hidden"
 						onChange={handleImageChange}
 					/>
-					{/* Botón personalizado */}
 					<Label htmlFor="foto" className="cursor-pointer max-w-50 w-full">
 						<Button variant="outline" size="icon" className="w-full flex" onClick={() => fileInputRef.current?.click()}>
                             <span className="bg-primary-foreground rounded-l-lg w-full h-full flex items-center justify-center">
@@ -143,7 +139,7 @@ export default function EditAdsModal({
 					{errors.foto && (
 						<p className="text-red-500 text-sm">{errors.foto.message}</p>
 					)}
-				</div>
+				</div>*/}
 
 				<div>
 					<Label htmlFor="idioma" className="mb-2">
@@ -165,7 +161,7 @@ export default function EditAdsModal({
 					{errors.idioma && (
 						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
 					)}
-				</div>
+				</div> 
 
 				<div className="flex justify-between">
 					<Button type="button" variant="outline" onClick={onClose}>
