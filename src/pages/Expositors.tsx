@@ -56,7 +56,7 @@ export default function Expositors() {
 
 	return (
 		<div className="p-3 md:p-6 flex flex-col items-center">
-			<h1 className="text-2xl font-bold mb-7">Gestión de Expositores</h1>
+			<h1 className="text-2xl font-bold mb-7">Gestión de Conferencistas</h1>
 
 			<div className="flex flex-col-reverse md:flex-row w-full h-full">
 				<div className="flex flex-wrap gap-4 justify-center w-2/3">

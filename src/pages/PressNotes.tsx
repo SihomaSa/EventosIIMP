@@ -23,7 +23,8 @@ export default function PressNotes() {
     const fetchPressNotes = async () => {
 			try {
 				const data = await getPressNotes();
-				setPressNotes(data);
+				setPressNotes(data?.filter((pressnote) => pressnote.idTipPre === 1) || []);
+
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al obtener los boletines");

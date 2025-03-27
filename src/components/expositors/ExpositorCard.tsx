@@ -14,7 +14,11 @@ export default function ExpositorCard({ expositor, openUpdateModal }: ExpositorC
   return (
     <Card className="shadow-md overflow-hidden p-4 w-80 hover:shadow-2xl transition delay-150 duration-300 ease-in-out hover:scale-110">
       <CardContent>
-
+      <img
+					src={expositor.foto}
+					alt={`publicidad ${expositor.idautor}`}
+					className="object-cover h-auto max-h-full rounded-md"
+				/>
         <form className="p-2 space-y-2">
           <div>
             <Label htmlFor="nombres">Nombres</Label>

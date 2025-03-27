@@ -86,7 +86,7 @@ export default function EditExpositorForm({
 	return (
 		<Card>
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-				<h2 className="text-xl">Nuevo Expositor</h2>
+				<h2 className="text-xl">Nuevo Conferencista</h2>
 
 				<div>
 					<Label htmlFor="nombres" className="mb-2">
