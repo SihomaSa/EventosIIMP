@@ -16,7 +16,15 @@ import { useEffect, useState } from "react";
 import { getSponsorCategories } from "../services/sponsorCategoriesService";
 import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
 import { ImageInput } from "../ImageInput";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
 
 // ✅ Esquema de validación con Zod
 const SponsorSchema = z.object({
@@ -65,25 +73,34 @@ export default function EditSponsorForm({
 	>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [language, setlanguage] = useState("2");
+	const [filteredCategories, setFilteredCategories] = useState<
+		SponsorCategoryType[] | null
+	>(null);
 
 	useEffect(() => {
-		const fetchSponsorCategories = async () => {
+		(async () => {
 			try {
 				const data = await getSponsorCategories();
-				setSponsorCategories(data);
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				setSponsorCategories(data || []);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
-				setError("Error al obtener los auspiciadores");
+				setError("Error al obtener las categorías de auspiciadores");
 			} finally {
 				setLoading(false);
 			}
-		};
-
-		fetchSponsorCategories();
+		})();
 	}, []);
+	
+	useEffect(() => {
+		setFilteredCategories(
+			sponsorCategories?.filter((cat) => cat.idIdioma === language) || []
+		);
+	}, [language, sponsorCategories]);
 
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
+		setlanguage(value);
 	};
 
 	const onSubmit = async (data: SponsorFormValues) => {
@@ -139,13 +156,6 @@ export default function EditSponsorForm({
 					)}
 				</div>
 
-				<ImageInput
-					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
-					preview={preview}
-					fileName={fileName}
-					setPreview={setPreview}
-					setFileName={setFileName}
-				/>
 				{/* Selector de idioma */}
 				<div>
 					<Label htmlFor="idioma" className="mb-2">
@@ -171,37 +181,44 @@ export default function EditSponsorForm({
 
 				{/* Selector de categoría */}
 				<div>
-					<div className="flex justify-between">
-						<Label htmlFor="categoria" className="mb-2">
-							Categoría
-						</Label>
-						{loading && (
-							<div>
-								<Loader2 className="animate-spin inline-block mr-2" />
-								Cargando caterogías...
-							</div>
-						)}
-					</div>
-					<Select
-						{...register("categoria")}
-						disabled={loading}
-					>
+					<Label htmlFor="categoria" className="mb-2">
+						Categoría
+					</Label>
+					<Select {...register("categoria")} disabled={loading}>
 						<SelectTrigger className="w-55">
 							<SelectValue placeholder="Seleccione una categoría" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>Categoría</SelectLabel>
-								{sponsorCategories?.map(({ idCategoriaAus, descripcion }) => (
-								<SelectItem key={idCategoriaAus} value={String(idCategoriaAus)}>{descripcion}</SelectItem>
-						))}
+								{filteredCategories?.map(({ idCategoriaAus, descripcion }) => (
+									<SelectItem
+										key={idCategoriaAus}
+										value={String(idCategoriaAus)}
+									>
+										{descripcion}
+									</SelectItem>
+								))}
 							</SelectGroup>
 						</SelectContent>
 					</Select>
+					{loading && (
+						<div className="flex">
+							<Loader2 className="animate-spin inline-block mr-2" />
+							Cargando caterogías...
+						</div>
+					)}
 					{errors.categoria && (
 						<p className="text-red-500 text-sm">{errors.categoria.message}</p>
 					)}
 				</div>
+				<ImageInput
+					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+					preview={preview}
+					fileName={fileName}
+					setPreview={setPreview}
+					setFileName={setFileName}
+				/>
 
 				<div className="flex justify-between">
 					<Button type="button" variant="outline" onClick={onClose}>

@@ -1,5 +1,5 @@
 export interface SponsorCategoryType {
-	idIdioma: number,
+	idIdioma: string,
 	prefijo: string,
 	descripcion_idoma: string,
 	idCategoriaAus: number,

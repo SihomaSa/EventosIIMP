@@ -37,8 +37,8 @@ export function ImageInput({ onChange, preview, fileName, setPreview, setFileNam
         className="hidden"
         onChange={handleImageChange}
       />
-      <Label htmlFor="foto" className="cursor-pointer max-w-50 w-full">
-        <Button variant="outline" size="icon" className="w-full flex" onClick={() => fileInputRef.current?.click()}>
+      <Label htmlFor="foto" className="cursor-pointer max-w-55 w-full">
+        <Button variant="outline" size="icon" className="w-full flex border-gray border-1" onClick={() => fileInputRef.current?.click()}>
           <span className="bg-primary-foreground rounded-l-lg w-full h-full flex items-center justify-center">
             <ImagePlus />
           </span>
