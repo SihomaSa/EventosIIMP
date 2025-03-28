@@ -3,6 +3,7 @@ import { SponsorType, NewSponsorType, NewSponsorRequestType } from "@/types/spon
 const API_GET_URL = "https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/sponsor/event/1";
 const API_POST_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
 const API_PUT_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
+const API_DELETE_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor";
 
 export const getSponsors = async (): Promise<SponsorType[]> => {
   const response = await fetch(API_GET_URL);
@@ -31,3 +32,12 @@ export const updateSponsor = async (updatedAd: NewSponsorRequestType): Promise<S
   if (!response.ok) throw new Error("Error al actualizar el auspiciador");
   return response.json();
 };
+
+export const deleteSponsor = async (sponsorId: string): Promise<void> => {
+  const response = await fetch(`${API_DELETE_URL}/${sponsorId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) throw new Error("Error al eliminar el auspiciador");
+};
+

@@ -47,7 +47,6 @@ export default function Ads() {
 
 	const handleDeleteAd = () => {
 		setAdsUpdated((prev) => prev + 1);
-		console.log("borrado");
 	};
 
 	const openUpdateModal = (ad: AdType) => {

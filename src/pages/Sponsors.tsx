@@ -44,6 +44,9 @@ export default function Sponsors() {
 		setSelectedSponsor(null);
 		setIsUpdateModalOpen(false);
 	};
+	const handleDeleteSponsor = () => {
+		setSponsorsUpdated((prev) => prev + 1);
+	};
 
 	const openUpdateModal = (sponsor: SponsorType) => {
 		setSelectedSponsor(sponsor);
@@ -80,6 +83,7 @@ export default function Sponsors() {
 							key={sponsor.idSponsor}
 							sponsor={sponsor}
 							openUpdateModal={() => openUpdateModal(sponsor)}
+							onDelete={handleDeleteSponsor}
 						/>
 					))}
 				</div>

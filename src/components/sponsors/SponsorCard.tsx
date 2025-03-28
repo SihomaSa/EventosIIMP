@@ -1,16 +1,34 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { SponsorType } from "@/types/sponsorTypes";
+import { deleteSponsor } from "../services/sponsorsService";
+import DeleteAlert from "../DeleteAlert";
+import { useState } from "react";
 
 interface SponsorCardProps {
   sponsor: SponsorType;
   openUpdateModal: () => void;
+  onDelete: () => void;
 }
 
-export default function SponsorCard({ sponsor, openUpdateModal }: SponsorCardProps) {
+export default function SponsorCard({ sponsor, openUpdateModal, onDelete }: SponsorCardProps) {
+  
+  const [error, setError] = useState<string | null>(null);
+	
+	const deleteSelectedSponsor = async (id: string) => {
+		try {
+			await deleteSponsor(id);
+			onDelete(); 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (err) {
+			setError("Error al borrar ");
+			console.error(error)
+		}
+	};
+  
   return (
     <Card className="shadow-md overflow-hidden p-4 w-80 hover:shadow-2xl transition delay-150 duration-300 ease-in-out hover:scale-110">
       <CardContent>
@@ -39,9 +57,7 @@ export default function SponsorCard({ sponsor, openUpdateModal }: SponsorCardPro
             <Input id="url" value={sponsor.url} disabled className="bg-gray-100" />
           </div>
           <div className="flex justify-between">
-            <Button variant="outline" disabled>
-              <Trash2 /> Eliminar
-            </Button>
+          <DeleteAlert id={String(sponsor.idSponsor)} name="el auspiciador" deleteMethod={() => deleteSelectedSponsor(String(sponsor.idSponsor))} />
             <Button
               onClick={(event) => {
                 event.preventDefault();
