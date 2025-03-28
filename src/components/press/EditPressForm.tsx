@@ -69,10 +69,12 @@ export default function EditPressNoteForm({
 				const base64Image = await fileToBase64(data.foto);
 				const newPressNote: NewPressNoteRequestType = {
 					titulo: data.titulo,
+					subtitulo: data.titulo,
+					fecha: new Date().toISOString().split("T")[0],
 					descripcion: data.descripcion,
 					url: data.url,
 					evento: String(selectedEvent.idEvent),
-					tipoprensa: "2",
+					tipoprensa: "1",
 					foto: base64Image,
 					idioma: data.idioma,
 				};

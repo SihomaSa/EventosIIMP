@@ -23,7 +23,7 @@ export default function Bulletins() {
 		const fetchBulletins = async () => {
 			try {
 				const data = await getBulletins();
-				setBulletins(data?.filter((bulletin) => bulletin.idTipPre === 1) || []);
+				setBulletins(data?.filter((bulletin) => bulletin.idTipPre === 2) || []);
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al obtener los boletines");

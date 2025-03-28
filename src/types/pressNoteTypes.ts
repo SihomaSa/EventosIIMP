@@ -12,6 +12,8 @@ export interface PressNoteType {
 }
 export interface NewPressNoteType {
   titulo: string;
+  subtitulo: string;
+  fecha: string;
   descripcion: string;
   url: string;
   foto: string;
@@ -19,10 +21,12 @@ export interface NewPressNoteType {
 }
 export interface NewPressNoteRequestType {
   titulo: string;
+  subtitulo: string;
+  fecha: string;
   descripcion: string;
   url: string;
   evento: string;
-  tipoprensa: "2";
+  tipoprensa: "1";
   foto: string;
   idioma: string;
 }

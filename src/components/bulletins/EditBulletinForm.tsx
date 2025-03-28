@@ -69,10 +69,12 @@ export default function EditBulletinForm({
 				const base64Image = await fileToBase64(data.foto);
 				const newBulletin: NewBulletinRequestType = {
 					titulo: data.titulo,
+          subtitulo: "no mandar subtitulo",
+					fecha: new Date().toISOString().split("T")[0],
 					descripcion: data.descripcion,
 					url: data.url,
 					evento: String(selectedEvent.idEvent),
-					tipoprensa: "1",
+					tipoprensa: "2",
 					foto: base64Image,
 					idioma: data.idioma,
 				};

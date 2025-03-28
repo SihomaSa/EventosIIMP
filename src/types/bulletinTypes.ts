@@ -12,6 +12,8 @@ export interface BulletinType {
   }
   export interface NewBulletinType {
     titulo: string;
+    subtitulo: string;
+    fecha: string;
     descripcion: string;
     url: string;
     foto: string;
@@ -20,10 +22,12 @@ export interface BulletinType {
   
   export interface NewBulletinRequestType {
     titulo: string;
+    subtitulo: string;
+    fecha: string;
     descripcion: string;
     url: string;
     evento: string;
-    tipoprensa: "1";
+    tipoprensa: "2";
     foto: string;
     idioma: string;
   }
