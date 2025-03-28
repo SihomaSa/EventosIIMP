@@ -1,16 +1,34 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { PressNoteType } from "@/types/pressNoteTypes";
+import { useState } from "react";
+import { deletePressNote } from "../services/pressNotesService";
+import DeleteAlert from "../DeleteAlert";
 
-interface BulletinCardProps {
+interface PressNoteCardProps {
   pressNote: PressNoteType;
   openUpdateModal: () => void;
+  onDelete: () => void;
 }
 
-export default function PressCard({ pressNote, openUpdateModal }: BulletinCardProps) {
+export default function PressCard({ pressNote, openUpdateModal, onDelete }: PressNoteCardProps) {
+
+  const [error, setError] = useState<string | null>(null);
+
+  const deleteSelectedPressNote = async (id: string) => {
+		try {
+			await deletePressNote(id);
+			onDelete(); 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		} catch (err) {
+			setError("Error al borrar ");
+			console.error(error)
+		}
+	};
+  
   return (
     <Card className="shadow-md overflow-hidden p-4 w-80 hover:shadow-2xl transition delay-150 duration-300 ease-in-out hover:scale-110">
       <CardContent>
@@ -37,9 +55,8 @@ export default function PressCard({ pressNote, openUpdateModal }: BulletinCardPr
             <Input id="url" value={pressNote.url} disabled className="bg-gray-100" />
           </div>
           <div className="flex justify-between">
-            <Button variant="outline" disabled>
-              <Trash2 /> Eliminar
-            </Button>
+            <DeleteAlert id={String(pressNote.idPrensa)} name="el auspiciador" deleteMethod={() => deleteSelectedPressNote(String(pressNote.idPrensa))} />
+
             <Button
               onClick={(event) => {
                 event.preventDefault(); // Previene la recarga de la página

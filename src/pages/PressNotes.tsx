@@ -47,6 +47,10 @@ export default function PressNotes() {
     setIsUpdateModalOpen(false);
   };
 
+  const handleDeletePressNote = () => {
+		setPressnotesUpdated((prev) => prev + 1);
+	};
+
   const openUpdateModal = (pressNote: PressNoteType) => {
     setSelectedPressNote(pressNote);
     setIsUpdateModalOpen(true);
@@ -82,6 +86,7 @@ export default function PressNotes() {
               key={index}
               pressNote={pressNote}
               openUpdateModal={() => openUpdateModal(pressNote)}
+              onDelete={handleDeletePressNote}
             />
           ))}
         </div>
