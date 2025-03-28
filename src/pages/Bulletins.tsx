@@ -46,6 +46,10 @@ export default function Bulletins() {
 		setIsUpdateModalOpen(false);
 	};
 
+	const handleDeleteBulletin = () => {
+		setBulletinsUpdated((prev) => prev + 1);
+	};
+
 	const openUpdateModal = (bulletin: BulletinType) => {
 		setSelectedBulletin(bulletin);
 		setIsUpdateModalOpen(true);
@@ -80,11 +84,13 @@ export default function Bulletins() {
 					bulletins.map((bulletin, index) => (
 						<BulletinCard
 						key={index}
+						id={bulletin.idPrensa}
 						foto={bulletin.foto}
 						titulo={bulletin.titulo}
 						descripcion={bulletin.descripcion}
 						idioma={bulletin.descripcionIdioma}
 						openUpdateModal={() => openUpdateModal(bulletin)}
+						onDelete={handleDeleteBulletin}
 						/>
 					))
 					) : (

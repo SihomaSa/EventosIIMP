@@ -55,7 +55,7 @@ export default function PressCard({ pressNote, openUpdateModal, onDelete }: Pres
             <Input id="url" value={pressNote.url} disabled className="bg-gray-100" />
           </div>
           <div className="flex justify-between">
-            <DeleteAlert id={String(pressNote.idPrensa)} name="el auspiciador" deleteMethod={() => deleteSelectedPressNote(String(pressNote.idPrensa))} />
+            <DeleteAlert id={String(pressNote.idPrensa)} name="la nota de prensa" deleteMethod={() => deleteSelectedPressNote(String(pressNote.idPrensa))} />
 
             <Button
               onClick={(event) => {

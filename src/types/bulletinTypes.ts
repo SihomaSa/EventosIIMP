@@ -1,5 +1,6 @@
 export interface BulletinType {
     idTipPre: number;
+    idPrensa: number;
     titulo: string;
     foto: string;
     descripcion_prensa: string;
