@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "./app-sidebar";
 import { useTheme } from "@/Contexts/themeContext";
+import { Toaster } from "@/components/ui/sonner"
 
 export default function Home() {
   const { logout } = useAuth();
@@ -27,6 +28,7 @@ export default function Home() {
         {/* Contenido dinámico */}
         <main className="p-3 md:p-6">
           <Outlet /> 
+          <Toaster />
         </main>
       </div>
     </SidebarProvider>

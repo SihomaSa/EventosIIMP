@@ -13,6 +13,7 @@ import { createAd } from "../services/adsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { ImageInput } from "../ImageInput";
+import { toast } from "sonner";
 
 // ✅ Esquema de validación con Zod
 const adSchema = z.object({
@@ -71,7 +72,7 @@ export default function EditAdsModal({
 				};
 
 				await createAd(newAd);
-				alert("Ad creado exitosamente"); // TODO cambiar por un toast
+				toast("La publicidad ha sido creada satisfactoriamente.")
 				onAdd();
 				reset(); // Resetea el formulario
 				onClose(); // Cierra el modal
