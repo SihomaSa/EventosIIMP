@@ -11,6 +11,7 @@ import { createExpositor } from "../services/expositorsService";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { Textarea } from "../ui/textarea";
 import { ImageInput } from "../ImageInput";
+import { toast } from "sonner";
 
 // ✅ Esquema de validación con Zod
 const ExpositorSchema = z.object({
@@ -63,7 +64,7 @@ export default function EditExpositorForm({
 				foto: base64Image,
 			};
 			await createExpositor(newExpositor);
-			alert("Conferencista creado exitosamente"); // TODO cambiar por un toast
+			toast("El conferencista ha sido creada satisfactoriamente ✅");
 			onAdd();
 			reset();
 			onClose();

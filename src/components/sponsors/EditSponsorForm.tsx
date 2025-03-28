@@ -25,6 +25,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
+import { toast } from "sonner";
 
 // ✅ Esquema de validación con Zod
 const SponsorSchema = z.object({
@@ -117,7 +118,7 @@ export default function EditSponsorForm({
 				};
 
 				await createSponsor(newSponsor);
-				alert("Sponsor creado exitosamente"); // TODO cambiar por un toast
+				toast("El auspiciador ha sido creada satisfactoriamente ✅");
 				onAdd();
 				reset(); // Resetea el formulario
 				onClose(); // Cierra el modal

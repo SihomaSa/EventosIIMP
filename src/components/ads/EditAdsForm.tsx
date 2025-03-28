@@ -72,7 +72,7 @@ export default function EditAdsModal({
 				};
 
 				await createAd(newAd);
-				toast("La publicidad ha sido creada satisfactoriamente.")
+				toast("La publicidad ha sido creada satisfactoriamente ✅");
 				onAdd();
 				reset(); // Resetea el formulario
 				onClose(); // Cierra el modal

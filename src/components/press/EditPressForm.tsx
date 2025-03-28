@@ -15,6 +15,7 @@ import { fileToBase64 } from "@/utils/fileToBase64";
 import { LanguageType } from "@/types/languageTypes";
 import { ImageInput } from "../ImageInput";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
 
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
@@ -79,7 +80,7 @@ export default function EditPressNoteForm({
 					idioma: data.idioma,
 				};
 				await createPressNote(newPressNote);
-				alert("Nota de prensa creada exitosamente"); // TODO cambiar por un toast
+				toast("La nota de prensa ha sido creada satisfactoriamente ✅");
 				onAdd();
 				reset();
 				onClose();

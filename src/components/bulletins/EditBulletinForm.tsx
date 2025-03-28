@@ -15,6 +15,7 @@ import { fileToBase64 } from "@/utils/fileToBase64";
 import { LanguageType } from "@/types/languageTypes";
 import { ImageInput } from "../ImageInput";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
 
 // ✅ Esquema de validación con Zod
 const BulletinSchema = z.object({
@@ -80,10 +81,10 @@ export default function EditBulletinForm({
 				};
 
 				await createBulletin(newBulletin);
-				alert("Boletin creado exitosamente"); // TODO cambiar por un toast
+				toast("El boletín ha sido creada satisfactoriamente ✅");
 				onAdd();
-				reset(); // Resetea el formulario
-				onClose(); // Cierra el modal
+				reset();
+				onClose(); 
 				setPreview(null);
 			} catch (error) {
 				console.error("Error al convertir imagen", error);
