@@ -23,7 +23,7 @@ export default function Ads() {
 			try {
 				const data = await getAds();
 				setAds(data);
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al obtener los publicidades");
 			} finally {
@@ -35,7 +35,7 @@ export default function Ads() {
 	}, [adsUpdated]);
 
 	const handleAddAd = () => {
-		setAdsUpdated((prev) => prev + 1); // Cambia el estado para volver a ejecutar useEffect
+		setAdsUpdated((prev) => prev + 1);
 		setIsAddModalOpen(false);
 	};
 
@@ -43,6 +43,11 @@ export default function Ads() {
 		setAdsUpdated((prev) => prev + 1);
 		setSelectedAd(null);
 		setIsUpdateModalOpen(false);
+	};
+
+	const handleDeleteAd = () => {
+		setAdsUpdated((prev) => prev + 1);
+		console.log("borrado");
 	};
 
 	const openUpdateModal = (ad: AdType) => {
@@ -58,7 +63,7 @@ export default function Ads() {
 
 			<div className="flex flex-col-reverse md:flex-row w-full h-full">
 				<div className="flex flex-wrap gap-4 justify-center  md:w-2/3">
-					{loading && (
+					{loading ? (
 						<div className="flex gap-4 space-y-3">
 							{[...Array(3)].map((_, index) => (
 								<div key={index} className="flex flex-col space-y-3">
@@ -74,17 +79,21 @@ export default function Ads() {
 								</div>
 							))}
 						</div>
+					) : ads?.length > 0 ? (
+						ads.map((ad) => (
+							<AdCard
+								key={ad.idPublicidad}
+								id={ad.idPublicidad}
+								foto={ad.foto}
+								url={ad.url}
+								idioma={ad.descripcionIdioma}
+								openUpdateModal={() => openUpdateModal(ad)}
+								onDelete={handleDeleteAd}
+							/>
+						))
+					) : (
+						<p className="text-gray-500">No hay Publicidades disponibles</p>
 					)}
-					{ads.map((ad, index) => (
-						<AdCard
-							key={index}
-							id={ad.idPublicidad}
-							foto={ad.foto}
-							url={ad.url}
-							idioma={ad.descripcionIdioma}
-							openUpdateModal={() => openUpdateModal(ad)}
-						/>
-					))}
 				</div>
 
 				<div className="md:w-1/3 flex flex-col gap-y-4 mx-4 mb-4">

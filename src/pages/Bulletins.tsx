@@ -77,9 +77,9 @@ export default function Bulletins() {
 						</div>
 					)}
 					{bulletins?.length ? (
-					bulletins.map((bulletin) => (
+					bulletins.map((bulletin, index) => (
 						<BulletinCard
-						key={bulletin.idTipPre}
+						key={index}
 						foto={bulletin.foto}
 						titulo={bulletin.titulo}
 						descripcion={bulletin.descripcion}

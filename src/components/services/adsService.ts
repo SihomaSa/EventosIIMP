@@ -3,6 +3,7 @@ import { AdType, NewAdRequestType, UpdateAdRequestType } from "@/types/adTypes";
 const API_GET_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
 const API_POST_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
 const API_PUT_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
+const API_DELETE_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising";
 
 export const getAds = async (): Promise<AdType[]> => {
   const response = await fetch(API_GET_URL);
@@ -30,4 +31,11 @@ export const updateAd = async (updatedAd: UpdateAdRequestType): Promise<AdType> 
 
   if (!response.ok) throw new Error("Error al actualizar el publicidad");
   return response.json();
+};
+export const deleteAd = async (adId: string): Promise<void> => {
+  const response = await fetch(`${API_DELETE_URL}/${adId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) throw new Error("Error al eliminar la publicidad");
 };
