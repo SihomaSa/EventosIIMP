@@ -15,6 +15,7 @@ import Bulletins from "./pages/Bulletins";
 import PressNotes from "./pages/PressNotes";
 import Expositors from "./pages/Expositors";
 import { ThemeProvider } from "./Contexts/themeContext";
+import Activities from "./pages/Activities";
 
 function App() {
 	return (
@@ -33,6 +34,7 @@ function App() {
 										<Route path="press" element={<PressNotes />} />
 										<Route path="ads" element={<Ads />} />
 										<Route path="expositors" element={<Expositors />} />
+										<Route path="activities" element={<Activities />} />
 									</Route>
 									<Route path="/home" element={<Home children={undefined} />} />
 								</Route>
