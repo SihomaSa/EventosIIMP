@@ -1,49 +1,27 @@
-import { useEffect, useState } from "react";
-import { CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
-
+import { FormEvent, useEffect, useState } from "react";
+import { CalendarDays } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import UpdateExpositorModal from "@/components/expositors/UpdateExpositorModal";
-import EditExpositorForm from "@/components/expositors/EditExpositorForm";
-import { ExpositorType } from "@/types/expositorTypes";
-
-import { getExpositors } from "@/components/services/expositorsService";
-import ActivityCard from "@/components/activities/ActivityCard";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
+import { getActivities } from "@/components/services/activitiesServicec";
+import { ActivityDay, ActivityDetail } from "../types/activityTypes";
+import ActivityDayCard from "@/components/activities/ActivityDayCard";
 
 export default function Expositors() {
-	const [expositors, setExpositors] = useState<ExpositorType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const [selectedExpositor, setSelectedExpositor] =
-		useState<ExpositorType | null>(null);
+	// const [selectedExpositor, setSelectedExpositor] =
+	// 	useState<ActivityDetail | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+	// const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 	const [expositorsUpdated, setExpositorsUpdated] = useState(0);
+	const [activities, setActivities] = useState<ActivityDay[] | null>(null);
 
 	useEffect(() => {
 		const fetchExpositors = async () => {
 			try {
-				const data = await getExpositors();
-				setExpositors(data);
+				const data = await getActivities();
+				setActivities(data);
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al obtener los publicidades");
@@ -60,21 +38,26 @@ export default function Expositors() {
 		setIsAddModalOpen(false);
 	};
 
-	const handleUpdateExpositor = () => {
-		setExpositorsUpdated((prev) => prev + 1);
-		setSelectedExpositor(null);
-		setIsUpdateModalOpen(false);
+	// const handleUpdateExpositor = () => {
+	// 	setExpositorsUpdated((prev) => prev + 1);
+	// 	setSelectedExpositor(null);
+	// 	setIsUpdateModalOpen(false);
+	// };
+
+
+	const handleChange = (field: keyof ActivityDetail, value: string) => {
+		setActivities(
+			(prev) =>
+				prev &&
+				prev.map((activity, index) =>
+					index === 0 ? { ...activity, [field]: value } : activity
+				)
+		);
 	};
 
-	const openUpdateModal = (expositor: ExpositorType) => {
-		setSelectedExpositor(expositor);
-		setIsUpdateModalOpen(true);
-	};
-	const handlesubmit = () => {
-		setTimeout(() => {
-			
-			setIsAddModalOpen(!isAddModalOpen)
-		}, 1000);
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		console.log("Actividades guardadas:", activities);
 	};
 
 	if (error) return <p className="text-red-500">{error}</p>;
@@ -92,7 +75,7 @@ export default function Expositors() {
 			<div className="flex flex-col-reverse md:flex-row w-full h-full bg-white py-8 rounded-xl">
 				<div className="flex flex-wrap gap-4 justify-center w-2/3">
 					{/* Skeleton */}
-					{/* {loading && (
+					{loading && (
 						<div className="flex gap-4 space-y-3">
 							{[...Array(3)].map((_, index) => (
 								<div key={index} className="flex flex-col space-y-3">
@@ -108,15 +91,14 @@ export default function Expositors() {
 								</div>
 							))}
 						</div>
-					)} */}
-					<div>
+					)}
+					{/* <div>
 						<Card className="bg-secondary text-primary text-4xl font-bold shadow-xl max-w-100">
 							<CardHeader className="text-2xl font-bold leading-4">
 								<span>08</span>
 								<span>Mayo</span>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-y-3">
-								{/* CHILD */}
 								<Card>
 									<CardContent className="text-sm">
 										<form className="p-2 space-y-4">
@@ -163,7 +145,6 @@ export default function Expositors() {
 									</CardFooter>
 								</Card>
 
-								{/* CHILD */}
 								<Card className="border-primary pt-0">
 									<CardHeader className="text-sm font-bold flex justify-between items-center w-full h-17 rounded-t-lg bg-primary text-white uppercase">
 										<div className="text-lg font-bold flex justify-between items-center w-full h-9 ">
@@ -215,37 +196,9 @@ export default function Expositors() {
 									</CardFooter>
 								</Card>
 
-								{/* CHILD */}
-								{/* <Card>
-									<CardHeader className="text-sm font-light flex justify-between items-center w-full h-9 ">
-										<div className="text-sm font-light flex justify-between items-center w-full h-9 py-6 border-gray-400 border-dashed border-b-1">
-											<span>08:00 a 9:00</span>
-											<Badge className="bg-secondary text-primary py-2 px-3 rounded-xl">
-												Viaje de campo
-											</Badge>
-										</div>
-									</CardHeader>
-									<CardContent className="text-lg">
-										<p>
-											Integrating Knowledge Advances to Design New Geological
-											Prospecting Tools Using Artificial Intelligence.
-										</p>
-									</CardContent>
-									<CardFooter className="flex justify-between">
-										<Button variant="outline">Eliminar</Button>
-										<Button>Editar</Button>
-									</CardFooter>
-								</Card> */}
 
 								<Card>
-									{/* <CardHeader className="text-sm font-light flex justify-between items-center w-full h-9 ">
-										<div className="text-sm font-light flex justify-between items-center w-full h-9 py-6 border-gray-400 border-dashed border-b-1">
-											<span>08:00 a 9:00</span>
-											<Badge className="bg-secondary text-primary py-2 px-3 rounded-xl">
-												Viaje de campo
-											</Badge>
-										</div>
-									</CardHeader> */}
+
 									<CardContent className="text-sm">
 										<form className="p-2 space-y-4">
 											<div>
@@ -308,16 +261,26 @@ export default function Expositors() {
 								</div>
 							</CardContent>
 						</Card>
-					</div>
+					</div> */}
 					{/* Card 2 */}
-					<div>
+					{activities &&
+						activities.map((activity, index) => {
+							return (
+								<ActivityDayCard
+									key={index}
+									activity={activity}
+									handleChange={handleChange}
+									handleSubmit={handleSubmit}
+								/>
+							);
+						})}
+					{/* <div>
 						<Card className="bg-secondary text-primary text-4xl font-bold shadow-xl max-w-100">
 							<CardHeader className="text-2xl font-bold leading-4">
 								<span>09</span>
 								<span>Mayo</span>
 							</CardHeader>
 							<CardContent className="flex flex-col gap-y-3">
-								{/* CHILD */}
 								<Card>
 									<CardContent className="text-sm">
 										<form className="p-2 space-y-4">
@@ -363,122 +326,8 @@ export default function Expositors() {
 										<Button>Editar</Button>
 									</CardFooter>
 								</Card>
-
-								{/* CHILD */}
-								{/* <Card className="border-primary pt-0">
-									<CardHeader className="text-sm font-bold flex justify-between items-center w-full h-17 rounded-t-lg bg-primary text-white uppercase">
-										<div className="text-lg font-bold flex justify-between items-center w-full h-9 ">
-											<h1>CORTE DE CINTA EXHIBICIÓN</h1>
-										</div>
-									</CardHeader>
-									<CardContent className="text-lg">
-										<form className="p-2 space-y-2">
-											<div>
-												<Label htmlFor="nombres" className="mb-2">
-													descripcion
-												</Label>
-												<Input
-													id="nombres"
-													value={
-														"Alteración desde la recolección de datos de campo a la generación de objetivos de machine learning."
-													}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="apellidos" className="mb-2">
-													Tipo de Actividad
-												</Label>
-												<Input
-													id="apellidos"
-													value={"expositor.apellidos"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="especialidad" className="mb-2">
-													Fecha
-												</Label>
-												<Input
-													id="especialidad"
-													value={"08:00 a 9:00"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-										</form>
-									</CardContent>
-									<CardFooter className="flex justify-between">
-										<Button variant="outline">Eliminar</Button>
-										<Button>Editar</Button>
-									</CardFooter>
-								</Card> */}
-
-								{/* CHILD */}
-								{/* <Card>
-									<CardHeader className="text-sm font-light flex justify-between items-center w-full h-9 ">
-										<div className="text-sm font-light flex justify-between items-center w-full h-9 py-6 border-gray-400 border-dashed border-b-1">
-											<span>08:00 a 9:00</span>
-											<Badge className="bg-secondary text-primary py-2 px-3 rounded-xl">
-												Viaje de campo
-											</Badge>
-										</div>
-									</CardHeader>
-									<CardContent className="text-lg">
-										<p>
-											Integrating Knowledge Advances to Design New Geological
-											Prospecting Tools Using Artificial Intelligence.
-										</p>
-									</CardContent>
-									<CardFooter className="flex justify-between">
-										<Button variant="outline">Eliminar</Button>
-										<Button>Editar</Button>
-									</CardFooter>
-								</Card> */}
-
-
 								<Card>
-
 									<CardContent className="text-sm">
-										<form className="p-2 space-y-4">
-											<div>
-												<Label htmlFor="especialidad" className="mb-2">
-													Fecha
-												</Label>
-												<Input
-													id="especialidad"
-													value={"08:00 a 9:00"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="nombres" className="mb-2">
-													descripcion
-												</Label>
-												<Input
-													id="nombres"
-													value={
-														"Alteración desde la recolección de datos de campo a la generación de objetivos de machine learning."
-													}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="apellidos" className="mb-2">
-													Tipo de Actividad
-												</Label>
-												<Input
-													id="apellidos"
-													value={"Viaje de Campo"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-										</form>
 									</CardContent>
 									<CardFooter className="flex justify-between">
 										<Button variant="outline">Eliminar</Button>
@@ -487,79 +336,78 @@ export default function Expositors() {
 								</Card>
 
 								<div className="flex flex-col gap-y-4 mb-4">
-									
-										<Dialog>
-											<DialogTrigger asChild>
-												<div
-													className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
-												>
-													<h3 className="text-lg font-semibold">Agregar Actividad</h3>
-													<Plus size={50} />
+									<Dialog>
+										<DialogTrigger asChild>
+											<div className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl">
+												<h3 className="text-lg font-semibold">
+													Agregar Actividad
+												</h3>
+												<Plus size={50} />
+											</div>
+										</DialogTrigger>
+										<DialogContent className="sm:max-w-[425px]">
+											<DialogHeader>
+												<DialogTitle>Agregar Actividad</DialogTitle>
+												<DialogDescription>
+													Realiza tus cambios aquí
+												</DialogDescription>
+											</DialogHeader>
+											<form className="p-2 space-y-4" onSubmit={handleSubmit}>
+												<div>
+													<Label htmlFor="especialidad" className="mb-2">
+														Fecha
+													</Label>
+													<Input
+														id="especialidad"
+														value={"08:00 a 9:00"}
+														disabled
+														className="bg-gray-100"
+													/>
 												</div>
-											</DialogTrigger>
-											<DialogContent className="sm:max-w-[425px]">
-												<DialogHeader>
-													<DialogTitle>Agregar Actividad</DialogTitle>
-													<DialogDescription>
-														Realiza tus cambios aquí
-													</DialogDescription>
-												</DialogHeader>
-												<form className="p-2 space-y-4" onSubmit={handlesubmit}>
-											<div>
-												<Label htmlFor="especialidad" className="mb-2">
-													Fecha
-												</Label>
-												<Input
-													id="especialidad"
-													value={"08:00 a 9:00"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="nombres" className="mb-2">
-													descripcion
-												</Label>
-												<Input
-													id="nombres"
-													value={
-														"Alteración desde la recolección de datos de campo a la generación de objetivos de machine learning."
-													}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-											<div>
-												<Label htmlFor="apellidos" className="mb-2">
-													Tipo de Actividad
-												</Label>
-												<Input
-													id="apellidos"
-													value={"Viaje de Campo"}
-													disabled
-													className="bg-gray-100"
-												/>
-											</div>
-													<DialogFooter>
-														<Button type="submit" >Save changes</Button>
-													</DialogFooter>
-										</form>
-											</DialogContent>
-										</Dialog>
+												<div>
+													<Label htmlFor="nombres" className="mb-2">
+														descripcion
+													</Label>
+													<Input
+														id="nombres"
+														value={
+															"Alteración desde la recolección de datos de campo a la generación de objetivos de machine learning."
+														}
+														disabled
+														className="bg-gray-100"
+													/>
+												</div>
+												<div>
+													<Label htmlFor="apellidos" className="mb-2">
+														Tipo de Actividad
+													</Label>
+													<Input
+														id="apellidos"
+														value={"Viaje de Campo"}
+														disabled
+														className="bg-gray-100"
+													/>
+												</div>
+												<DialogFooter>
+													<Button type="submit">Save changes</Button>
+												</DialogFooter>
+											</form>
+										</DialogContent>
+									</Dialog>
 								</div>
 							</CardContent>
 						</Card>
-					</div>
+					</div> */}
 				</div>
 			</div>
-			{isUpdateModalOpen && selectedExpositor && (
+			{/* {isUpdateModalOpen && selectedExpositor && (
 				<UpdateExpositorModal
 					expositor={selectedExpositor}
 					onUpdate={handleUpdateExpositor}
 					open={isUpdateModalOpen}
 					onClose={() => setIsUpdateModalOpen(false)}
 				/>
-			)}
+			)} */}
 		</div>
 	);
 }

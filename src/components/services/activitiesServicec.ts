@@ -1,10 +1,11 @@
+import { ActivityDay } from "@/types/activityTypes";
 import { SponsorType, NewSponsorType, NewSponsorRequestType } from "@/types/sponsorTypes";
 
 const API_GET_URL = "https://bxhrusut32.execute-api.us-east-1.amazonaws.com/web/activity/event/1";
 const API_POST_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
 const API_PUT_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
 
-export const getActivities = async (): Promise<SponsorType[]> => {
+export const getActivities = async (): Promise<ActivityDay[]> => {
   const response = await fetch(API_GET_URL);
   if (!response.ok) throw new Error("Error al obtener los auspiciadores");
   return response.json();
