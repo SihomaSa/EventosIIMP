@@ -72,6 +72,77 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
 								</div>
 							</>
 						)}
+						{details.horaIni && (
+							<>
+								<input
+									type="text"
+									value={details.horaIni}
+									onChange={(e) => handleChange("horaIni", e.target.value)}
+									hidden
+								/>
+								<div>
+									<Label htmlFor="horaIni" className="mb-2">
+										Hora de Inicio
+									</Label>
+									<Input
+										id="horaIni"
+										value={
+											details.horaIni
+												? details.horaIni.split("T")[1]
+												: "Sin asignar"
+										}
+										disabled
+										className="bg-gray-100"
+									/>
+								</div>
+							</>
+						)}
+						{details.horaFin && (
+							<>
+								<input
+									type="text"
+									value={details.horaFin}
+									onChange={(e) => handleChange("horaFin", e.target.value)}
+									hidden
+								/>
+								<div>
+									<Label htmlFor="horaFin" className="mb-2">
+										Hora de finalización
+									</Label>
+									<Input
+										id="horaFin"
+										value={
+											details.horaFin
+												? details.horaFin.split("T")[1]
+												: "Sin asignar"
+										}
+										disabled
+										className="bg-gray-100"
+									/>
+								</div>
+							</>
+						)}
+						{details.idioma && (
+							<>
+								<input
+									type="text"
+									value={details.idioma}
+									onChange={(e) => handleChange("idioma", e.target.value)}
+									hidden
+								/>
+								<div>
+									<Label htmlFor="idioma" className="mb-2">
+										Idioma
+									</Label>
+									<Input
+										id="idioma"
+										value={details.idioma ? details.idioma : "Sin asignar"}
+										disabled
+										className="bg-gray-100"
+									/>
+								</div>
+							</>
+						)}
 					</div>
 				</form>
 			</CardContent>

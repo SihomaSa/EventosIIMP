@@ -63,7 +63,7 @@ export default function Expositors() {
 	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
-		<div className="p-3 md:p-6 flex flex-col items-center">
+		<div className="p-6 flex flex-col items-center">
 			<div className="flex items-center justify-between w-full px-20">
 				<h1 className="text-2xl font-bold mb-7">Actividades del Evento</h1>
 				<Button>
@@ -72,8 +72,8 @@ export default function Expositors() {
 				</Button>
 			</div>
 
-			<div className="flex flex-col-reverse md:flex-row w-full h-full bg-white py-8 rounded-xl">
-				<div className="flex flex-wrap gap-4 justify-center w-2/3">
+			<div className="flex flex-col-reverse md:flex-row w-full h-full bg-white py-8 px-3 rounded-xl">
+				<div className="flex flex-wrap gap-4 justify-center">
 					{/* Skeleton */}
 					{loading && (
 						<div className="flex gap-4 space-y-3">
