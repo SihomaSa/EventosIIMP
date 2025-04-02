@@ -93,7 +93,7 @@ export default function EventList() {
 						);
 					}
 					return (
-						<Link key={index} to={`/home/sponsors`} onClick={() => { selectEvent(event); setTheme(`event${event.idEvent}`); }}>
+						<Link key={index} to={`/home/ads`} onClick={() => { selectEvent(event); setTheme(`event${event.idEvent}`); }}>
 							<div className="w-20 h-20 border-3 border-primary rounded-lg shadow-xl hover:shadow-2xl flex items-center transition delay-150 duration-300 ease-in-out hover:scale-110">
 								<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto" />
 							</div>

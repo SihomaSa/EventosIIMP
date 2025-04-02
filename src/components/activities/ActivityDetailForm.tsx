@@ -46,7 +46,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
 						<CardContent className="text-sm">
 							<form onSubmit={handleSubmit} className="p-2 space-y-4">
 								<div className="gap-y-3 flex flex-col">
-									{details.desTipoActividad && (
+									{details.responsable && (
 										<>
 											<input
 												type="text"
