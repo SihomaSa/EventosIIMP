@@ -67,29 +67,29 @@ export default function EditActivityModal({
 			"idIdioma",
 			"titulo",
 			"responsable",
-			"fechaFin",
 			"fechaIni",
-			"horaFin",
+			"fechaFin",
 			"horaIni",
+			"horaFin",
 		], // Viaje de Campo
 		2: [
 			"idIdioma",
 			"titulo",
 			"responsable",
 			"traduccion",
-			"horaFin",
 			"horaIni",
+			"horaFin",
 			"lugar",
 		], // Curso Corto
-		3: ["idIdioma", "titulo", "horaFin", "horaIni"], // Pausa Café
-		4: ["idIdioma", "titulo", "horaFin", "horaIni"], // Almuerzo
-		5: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Corte de Cinta de Exhibición
-		6: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Clausura
-		7: ["idIdioma", "titulo", "horaFin", "horaIni", "responsable"], // Otros
-		8: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Inauguración del Congreso
-		9: ["idIdioma", "titulo", "horaFin", "horaIni"], // Cena de Agradecimiento
-		10: ["idIdioma", "titulo", "horaFin", "horaIni"], // Conferencia Magistral
-		11: ["idIdioma", "titulo", "horaFin", "horaIni"], // Mesa Redonda
+		3: ["idIdioma", "titulo", "horaIni", "horaFin"], // Pausa Café
+		4: ["idIdioma", "titulo", "horaIni", "horaFin"], // Almuerzo
+		5: ["idIdioma", "titulo", "horaIni", "horaFin", "lugar"], // Corte de Cinta de Exhibición
+		6: ["idIdioma", "titulo", "horaIni", "horaFin", "lugar"], // Clausura
+		7: ["idIdioma", "titulo", "horaIni", "horaFin", "responsable"], // Otros
+		8: ["idIdioma", "titulo", "horaIni", "horaFin", "lugar"], // Inauguración del Congreso
+		9: ["idIdioma", "titulo", "horaIni", "horaFin"], // Cena de Agradecimiento
+		10: ["idIdioma", "titulo", "horaIni", "horaFin"], // Conferencia Magistral
+		11: ["idIdioma", "titulo", "horaIni", "horaFin"], // Mesa Redonda
 	};
 	type AcceptedFields =
 		| "idIdioma"
@@ -475,9 +475,9 @@ export default function EditActivityModal({
 																!field && "text-muted-foreground"
 															)}
 														>
-															{getValues(field) ? (
+															{getValues(field as keyof FormData) ? (
 																<span className="">
-																	{String(getValues("fechaIni") ?? "")}
+																	{getValues(field as keyof FormData)}
 																</span>
 															) : (
 																<span>seleccione una fecha</span>
@@ -489,15 +489,13 @@ export default function EditActivityModal({
 														<Calendar
 															mode="single"
 															selected={
-																watch(field)
-																	? new Date(watch(field) as string)
-																	: undefined
+																watch(field as keyof FormData) ? new Date(String(watch(field as keyof FormData))) : undefined
 															}
 															onSelect={(date) => {
-																setValue(
-																	field,
-																	String(date?.toISOString().split("T")[0])
-																);
+																if (date) {
+																	const isoDate = date.toISOString().split("T")[0];
+																	setValue(field as keyof FormData, isoDate as never ); // ya no hay error aquí
+																}
 															}}
 															// disabled={(date) =>
 															// 	date > new Date() ||
@@ -531,7 +529,7 @@ export default function EditActivityModal({
 										)}
 									</div>
 								))}
-							<div className="flex justify-between">
+							<div className="flex justify-end gap-x-2">
 								<Button variant="outline" onClick={handleBack}>
 									Volver
 								</Button>
