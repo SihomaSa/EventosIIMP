@@ -20,9 +20,15 @@ import { toast } from "sonner";
 import { useEventStore } from "@/stores/eventStore";
 import {
 	ActivityType,
+	NewClosingRequest,
+	NewCoffeeBreakRequest,
+	NewCongressInaugurationRequest,
 	NewCourseRequest,
 	NewExhibitionRibbonCuttingRequest,
 	NewFieldTripRequest,
+	NewGratitudDinnerRequest,
+	NewLunchRequest,
+	NewOthersRequest,
 } from "../../types/activityTypes";
 import { Calendar } from "../ui/calendar";
 import {
@@ -61,7 +67,6 @@ export default function EditActivityModal({
 			"idIdioma",
 			"titulo",
 			"responsable",
-			"duracion",
 			"fechaFin",
 			"fechaIni",
 			"horaFin",
@@ -76,13 +81,13 @@ export default function EditActivityModal({
 			"horaIni",
 			"lugar",
 		], // Curso Corto
-		3: ["idIdioma", "titulo"], // Pausa Café
+		3: ["idIdioma", "titulo", "horaFin", "horaIni"], // Pausa Café
 		4: ["idIdioma", "titulo", "horaFin", "horaIni"], // Almuerzo
 		5: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Corte de Cinta de Exhibición
 		6: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Clausura
-		7: ["idIdioma", "titulo", "horaFin", "horaIni"], // Otros
+		7: ["idIdioma", "titulo", "horaFin", "horaIni", "responsable"], // Otros
 		8: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Inauguración del Congreso
-		9: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Cena de Agradecimiento
+		9: ["idIdioma", "titulo", "horaFin", "horaIni"], // Cena de Agradecimiento
 	};
 	type AcceptedFields =
 		| "idIdioma"
@@ -153,16 +158,13 @@ export default function EditActivityModal({
 		return (
 			typeof data.responsable === "string" &&
 			typeof data.fechaIni === "string" &&
-			typeof data.fechaFin === "string" &&
-			typeof data.duracion === "string"
+			typeof data.fechaFin === "string"
 		);
 	}
 	function isCourseRequest(data: any): data is NewCourseRequest {
 		return (
 			typeof data.responsable === "string" &&
-			typeof data.fechaIni === "string" &&
-			typeof data.fechaFin === "string" &&
-			typeof data.duracion === "string" &&
+			typeof data.traduccion === "string" &&
 			typeof data.lugar === "string"
 		);
 	}
@@ -171,6 +173,30 @@ export default function EditActivityModal({
 		data: any
 	): data is NewExhibitionRibbonCuttingRequest {
 		return typeof data.lugar === "string";
+	}
+	function isCoffeeBreakRequest(data: any): data is NewCoffeeBreakRequest {
+		return typeof data.titulo === "string";
+	}
+	function isLunchRequest(data: any): data is NewLunchRequest {
+		return typeof data.titulo === "string";
+	}
+	
+	function isClosingRequest(data: any): data is NewClosingRequest {
+		return typeof data.lugar === "string";
+	}
+	
+	function isOthersRequest(data: any): data is NewOthersRequest {
+		return typeof data.responsable === "string";
+	}
+	
+	function isCongressInaugurationRequest(data: any): data is NewCongressInaugurationRequest {
+		return (
+			typeof data.lugar === "string"
+		);
+	}
+	
+	function isGratitudDinnerRequest(data: any): data is NewGratitudDinnerRequest {
+		return typeof data.titulo === "string";
 	}
 
 	const onSubmit = async (data: FormData) => {
@@ -189,7 +215,6 @@ export default function EditActivityModal({
 					horaFin: data.horaFin,
 					idIdioma: data.idIdioma as LanguageType,
 					responsable: data.responsable ?? "",
-					duracion: data.duracion ?? "",
 					fechaIni: data.fechaIni ?? "",
 					fechaFin: data.fechaFin ?? "",
 				};
@@ -203,6 +228,20 @@ export default function EditActivityModal({
 					traduccion: data.traduccion ?? "",
 					lugar: data.lugar ?? "",
 				};
+			} else if (activityType === 3 && isCoffeeBreakRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+				};
+			} else if (activityType === 4 && isLunchRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+				};
 			} else if (activityType === 5 && isExhibitionRibbonCuttingRequest(data)) {
 				detalles = {
 					titulo: data.titulo,
@@ -210,6 +249,37 @@ export default function EditActivityModal({
 					horaFin: data.horaFin,
 					idIdioma: data.idIdioma as LanguageType,
 					lugar: data.lugar ?? "",
+				};
+			} else if (activityType === 6 && isClosingRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+					lugar: data.lugar ?? "",
+				};
+			} else if (activityType === 7 && isOthersRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					responsable: data.responsable ?? "",
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+				};
+			} else if (activityType === 8 && isCongressInaugurationRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+					lugar: data.lugar ?? "",
+				};
+			} else if (activityType === 9 && isGratitudDinnerRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
 				};
 			};
 			console.log("detalles pasando", detalles);
@@ -239,7 +309,7 @@ export default function EditActivityModal({
 			setLoading(false);
 		}
 	};
-	console.log(errors);
+	// console.log(errors);
 
 	return (
 		<div className="flex flex-col gap-y-4 mb-4">

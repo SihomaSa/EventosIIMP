@@ -53,7 +53,6 @@ export interface NewFieldTripRequest extends BaseActivityRequestType {
   // idTipoActividad: 1;
 
     responsable: string;
-    duracion: string; // Opcional
     titulo: string;
     fechaFin: string;
     fechaIni: string;
@@ -115,6 +114,7 @@ export interface NewOthersRequest extends BaseActivityRequestType {
   // idTipoActividad: 7;
 
     idIdioma: LanguageType;
+    responsable: string;
     titulo: string;
     horaFin: string;
     horaIni: string;
@@ -137,7 +137,6 @@ export interface NewGratitudDinnerRequest extends BaseActivityRequestType {
     titulo: string;
     horaFin: string;
     horaIni: string;
-    lugar: string;
 
 }
 export interface NewActivityDet {
