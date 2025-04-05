@@ -10,6 +10,8 @@ export type ActivityTypeMap = {
   7: NewOthersRequest;
   8: NewCongressInaugurationRequest;
   9: NewGratitudDinnerRequest;
+  10: NewMagisterialConferenceRequest;
+  11: NewRoundTableRequest;
 };
 export interface ActivityDetail {
   idActividad: number;
@@ -32,17 +34,6 @@ export interface ActivityType {
   des_actividad: string;
   idTipoActividad: number;
 }
-export const ActivityTypes: ActivityType[] = [
-  { des_actividad: "VIAJE DE CAMPO", idTipoActividad: 1 },
-  { des_actividad: "CURSO CORTO", idTipoActividad: 2 },
-  { des_actividad: "PAUSA CAFE", idTipoActividad: 3 },
-  { des_actividad: "ALMUERZO", idTipoActividad: 4 },
-  { des_actividad: "CORTE DE CINTA DE EXHIBICION", idTipoActividad: 5 },
-  { des_actividad: "CLAUSURA", idTipoActividad: 6 },
-  { des_actividad: "OTROS", idTipoActividad: 7 },
-  { des_actividad: "INAUGURACIÓN DEL CONGRESO", idTipoActividad: 8 },
-  { des_actividad: "CENA DE AGRADECIMIENTO", idTipoActividad: 9 },
-];
 export interface BaseActivityRequestType {
   fechaActividad: string; // yyyy-mm-dd
   idEvento: number;
@@ -132,6 +123,24 @@ export interface NewCongressInaugurationRequest extends BaseActivityRequestType 
 }
 export interface NewGratitudDinnerRequest extends BaseActivityRequestType {
   // idTipoActividad: 9;
+
+    idIdioma: LanguageType;
+    titulo: string;
+    horaFin: string;
+    horaIni: string;
+
+}
+export interface NewMagisterialConferenceRequest extends BaseActivityRequestType {
+  // idTipoActividad: 10;
+
+    idIdioma: LanguageType;
+    titulo: string;
+    horaFin: string;
+    horaIni: string;
+
+}
+export interface NewRoundTableRequest extends BaseActivityRequestType {
+  // idTipoActividad: 11;
 
     idIdioma: LanguageType;
     titulo: string;

@@ -28,7 +28,9 @@ import {
 	NewFieldTripRequest,
 	NewGratitudDinnerRequest,
 	NewLunchRequest,
+	NewMagisterialConferenceRequest,
 	NewOthersRequest,
+	NewRoundTableRequest,
 } from "../../types/activityTypes";
 import { Calendar } from "../ui/calendar";
 import {
@@ -39,8 +41,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
 import { activitySchemas, getActivitySchema } from "@/schemas/activitySchemas";
 import { z } from "zod";
-import { useDynamicActivityForm } from "@/hooks/useDynamicActivityForm";
-import { ActivityTypeMap } from "../../types/activityTypes";
 
 interface UpdateAdsModalProps {
 	onAdd: () => void;
@@ -88,6 +88,8 @@ export default function EditActivityModal({
 		7: ["idIdioma", "titulo", "horaFin", "horaIni", "responsable"], // Otros
 		8: ["idIdioma", "titulo", "horaFin", "horaIni", "lugar"], // Inauguración del Congreso
 		9: ["idIdioma", "titulo", "horaFin", "horaIni"], // Cena de Agradecimiento
+		10: ["idIdioma", "titulo", "horaFin", "horaIni"], // Conferencia Magistral
+		11: ["idIdioma", "titulo", "horaFin", "horaIni"], // Mesa Redonda
 	};
 	type AcceptedFields =
 		| "idIdioma"
@@ -141,7 +143,7 @@ export default function EditActivityModal({
 		if (activityType) {
 			setStep(2);
 		} else {
-			alert("Selecciona un tipo de actividad antes de continuar.");
+			toast("Selecciona un tipo de actividad antes de continuar.");
 		}
 	};
 
@@ -152,7 +154,6 @@ export default function EditActivityModal({
 	};
 	const handleLanguageChange = (value: string) => {
 		setValue("idIdioma" as keyof FormData, value as keyof FormData);
-		console.log("Idioma seleccionado:", value, typeof value);
 	};
 	function isFieldTripRequest(data: any): data is NewFieldTripRequest {
 		return (
@@ -198,9 +199,14 @@ export default function EditActivityModal({
 	function isGratitudDinnerRequest(data: any): data is NewGratitudDinnerRequest {
 		return typeof data.titulo === "string";
 	}
+	function isMagisterialConferenceRequest(data: any): data is NewMagisterialConferenceRequest {
+		return typeof data.titulo === "string";
+	}
+	function isRoundTableRequest(data: any): data is NewRoundTableRequest {
+		return typeof data.titulo === "string";
+	}
 
 	const onSubmit = async (data: FormData) => {
-		console.log("csmpos", { activityType, ...data });
 		if (!selectedEvent || !activityType) return;
 		
 		try {
@@ -281,8 +287,21 @@ export default function EditActivityModal({
 					horaFin: data.horaFin,
 					idIdioma: data.idIdioma as LanguageType,
 				};
+			}else if (activityType === 10 && isMagisterialConferenceRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+				};
+			}else if (activityType === 11 && isRoundTableRequest(data)) {
+				detalles = {
+					titulo: data.titulo,
+					horaIni: data.horaIni,
+					horaFin: data.horaFin,
+					idIdioma: data.idIdioma as LanguageType,
+				};
 			};
-			console.log("detalles pasando", detalles);
 			if (detalles) {
 				const newActivityDet = [
 					{
@@ -292,7 +311,6 @@ export default function EditActivityModal({
 						detalles: [detalles],
 					},
 				] satisfies Parameters<typeof createActivityDetail>[0];
-				console.log("sera", newActivityDet);
 	
 				await createActivityDetail(newActivityDet);
 	

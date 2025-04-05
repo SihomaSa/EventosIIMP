@@ -49,6 +49,8 @@ const lunchSchema = coffeeBreakSchema;
 const ribbonCuttingSchema = closingSchema;
 const congressInaugurationSchema = closingSchema;
 const gratitudeDinnerSchema = coffeeBreakSchema;
+const magisterialConferenceSchema = coffeeBreakSchema;
+const roundTableSchema = coffeeBreakSchema;
 
 export const activitySchemas = {
 	1: fieldTripSchema,
@@ -60,6 +62,8 @@ export const activitySchemas = {
 	7: othersSchema,
 	8: congressInaugurationSchema,
 	9: gratitudeDinnerSchema,
+	10: magisterialConferenceSchema,
+	11: roundTableSchema,
 } as const;
 
 export function getActivitySchema<T extends keyof ActivityTypeMap>(
