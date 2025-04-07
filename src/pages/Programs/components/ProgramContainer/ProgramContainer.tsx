@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Program, ProgramCategory } from "../../types/Program";
 import ProgramCard from "../ProgramCard/ProgramCard";
+import NewProgramButton from "../NewProgramButton/NewProgramButton";
 
 type Props = {
   programs: Program[];
@@ -10,6 +11,7 @@ type Props = {
 const ProgramContainer: FC<Props> = ({ programs, programCategories }) => {
   return (
     <div className="flex flex-col gap-4">
+      <NewProgramButton />
       {programs.map((program, index) => (
         <ProgramCard
           program={program}
