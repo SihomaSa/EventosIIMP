@@ -11,8 +11,6 @@ export type Program = {
 type DetalleAdicional = {
   descripcionBody: string;
   idPrograma: number;
-  idAutor: null | string;
-  nombres: string | null;
   sala: string;
   horaIni: string;
   horaFin: string;
@@ -21,6 +19,13 @@ type DetalleAdicional = {
   descIdioma: DescIdioma;
   prefijoIdioma: PrefijoIdioma;
   tipoPrograma: number;
+  autores: Autor[] | null;
+};
+
+type Autor = {
+  apellidos: string;
+  idAutor: number;
+  nombres: string;
 };
 
 type DescIdioma = "ESPAÑOL" | "INGLES";
