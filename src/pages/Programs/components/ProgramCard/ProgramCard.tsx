@@ -18,7 +18,7 @@ type Props = {
   programCategories: ProgramCategory[];
 };
 
-const CELL_CLASS_NAME = "overflow-ellipsis max-w-[80px] overflow-hidden";
+const ELLIPSE_CN = "overflow-ellipsis max-w-[80px] overflow-hidden";
 
 const ProgramCard: FC<Props> = ({ program, programCategories }) => {
   function mapCategory(id: number) {
@@ -37,11 +37,15 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
           <div className="w-[400px] sticky top-4 flex flex-col gap-2">
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
-              <Button variant="outline" size="sm">
+              <Button variant="link" size="sm" className="text-xs text-primary">
                 <Edit />
                 Editar
               </Button>
-              <Button variant="destructive" size="sm">
+              <Button
+                variant="link"
+                size="sm"
+                className="text-xs text-destructive"
+              >
                 <Trash />
                 Eliminar
               </Button>
@@ -54,9 +58,8 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                 <TableHead className="text-center w-fit">Horario</TableHead>
                 <TableHead>Descripción</TableHead>
                 <TableHead>Autores</TableHead>
-                <TableHead>Sala</TableHead>
-                <TableHead>Idioma</TableHead>
-                <TableHead>Tipo</TableHead>
+                <TableHead>Detalles</TableHead>
+                <TableHead>Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,7 +72,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                   </TableCell>
                   <TableCell
                     align="left"
-                    className={CELL_CLASS_NAME}
+                    className={ELLIPSE_CN}
                     title={additional.descripcionBody}
                   >
                     {additional.descripcionBody}
@@ -77,18 +80,40 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                   <TableCell align="left">
                     {(additional.autores || []).map((autor) => (
                       <p
-                        className={CELL_CLASS_NAME}
+                        className={ELLIPSE_CN}
+                        title={`${autor.nombres} ${autor.apellidos}`}
                       >{`${autor.nombres} ${autor.apellidos}`}</p>
                     ))}
                   </TableCell>
-                  <TableCell align="left" className={CELL_CLASS_NAME}>
-                    {additional.sala}
+                  <TableCell align="left">
+                    <p
+                      className={ELLIPSE_CN}
+                      title={mapCategory(additional.tipoPrograma)}
+                    >
+                      {mapCategory(additional.tipoPrograma)}
+                    </p>
+                    <p className={ELLIPSE_CN}>{additional.descIdioma}</p>
+                    <p className={ELLIPSE_CN}>{additional.sala}</p>
                   </TableCell>
-                  <TableCell align="left" className={CELL_CLASS_NAME}>
-                    {additional.descIdioma}
-                  </TableCell>
-                  <TableCell align="left" className={CELL_CLASS_NAME}>
-                    {mapCategory(additional.tipoPrograma)}
+                  <TableCell align="left">
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="text-xs text-primary"
+                      >
+                        <Edit />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="text-xs text-destructive"
+                      >
+                        <Trash />
+                        Eliminar
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
