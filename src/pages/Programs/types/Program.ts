@@ -31,3 +31,8 @@ type Autor = {
 type DescIdioma = "ESPAÑOL" | "INGLES";
 
 type PrefijoIdioma = "EN" | "SP";
+
+export type ProgramCategory = {
+  descripcion: string;
+  idTipoPrograma: number;
+};

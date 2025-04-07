@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProgramsService from "./services/ProgramsService";
-import { Program } from "./types/Program";
+import { Program, ProgramCategory } from "./types/Program";
 import ProgramDatePicker from "./components/ProgramDatePicker/ProgramDatePicker";
 import ProgramContainer from "./components/ProgramContainer/ProgramContainer";
 
@@ -9,6 +9,9 @@ export default function Expositors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [programCategories, setProgramCategories] = useState<ProgramCategory[]>(
+    []
+  );
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -26,6 +29,15 @@ export default function Expositors() {
         setLoading(false);
       }
     };
+    const loadProgramCategories = async () => {
+      try {
+        const categories = await ProgramsService.getProgramCategories();
+        setProgramCategories(categories);
+      } catch {
+        setError("Error al cargar categorias");
+      }
+    };
+    loadProgramCategories();
     loadPrograms();
   }, []);
 
@@ -52,7 +64,10 @@ export default function Expositors() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
       />
-      <ProgramContainer programs={programsByDate} />
+      <ProgramContainer
+        programs={programsByDate}
+        programCategories={programCategories}
+      />
     </div>
   );
 }

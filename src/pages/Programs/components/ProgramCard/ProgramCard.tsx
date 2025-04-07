@@ -1,7 +1,6 @@
 import { FC } from "react";
-import { Program } from "../../types/Program";
+import { Program, ProgramCategory } from "../../types/Program";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -16,9 +15,18 @@ import { Edit, Trash } from "lucide-react";
 
 type Props = {
   program: Program;
+  programCategories: ProgramCategory[];
 };
 
-const ProgramCard: FC<Props> = ({ program }) => {
+const CELL_CLASS_NAME = "overflow-ellipsis max-w-[80px] overflow-hidden";
+
+const ProgramCard: FC<Props> = ({ program, programCategories }) => {
+  function mapCategory(id: number) {
+    const category = programCategories.find(
+      (category) => category.idTipoPrograma === id
+    );
+    return category ? category.descripcion : `ID-${id}`;
+  }
   return (
     <Card>
       {program.detalles.map((detalle) => (
@@ -39,7 +47,7 @@ const ProgramCard: FC<Props> = ({ program }) => {
               </Button>
             </div>
           </div>
-          <Separator orientation="vertical" className="h-full" />
+
           <Table className="text-xs">
             <TableHeader>
               <TableRow>
@@ -61,19 +69,27 @@ const ProgramCard: FC<Props> = ({ program }) => {
                   </TableCell>
                   <TableCell
                     align="left"
-                    className="overflow-ellipsis max-w-[100px] overflow-hidden"
+                    className={CELL_CLASS_NAME}
                     title={additional.descripcionBody}
                   >
                     {additional.descripcionBody}
                   </TableCell>
                   <TableCell align="left">
                     {(additional.autores || []).map((autor) => (
-                      <p>{`${autor.nombres} ${autor.apellidos}`}</p>
+                      <p
+                        className={CELL_CLASS_NAME}
+                      >{`${autor.nombres} ${autor.apellidos}`}</p>
                     ))}
                   </TableCell>
-                  <TableCell align="left">{additional.sala}</TableCell>
-                  <TableCell align="left">{additional.descIdioma}</TableCell>
-                  <TableCell align="left">{additional.tipoPrograma}</TableCell>
+                  <TableCell align="left" className={CELL_CLASS_NAME}>
+                    {additional.sala}
+                  </TableCell>
+                  <TableCell align="left" className={CELL_CLASS_NAME}>
+                    {additional.descIdioma}
+                  </TableCell>
+                  <TableCell align="left" className={CELL_CLASS_NAME}>
+                    {mapCategory(additional.tipoPrograma)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
