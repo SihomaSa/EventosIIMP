@@ -1,6 +1,6 @@
 import { AdType, NewAdRequestType, UpdateAdRequestType } from "@/types/adTypes";
 
-const API_GET_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
+const API_GET_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
 const API_POST_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
 const API_PUT_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
 const API_DELETE_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising";

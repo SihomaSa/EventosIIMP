@@ -1,6 +1,6 @@
 import { SponsorType, NewSponsorType, NewSponsorRequestType } from "@/types/sponsorTypes";
 
-const API_GET_URL = "https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/sponsor/event/1";
+const API_GET_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event/1";
 const API_POST_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
 const API_PUT_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
 const API_DELETE_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor";

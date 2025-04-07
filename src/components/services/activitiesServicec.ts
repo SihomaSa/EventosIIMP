@@ -1,7 +1,7 @@
 import { ActivityDay, ActivityDetail, ActivityType } from "@/types/activityTypes";
 import { SponsorType, NewSponsorRequestType } from "@/types/sponsorTypes";
 
-const API_GET_TYPE_URL = "https://dvi5sj2sd8.execute-api.us-east-1.amazonaws.com/web/typeactivity/event";
+const API_GET_TYPE_URL = "https://obs1t6axmk.execute-api.us-east-1.amazonaws.com/web/typeactivity/event";
 
 
 const API_GET_URL = "https://nl62yyb5a0.execute-api.us-east-1.amazonaws.com/web/activity/event/1";
