@@ -1,4 +1,11 @@
-import { CalendarDays, Handshake, Megaphone, Newspaper, Settings, Users } from "lucide-react"
+import {
+  CalendarDays,
+  Handshake,
+  Megaphone,
+  Newspaper,
+  Settings,
+  Users,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -9,7 +16,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Menu items.
 const items = [
@@ -44,18 +51,25 @@ const items = [
     icon: CalendarDays,
   },
   {
+    title: "Programas",
+    url: "/home/programs",
+    icon: CalendarDays,
+  },
+  {
     title: "Configuración",
     url: "#",
     icon: Settings,
   },
-]
+];
 
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-md py-8">Administrador</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-md py-8">
+            Administrador
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -73,5 +87,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
