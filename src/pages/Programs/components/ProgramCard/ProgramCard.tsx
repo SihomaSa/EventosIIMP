@@ -18,7 +18,7 @@ type Props = {
   programCategories: ProgramCategory[];
 };
 
-const ELLIPSE_CN = "overflow-ellipsis max-w-[80px] overflow-hidden";
+const ELLIPSE_CN = "overflow-ellipsis max-w-[200px] overflow-hidden";
 
 const ProgramCard: FC<Props> = ({ program, programCategories }) => {
   function mapCategory(id: number) {
@@ -59,7 +59,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                 <TableHead>Descripción</TableHead>
                 <TableHead>Autores</TableHead>
                 <TableHead>Detalles</TableHead>
-                <TableHead>Acciones</TableHead>
+                {/* <TableHead>Acciones</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -95,7 +95,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                     <p className={ELLIPSE_CN}>{additional.descIdioma}</p>
                     <p className={ELLIPSE_CN}>{additional.sala}</p>
                   </TableCell>
-                  <TableCell align="left">
+                  {/* <TableCell align="left">
                     <div className="flex gap-2 w-full">
                       <Button
                         variant="link"
@@ -114,7 +114,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                         Eliminar
                       </Button>
                     </div>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               ))}
             </TableBody>

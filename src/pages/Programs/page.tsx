@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProgramsService from "./services/ProgramsService";
 import { Program, ProgramCategory } from "./types/Program";
-import ProgramDatePicker from "./components/ProgramDatePicker/ProgramDatePicker";
+import ProgramDateNavigator from "./components/ProgramDateNavigator/ProgramDateNavigator";
 import ProgramContainer from "./components/ProgramContainer/ProgramContainer";
 
 export default function Expositors() {
@@ -59,7 +59,7 @@ export default function Expositors() {
 
   return (
     <div>
-      <ProgramDatePicker
+      <ProgramDateNavigator
         dates={dates}
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}

@@ -8,7 +8,7 @@ type Props = {
   dates: string[];
 };
 
-const ProgramDatePicker: FC<Props> = ({
+const ProgramDateNavigator: FC<Props> = ({
   dates,
   selectedDate,
   setSelectedDate,
@@ -32,4 +32,4 @@ const ProgramDatePicker: FC<Props> = ({
   );
 };
 
-export default ProgramDatePicker;
+export default ProgramDateNavigator;
