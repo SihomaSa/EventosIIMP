@@ -42,7 +42,7 @@ export default function EventList() {
 	useEffect(() => {
 		const loadEvents = async () => {
 			try {
-				const response = await fetch("https://3damgcmqcg.execute-api.us-east-1.amazonaws.com/mob/event"); // Reemplaza con tu URL real
+				const response = await fetch("https://d47n68si9j.execute-api.us-east-1.amazonaws.com/web/category/sponsors"); // Reemplaza con tu URL real
 				if (!response.ok) throw new Error("Error al obtener eventos");
 				
 				const data: EventType[] = await response.json();
