@@ -18,7 +18,7 @@ type Props = {
   programCategories: ProgramCategory[];
 };
 
-const ELLIPSE_CN = "overflow-ellipsis max-w-[200px] overflow-hidden";
+const ELLIPSE_CN = "overflow-ellipsis max-w-[120px] overflow-hidden";
 
 const ProgramCard: FC<Props> = ({ program, programCategories }) => {
   function mapCategory(id: number) {
