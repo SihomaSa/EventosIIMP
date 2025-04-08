@@ -1,65 +1,16 @@
-import {
-  CalendarDays,
-  Handshake,
-  Megaphone,
-  Newspaper,
-  Settings,
-  Users,
-} from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Megaphone, Newspaper, Users, Handshake, CalendarDays, Settings } from "lucide-react";
+import NavItem from "@/components/NavItem"; // Importa el componente corregido
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-
-// Menu items.
 const items = [
-  {
-    title: "Publicidad",
-    url: "/home/ads",
-    icon: Megaphone,
-  },
-  {
-    title: "Nota de Prensa",
-    url: "/home/press",
-    icon: Megaphone,
-  },
-  {
-    title: "Boletines",
-    url: "/home/bulletins",
-    icon: Newspaper,
-  },
-  {
-    title: "Conferencistas",
-    url: "/home/expositors",
-    icon: Users,
-  },
-  {
-    title: "Auspiciadores",
-    url: "/home/sponsors",
-    icon: Handshake,
-  },
-  {
-    title: "Actividades",
-    url: "/home/activities",
-    icon: CalendarDays,
-  },
-  {
-    title: "Programas",
-    url: "/home/programs",
-    icon: CalendarDays,
-  },
-  {
-    title: "Configuración",
-    url: "#",
-    icon: Settings,
-  },
+  { label: "Publicidad", to: "/home/ads", icon: <Megaphone strokeWidth={3} /> },
+  { label: "Nota de Prensa", to: "/home/press", icon: <Megaphone strokeWidth={3} /> },
+  { label: "Boletines", to: "/home/bulletins", icon: <Newspaper strokeWidth={3} /> },
+  { label: "Conferencistas", to: "/home/expositors", icon: <Users strokeWidth={3} /> },
+  { label: "Auspiciadores", to: "/home/sponsors", icon: <Handshake strokeWidth={3} /> },
+  { label: "Actividades", to: "/home/activities", icon: <CalendarDays strokeWidth={3} /> },
+  { label: "Programas", to: "/home/programs", icon: <CalendarDays strokeWidth={3} /> },
+  { label: "Configuración", to: "/home/settings", icon: <Settings strokeWidth={3} /> },
 ];
 
 export function AppSidebar() {
@@ -67,19 +18,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-md py-8">
-            Administrador
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-md py-8">Administrador</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="font-bold">
-                      <item.icon strokeWidth={3} />
-                      <span className="text-2xl pl-2">{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
+                <SidebarMenuItem key={item.label}>
+                  <NavItem icon={item.icon} label={item.label} to={item.to} />
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

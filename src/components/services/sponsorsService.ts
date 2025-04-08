@@ -1,9 +1,9 @@
 import { SponsorType, NewSponsorType, NewSponsorRequestType } from "@/types/sponsorTypes";
 
 const API_GET_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event/1";
-const API_POST_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
-const API_PUT_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
-const API_DELETE_URL = "https://vmy2jxg4e6.execute-api.us-east-1.amazonaws.com/web/sponsor";
+const API_POST_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
+const API_PUT_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
+const API_DELETE_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/10";
 
 export const getSponsors = async (): Promise<SponsorType[]> => {
   const response = await fetch(API_GET_URL);
