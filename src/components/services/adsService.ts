@@ -1,9 +1,9 @@
 import { AdType, NewAdRequestType, UpdateAdRequestType } from "@/types/adTypes";
 
-const API_GET_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
-const API_POST_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
-const API_PUT_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising/event";
-const API_DELETE_URL = "https://xahhfxc3dc.execute-api.us-east-1.amazonaws.com/web/advertising";
+const API_GET_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
+const API_POST_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event";
+const API_PUT_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event";
+const API_DELETE_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/17";
 
 export const getAds = async (): Promise<AdType[]> => {
   const response = await fetch(API_GET_URL);
