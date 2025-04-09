@@ -16,12 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProgramCategory } from "../../types/Program";
+import { ExpositorType } from "@/types/expositorTypes";
 
 type Props = {
   form: UseFormReturn<ProgramFormType, unknown, undefined>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
+  expositors: ExpositorType[];
 };
 
 const ProgramForm: FC<Props> = ({
@@ -55,6 +57,48 @@ const ProgramForm: FC<Props> = ({
     ]);
   }
 
+  function detailFormByProgramId(index: number) {
+    const tipoPrograma = details[index]?.tipoPrograma;
+    if (!tipoPrograma) return;
+    const idIdioma = details[index]?.idIdioma;
+    return (
+      <>
+        <Input
+          {...register(`detalles.${index}.descripcionBody`)}
+          placeholder="Descripción"
+        />
+        <Select
+          value={idIdioma ? `${idIdioma}` : undefined}
+          onValueChange={(value) =>
+            setValue(`detalles.${index}.idIdioma`, Number(value))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Idioma" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Idioma</SelectLabel>
+              <SelectItem value="1">Español</SelectItem>
+              <SelectItem value="2">Inglés</SelectItem>
+              <SelectItem value="3">Español / Inglés</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        {tipoPrograma === 3 && (
+          <>
+            <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
+            {/* TODO: Multiselect */}
+            <Input
+              {...register(`detalles.${index}.idAutor`)}
+              placeholder="idAutor"
+            />
+          </>
+        )}
+      </>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
       <div className="grid grid-cols-4 items-center gap-4">
@@ -86,7 +130,7 @@ const ProgramForm: FC<Props> = ({
 
       <p className="text-sm">Hora de inicio / Hora de fin</p>
 
-      {details.map((_, index) => (
+      {details.map(({ tipoPrograma }, index) => (
         <div className="flex gap-2" key={index}>
           <Input
             {...register(`detalles.${index}.horaIni`)}
@@ -100,8 +144,12 @@ const ProgramForm: FC<Props> = ({
             className="w-22"
             placeholder="Hora fin"
           />
-          {/* tipoPrograma */}
-          <Select>
+          <Select
+            value={tipoPrograma ? `${tipoPrograma}` : undefined}
+            onValueChange={(value) =>
+              setValue(`detalles.${index}.tipoPrograma`, Number(value))
+            }
+          >
             <SelectTrigger>
               <SelectValue placeholder="Tipo de programa" />
             </SelectTrigger>
@@ -109,21 +157,17 @@ const ProgramForm: FC<Props> = ({
               <SelectGroup>
                 <SelectLabel>Tipo de programa</SelectLabel>
                 {programCategories.map((category) => (
-                  <SelectItem value={String(category.idTipoPrograma)}>
+                  <SelectItem
+                    value={String(category.idTipoPrograma)}
+                    key={category.idTipoPrograma}
+                  >
                     {category.descripcion}
                   </SelectItem>
                 ))}
               </SelectGroup>
             </SelectContent>
           </Select>
-          {/* descripcionBody */}
-          {/* <Input placeholder="Descripción" /> */}
-          {/* idAutor: string; // 1,2,3 */}
-          {/* <p>Autores</p> */}
-          {/* sala */}
-          {/* <Input placeholder="Sala" /> */}
-          {/* idIdioma */}
-          {/* <p>Idioma</p> */}
+          {detailFormByProgramId(index)}
         </div>
       ))}
 
