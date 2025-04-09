@@ -2,7 +2,7 @@ import { NewPressNoteRequestType, PressNoteType } from "@/types/pressNoteTypes";
 
 const API_GET_URL = "https://p47i41cvzj.execute-api.us-east-1.amazonaws.com/web/news/event/1";
 const API_POST_URL = "https://p47i41cvzj.execute-api.us-east-1.amazonaws.com/web/news/event";
-const API_DELETE_URL = "https://p47i41cvzj.execute-api.us-east-1.amazonaws.com/web/news/9";
+const API_DELETE_URL = "https://p47i41cvzj.execute-api.us-east-1.amazonaws.com/web/news";
 
 export const getPressNotes = async (): Promise<PressNoteType[]> => {
   const response = await fetch(API_GET_URL);

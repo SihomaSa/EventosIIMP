@@ -3,7 +3,7 @@ import { useAuth } from "../Contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email("Correo inválido"),
@@ -17,6 +17,7 @@ export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar u ocultar contraseña
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,13 +76,25 @@ export default function Login() {
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
-            <input
-              className="border border-gray-400 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#C09054]"
-              type="password"
-              placeholder="Contraseña"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
+        {/* Campo de contraseña con botón de ojo */}
+			<div className="relative">
+			<input
+				className="border border-gray-400 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-[#C09054] pr-10"
+				type={showPassword ? "text" : "password"}
+				placeholder="Contraseña"
+				value={formData.password}
+				onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+			/>
+			{/* Botón de ojo para mostrar/ocultar contraseña */}
+			<button
+				type="button"
+				onClick={() => setShowPassword(!showPassword)}
+				className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+			>
+				{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+			</button>
+			</div>
+
             {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
             {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>}
