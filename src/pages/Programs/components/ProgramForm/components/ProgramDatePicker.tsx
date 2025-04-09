@@ -9,20 +9,29 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FC, useState } from "react";
+import { FC } from "react";
 
 type Props = {
   id?: string;
   className?: string;
+  disabled?: boolean;
+  date?: Date;
+  setDate: (newDate?: Date) => void;
 };
 
-const ProgramDatePicker: FC<Props> = ({ id, className }) => {
-  const [date, setDate] = useState<Date>();
+const ProgramDatePicker: FC<Props> = ({
+  id,
+  className,
+  disabled,
+  date,
+  setDate,
+}) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
+          disabled={disabled}
           className={cn(
             className,
             "w-full justify-start text-left font-normal",
@@ -38,7 +47,7 @@ const ProgramDatePicker: FC<Props> = ({ id, className }) => {
           id={id}
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={(newDate) => setDate(newDate)}
           initialFocus
         />
       </PopoverContent>
