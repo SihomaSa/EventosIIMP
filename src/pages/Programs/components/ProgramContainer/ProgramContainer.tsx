@@ -11,7 +11,7 @@ type Props = {
 const ProgramContainer: FC<Props> = ({ programs, programCategories }) => {
   return (
     <div className="flex flex-col gap-4">
-      <NewProgramDialog />
+      <NewProgramDialog programCategories={programCategories} />
       {programs.map((program, index) => (
         <ProgramCard
           program={program}

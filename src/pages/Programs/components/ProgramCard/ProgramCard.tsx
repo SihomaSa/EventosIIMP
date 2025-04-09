@@ -37,15 +37,11 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
           <div className="w-[400px] sticky top-4 flex flex-col gap-2">
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
-              <Button variant="link" size="sm" className="text-xs text-primary">
+              <Button size="sm" className="text-xs">
                 <Edit />
                 Editar
               </Button>
-              <Button
-                variant="link"
-                size="sm"
-                className="text-xs text-destructive"
-              >
+              <Button variant="outline" size="sm" className="text-xs">
                 <Trash />
                 Eliminar
               </Button>
@@ -80,6 +76,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                   <TableCell align="left">
                     {(additional.autores || []).map((autor) => (
                       <p
+                        key={`card-${program.fechaPrograma}-${detalle.idPrograma}-${additional.idProDetalle}-${autor.idAutor}`}
                         className={ELLIPSE_CN}
                         title={`${autor.nombres} ${autor.apellidos}`}
                       >{`${autor.nombres} ${autor.apellidos}`}</p>
