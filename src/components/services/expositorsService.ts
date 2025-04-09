@@ -2,6 +2,7 @@ import { ExpositorType, NewExpositorType } from "@/types/expositorTypes";
 
 const API_GET_URL = "https://zo7zhx2dui.execute-api.us-east-1.amazonaws.com/web/author";
 const API_POST_URL = "https://zo7zhx2dui.execute-api.us-east-1.amazonaws.com/web/author";
+const API_DELETE_URL = "https://zo7zhx2dui.execute-api.us-east-1.amazonaws.com/web/author";
 
 export const getExpositors = async (): Promise<ExpositorType[]> => {
   const response = await fetch(API_GET_URL);
@@ -19,3 +20,11 @@ export const createExpositor = async (newExpositor: NewExpositorType): Promise<E
   if (!response.ok) throw new Error("Error al crear el conferencista");
   return response.json();
 };
+export const deleteExpositor = async (expositorId: string): Promise<void> => {
+  const response = await fetch(`${API_DELETE_URL}/${expositorId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) throw new Error("Error al eliminar al expositor");
+};
+
