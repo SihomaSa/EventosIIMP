@@ -3,12 +3,12 @@ export type ProgramForm = {
   descripcionPro: string;
   idEvento: 1;
   detalles: {
-    descripcionBody: string;
-    idAutor: string; // 1,2,3
-    sala: string;
+    descripcionBody?: string;
+    idAutor?: string; // 1,2,3
+    sala?: string;
     horaIni: string;
     horaFin: string;
-    idIdioma: number;
-    tipoPrograma: number;
+    idIdioma?: number;
+    tipoPrograma?: number;
   }[];
 };
