@@ -19,7 +19,7 @@ const sponsorSchema = z.object({
 	  message: "Seleccione una categoría válida",
 	}),
   });
-  
+
 
 type SponsorFormValues = z.infer<typeof sponsorSchema>;
 
@@ -45,7 +45,7 @@ export default function UpdateSponsorModal({ onClose, sponsor, onUpdate, open }:
 		descripcionIdioma: sponsor.descripcionIdioma as "ESPAÑOL" | "INGLÉS",
 		url: sponsor.url,
 		categoria: sponsor.categoria,
-	  }	  
+	  }
   });
 
   const onSubmit = (data: SponsorFormValues) => {

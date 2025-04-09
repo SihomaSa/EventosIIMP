@@ -181,21 +181,21 @@ export default function EditActivityModal({
 	function isLunchRequest(data: any): data is NewLunchRequest {
 		return typeof data.titulo === "string";
 	}
-	
+
 	function isClosingRequest(data: any): data is NewClosingRequest {
 		return typeof data.lugar === "string";
 	}
-	
+
 	function isOthersRequest(data: any): data is NewOthersRequest {
 		return typeof data.responsable === "string";
 	}
-	
+
 	function isCongressInaugurationRequest(data: any): data is NewCongressInaugurationRequest {
 		return (
 			typeof data.lugar === "string"
 		);
 	}
-	
+
 	function isGratitudDinnerRequest(data: any): data is NewGratitudDinnerRequest {
 		return typeof data.titulo === "string";
 	}
@@ -208,12 +208,12 @@ export default function EditActivityModal({
 
 	const onSubmit = async (data: FormData) => {
 		if (!selectedEvent || !activityType) return;
-		
+
 		try {
 			setLoading(true);
-	
+
 			let detalles;
-	
+
 			if (activityType === 1 && isFieldTripRequest(data)) {
 				detalles = {
 					titulo: data.titulo,
@@ -311,9 +311,9 @@ export default function EditActivityModal({
 						detalles: [detalles],
 					},
 				] satisfies Parameters<typeof createActivityDetail>[0];
-	
+
 				await createActivityDetail(newActivityDet);
-	
+
 				toast("La actividad ha sido creada satisfactoriamente ✅");
 				setActivityType("");
 				setStep(1);

@@ -36,11 +36,11 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
 	return (
 		<div>
 			<Card className="bg-secondary text-primary text-4xl font-bold shadow-xl max-w-100">
-				<CardHeader className="text-xl font-bold leading-4">
-					<span className="text-3xl">
+				<CardHeader className="flex gap-2 justify-center text-2xl font-bold leading-4">
+					<span>{getMonth(activity.fechaActividad)}</span>
+					<span>
 						{activity.fechaActividad.split("-")[2]}
 					</span>
-					<span>{getMonth(activity.fechaActividad)}</span>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-y-3">
 					{activity?.detalles &&
