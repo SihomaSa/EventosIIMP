@@ -1,5 +1,5 @@
 import React, { FormEvent } from "react";
-import { ActivityDay, ActivityDetail } from "@/types/activityTypes"; // Asegúrate de importar el tipo correcto
+import { ActivityDay, ActivityDetail } from "@/types/activityTypes";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import ActivityDetailForm from "./ActivityDetailForm";
 import EditActivityModal from "./EditActivityModal";
@@ -32,32 +32,114 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
       "Noviembre",
       "Diciembre",
     ];
-
     return meses[+date.split("-")[1] - 1];
   };
+
+  const detalles: ActivityDetail[] = Array.isArray(activity.detalles) ? activity.detalles : [];
+
+  const englishActivities: ActivityDetail[] = detalles.filter(
+    (detail: ActivityDetail) => detail.idIdioma === "1" || detail.prefijoIdioma === "EN"
+  );
+
+  const spanishActivities: ActivityDetail[] = detalles.filter(
+    (detail: ActivityDetail) => detail.idIdioma === "2" || detail.prefijoIdioma === "SP"
+  );
+
+  const otherActivities: ActivityDetail[] = detalles.filter(
+    (detail: ActivityDetail) =>
+      (detail.idIdioma !== "1" && detail.idIdioma !== "2") &&
+      (detail.prefijoIdioma !== "EN" && detail.prefijoIdioma !== "SP")
+  );
+
   return (
     <div>
-      <Card className="bg-secondary text-primary text-4xl font-bold shadow-xl max-w-100">
+      <Card className="bg-secondary text-primary text-4xl font-bold shadow-xl w-full">
         <CardHeader className="flex gap-2 justify-center text-2xl font-bold leading-4">
-          <span>{activity.fechaActividad}</span>
           <span>{activity.fechaActividad.split("-")[2]}</span>
+          <span>{getMonth(activity.fechaActividad)}</span>
         </CardHeader>
         <CardContent className="flex flex-col gap-y-3">
-          {activity?.detalles &&
-            Array.isArray(activity.detalles) &&
-            activity.detalles.map((det, index) => (
-              <ActivityDetailForm
-                key={index}
-                onDelete={onActivityDeleted}
-                details={det}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-              />
-            ))}
+          {englishActivities.length > 0 && spanishActivities.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-y-3">
+                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">English</h3>
+                {englishActivities.map((det: ActivityDetail, index: number) => (
+                  <ActivityDetailForm
+                    key={`en-${index}`}
+                    onDelete={onActivityDeleted}
+                    details={det}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                  />
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-y-3">
+                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Español</h3>
+                {spanishActivities.map((det: ActivityDetail, index: number) => (
+                  <ActivityDetailForm
+                    key={`es-${index}`}
+                    onDelete={onActivityDeleted}
+                    details={det}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <>
+              {englishActivities.length > 0 && (
+                <div className="flex flex-col gap-y-3">
+                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">English</h3>
+                  {englishActivities.map((det: ActivityDetail, index: number) => (
+                    <ActivityDetailForm
+                      key={`en-${index}`}
+                      onDelete={onActivityDeleted}
+                      details={det}
+                      handleChange={handleChange}
+                      handleSubmit={handleSubmit}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {spanishActivities.length > 0 && (
+                <div className="flex flex-col gap-y-3">
+                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Español</h3>
+                  {spanishActivities.map((det: ActivityDetail, index: number) => (
+                    <ActivityDetailForm
+                      key={`es-${index}`}
+                      onDelete={onActivityDeleted}
+                      details={det}
+                      handleChange={handleChange}
+                      handleSubmit={handleSubmit}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {otherActivities.length > 0 && (
+            <div className="flex flex-col gap-y-3 mt-4">
+              <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Other Activities</h3>
+              {otherActivities.map((det: ActivityDetail, index: number) => (
+                <ActivityDetailForm
+                  key={`other-${index}`}
+                  onDelete={onActivityDeleted}
+                  details={det}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                />
+              ))}
+            </div>
+          )}
 
           <EditActivityModal
-            onAdd={() => console.log("Creando")}
-            onClose={() => console.log("Cerrando")}
+            activity={activity}
+            onAdd={onActivityDeleted}
+            onClose={() => {}}
           />
         </CardContent>
       </Card>

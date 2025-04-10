@@ -12,11 +12,11 @@ import { cn } from "@/lib/utils";
 
 // Generate hour options (00-23)
 const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-
 // Generate minute options (00-59)
 const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
 
 interface TimePickerProps {
+  fechaActividad?: string;
   label?: string;
   value: string;
   onChange: (value: string) => void;
@@ -26,6 +26,7 @@ interface TimePickerProps {
 }
 
 export function TimePicker({
+  fechaActividad,
   label,
   value,
   onChange,
@@ -34,10 +35,18 @@ export function TimePicker({
   className,
   ...props
 }: TimePickerProps & React.HTMLAttributes<HTMLDivElement>) {
-  // Parse the time string (HH:MM) into hours and minutes
-  const [hour, minute] = value ? value.split(":") : ["", ""];
+  let hour = "";
+  let minute = "";
 
-  // Update the time when either hours or minutes change
+  if (value) {
+    if (value.includes("T")) {
+      const timePart = value.split("T")[1];
+      [hour, minute] = timePart.split(":");
+    } else {
+      [hour, minute] = value.split(":");
+    }
+  }
+
   const handleTimeChange = (type: "hour" | "minute", newValue: string) => {
     let newHour = hour;
     let newMinute = minute;
@@ -48,13 +57,24 @@ export function TimePicker({
       newMinute = newValue;
     }
 
-    // Only trigger onChange if we have both values
     if (newHour && newMinute) {
-      onChange(`${newHour}:${newMinute}`);
+      if (fechaActividad) {
+        onChange(`${fechaActividad}T${newHour}:${newMinute}`);
+      } else {
+        onChange(`${newHour}:${newMinute}`);
+      }
     } else if (newHour) {
-      onChange(`${newHour}:00`);
+      if (fechaActividad) {
+        onChange(`${fechaActividad}T${newHour}:00`);
+      } else {
+        onChange(`${newHour}:00`);
+      }
     } else if (newMinute) {
-      onChange(`00:${newMinute}`);
+      if (fechaActividad) {
+        onChange(`${fechaActividad}T00:${newMinute}`);
+      } else {
+        onChange(`00:${newMinute}`);
+      }
     }
   };
 
@@ -65,7 +85,6 @@ export function TimePicker({
         <div className="relative w-full flex items-center">
           <Clock className="absolute left-2 h-4 w-4 text-gray-400 pointer-events-none" />
           <div className="flex w-full">
-            {/* Hours select */}
             <Select
               value={hour}
               onValueChange={(value) => handleTimeChange("hour", value)}
@@ -86,8 +105,6 @@ export function TimePicker({
                 ))}
               </SelectContent>
             </Select>
-
-            {/* Minutes select */}
             <Select
               value={minute}
               onValueChange={(value) => handleTimeChange("minute", value)}

@@ -52,16 +52,20 @@ import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { TimePicker } from "@/components/TimePicker"; // Import our custom TimePicker
+import { TimePicker } from "@/components/TimePicker";
+import { ActivityDay } from "@/types/activityTypes";
 
-interface UpdateAdsModalProps {
+interface EditActivityModalProps {
+  activity: ActivityDay;
   onAdd: () => void;
   onClose: () => void;
 }
+
 export default function EditActivityModal({
+  activity,
   onAdd,
-  onClose,
-}: UpdateAdsModalProps) {
+}: EditActivityModalProps) {
+  const { fechaActividad } = activity;
   const [activityTypes, setActivityTypes] = useState<ActivityType[] | []>([]);
   const { selectedEvent } = useEventStore();
   const [step, setStep] = useState(1);
@@ -367,7 +371,7 @@ export default function EditActivityModal({
       if (detalles) {
         const newActivityDet = [
           {
-            fechaActividad: "2025-04-07",
+            fechaActividad: fechaActividad,
             idEvento: selectedEvent.idEvent,
             idTipoActividad: activityType,
             detalles: [detalles],
@@ -443,9 +447,9 @@ export default function EditActivityModal({
     <div className="flex flex-col gap-y-4 mb-4">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <div className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transition-all duration-200 hover:bg-primary/5">
-            <h3 className="text-lg font-semibold">Agregar Actividad</h3>
-            <Plus size={50} />
+          <div className="text-primary rounded-lg p-3 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow transition-all duration-200 hover:bg-primary/5 h-full">
+            <Plus size={24} className="mb-1" />
+            <h3 className="text-sm font-medium">Agregar Actividad</h3>
           </div>
         </DialogTrigger>
         <DialogContent className="max-w-md md:max-w-2xl w-full flex flex-col max-h-[90vh]">
@@ -564,6 +568,7 @@ export default function EditActivityModal({
                             {field.includes("hora") ? (
                               // Use our custom TimePicker for time fields
                               <TimePicker
+                                fechaActividad={fechaActividad}
                                 id={field}
                                 value={watch(field) || ""}
                                 onChange={(value: string) =>
