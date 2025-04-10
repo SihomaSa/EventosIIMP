@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import UpdateExpositorModal from "@/components/expositors/UpdateExpositorModal";
 import EditExpositorForm from "@/components/expositors/EditExpositorForm";
@@ -46,6 +45,9 @@ export default function Expositors() {
 		setSelectedExpositor(null);
 		setIsUpdateModalOpen(false);
 	};
+	const handleDelete = (id: number) => {
+		setExpositors((prev) => prev.filter((exp) => exp.idAutor !== id));
+	  };
 
 	const openUpdateModal = (expositor: ExpositorType) => {
 		setSelectedExpositor(expositor);
@@ -82,6 +84,7 @@ export default function Expositors() {
 							key={index}
 							expositor={expositor}
 							openUpdateModal={() => openUpdateModal(expositor)}
+							onDelete={() => handleDelete(expositor.idAutor)}
 						/>
 					))}
 				</div>

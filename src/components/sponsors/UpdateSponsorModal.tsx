@@ -105,7 +105,9 @@ export default function UpdateSponsorModal({ onClose, sponsor, onUpdate, open }:
             </div>
 
             <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancelar
+              </Button>
               <Button type="submit">Guardar</Button>
             </div>
           </form>
