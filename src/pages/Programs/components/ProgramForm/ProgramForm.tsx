@@ -17,9 +17,10 @@ import {
 } from "@/components/ui/select";
 import { ProgramCategory } from "../../types/Program";
 import { ExpositorType } from "@/types/expositorTypes";
+import { MultiSelect } from "@/components/ui-custom/multi-select";
 
 type Props = {
-  form: UseFormReturn<ProgramFormType, unknown, undefined>;
+  form: UseFormReturn<ProgramFormType, undefined, ProgramFormType>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
@@ -31,6 +32,7 @@ const ProgramForm: FC<Props> = ({
   onSubmit,
   disabled,
   programCategories,
+  expositors,
 }) => {
   const dateStr = watch("fechaPrograma");
   const details = watch("detalles");
@@ -61,6 +63,7 @@ const ProgramForm: FC<Props> = ({
     const tipoPrograma = details[index]?.tipoPrograma;
     if (!tipoPrograma) return;
     const idIdioma = details[index]?.idIdioma;
+    const idAutor = details[index]?.idAutor;
     return (
       <>
         <Input
@@ -88,10 +91,17 @@ const ProgramForm: FC<Props> = ({
         {tipoPrograma === 3 && (
           <>
             <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
-            {/* TODO: Multiselect */}
-            <Input
-              {...register(`detalles.${index}.idAutor`)}
-              placeholder="idAutor"
+            <MultiSelect
+              className="w-fit"
+              placeholder="Autores"
+              selected={idAutor ? idAutor.split(",") : []}
+              onChange={(selected) =>
+                setValue(`detalles.${index}.idAutor`, selected.join(","))
+              }
+              options={expositors.map((expositor) => ({
+                label: `${expositor.nombres}, ${expositor.apellidos}`,
+                value: `${expositor.idAutor}`,
+              }))}
             />
           </>
         )}
@@ -111,7 +121,6 @@ const ProgramForm: FC<Props> = ({
           })}
           id="description"
           placeholder="..."
-          className="col-span-3"
           disabled={disabled}
         />
       </div>
@@ -121,7 +130,6 @@ const ProgramForm: FC<Props> = ({
         </Label>
         <ProgramDatePicker
           id="fechaPrograma"
-          className="col-span-3"
           disabled={disabled}
           date={dateStr ? new Date(dateStr) : undefined}
           setDate={handleSetDate}
@@ -133,15 +141,15 @@ const ProgramForm: FC<Props> = ({
       {details.map(({ tipoPrograma }, index) => (
         <div className="flex gap-2" key={index}>
           <Input
+            className="flex min-w-max max-w-[100px]"
             {...register(`detalles.${index}.horaIni`)}
             type="time"
-            className="w-22"
             placeholder="Hora inicio"
           />
           <Input
+            className="flex min-w-max max-w-[100px]"
             {...register(`detalles.${index}.horaFin`)}
             type="time"
-            className="w-22"
             placeholder="Hora fin"
           />
           <Select
@@ -171,7 +179,9 @@ const ProgramForm: FC<Props> = ({
         </div>
       ))}
 
-      <Button onClick={addSubProgram}>Añadir horario</Button>
+      <Button onClick={addSubProgram} disabled={disabled}>
+        Añadir horario
+      </Button>
 
       <DialogFooter>
         <Button type="submit" disabled>
