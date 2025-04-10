@@ -1,12 +1,10 @@
 export interface ExpositorType {
-  idautor: number;
+  idAutor: number;
   nombres: string;
   apellidos: string;
   especialidad: string;
   hojavida: string;
   foto: string;
-  // TODO: Determinar si idautor es un error ortográfico
-  idAutor: number;
 }
 
 export interface NewExpositorType {
