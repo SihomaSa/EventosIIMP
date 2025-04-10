@@ -75,6 +75,8 @@ export default function AddActivityModal({
   const [activityType, setActivityType] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"1" | "2">("2"); // Default to Spanish (2)
+  const [fechaIniOpen, setFechaIniOpen] = useState(false);
+  const [fechaFinOpen, setFechaFinOpen] = useState(false);
   // Field configuration for each activity type
   const fieldsByActivityType: Record<number, string[]> = {
     1: ["titulo", "responsable", "fechaIni", "fechaFin", "horaIni", "horaFin"], // Viaje de Campo
@@ -99,6 +101,7 @@ export default function AddActivityModal({
     horaFin: "Hora de finalización",
     lugar: "Lugar",
     traduccion: "Traducción",
+    duracion: "Duración del viaje",
   };
   // Field icons for visual cues
   const fieldIcons: Record<string, React.ReactNode> = {
@@ -110,6 +113,7 @@ export default function AddActivityModal({
     horaFin: <Clock size={16} className="text-primary" />,
     lugar: <MapPin size={16} className="text-primary" />,
     traduccion: <Languages size={16} className="text-primary" />,
+    duracion: <Clock size={16} className="text-primary" />,
   };
   // Activity type names by language
   const activityTypeNames: Record<string, Record<string, string>> = {
@@ -284,6 +288,10 @@ export default function AddActivityModal({
       setLoading(true);
       let detalles;
       if (activityType === 1 && isFieldTripRequest(data)) {
+        const calculatedDuration = calculateDuration(
+          data.fechaIni,
+          data.fechaFin
+        );
         detalles = {
           titulo: data.titulo,
           horaIni: data.horaIni,
@@ -292,6 +300,7 @@ export default function AddActivityModal({
           responsable: data.responsable,
           fechaIni: data.fechaIni,
           fechaFin: data.fechaFin,
+          duracion: calculatedDuration,
         };
       } else if (activityType === 2 && isCourseRequest(data)) {
         detalles = {
@@ -408,6 +417,20 @@ export default function AddActivityModal({
     );
     return foundType?.des_actividad.toUpperCase() || "";
   };
+
+  const calculateDuration = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Calculate difference in days
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "1 día";
+    if (diffDays === 1) return "1 día";
+    return `${diffDays} días`;
+  };
+
   // Language selector component
   const renderLanguageSelector = () => (
     <div className="flex flex-col space-y-4 p-4 bg-gray-50 rounded-lg mb-4">
@@ -446,6 +469,15 @@ export default function AddActivityModal({
       </p>
     </div>
   );
+
+  // Add this to your utils/dateHelpers.ts
+  const formatLocalDate = (dateString: string) => {
+    const [year, month, day] = dateString.split("-");
+    // Create date at noon local time to avoid timezone issues
+    const date = new Date(Number(year), Number(month) - 1, Number(day), 12);
+    return format(date, "PPP", { locale: es });
+  };
+
   return (
     <div className="flex flex-col gap-y-4 mb-4">
       <Dialog open={open} onOpenChange={setOpen}>
@@ -550,115 +582,310 @@ export default function AddActivityModal({
                     <AlertCircle size={14} className="text-primary mr-2" />
                     Todos los campos son obligatorios
                   </div>
+
                   {/* Simple form without accordion */}
                   <div className="space-y-4">
-                    {activityType &&
-                      fieldsByActivityType[activityType]?.map((field) => (
-                        <div
-                          key={field}
-                          className="p-3 border rounded-md hover:border-primary transition-colors duration-200"
-                        >
+                    {/* Group fecha de inicio and fecha de fin for Field Trip */}
+                    {activityType === 1 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {/* Fecha de inicio */}
+                        <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
                           <div className="flex flex-col space-y-2">
                             <Label
-                              htmlFor={field}
+                              htmlFor="fechaIni"
                               className="flex items-center text-sm font-medium"
                             >
-                              {fieldIcons[field]}
-                              <span className="ml-2">{fieldNames[field]}</span>
+                              {fieldIcons.fechaIni}
+                              <span className="ml-2">
+                                {fieldNames.fechaIni}
+                              </span>
                               <span className="text-red-500 ml-1">*</span>
                             </Label>
-
-                            {field.includes("hora") ? (
-                              // Use our custom TimePicker for time fields
-                              <TimePicker
-                                fechaActividad={fechaActividad}
-                                id={field}
-                                value={watch(field) || ""}
-                                onChange={(value: string) =>
-                                  setValue(field, value, {
-                                    shouldValidate: true,
-                                  })
-                                }
-                                error={errors[field]?.message?.toString()}
-                              />
-                            ) : field.includes("fecha") ? (
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    id={field}
-                                    variant="outline"
-                                    className={cn(
-                                      "w-full justify-start text-left font-normal",
-                                      !(watch(field as keyof FormData)) && "text-muted-foreground",
-                                      errors[field as keyof FormData] && "border-red-500"
-                                    )}
-                                  >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {watch(field as keyof FormData) ? (
-                                      format(
-                                        new Date(String(watch(field as keyof FormData))),
-                                        "PPP",
-                                        { locale: es }
-                                      )
-                                    ) : (
-                                      <span>Seleccionar fecha</span>
-                                    )}
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
+                            <Popover
+                              open={fechaIniOpen}
+                              onOpenChange={setFechaIniOpen}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="fechaIni"
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !watch("fechaIni") &&
+                                      "text-muted-foreground",
+                                    errors.fechaIni && "border-red-500"
+                                  )}
                                 >
-                                  <Calendar
-                                    mode="single"
-                                    selected={
-                                      watch(field as keyof FormData)
-                                        ? new Date(String(watch(field as keyof FormData)))
-                                        : undefined
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {watch("fechaIni") ? (
+                                    formatLocalDate(watch("fechaIni"))
+                                  ) : (
+                                    <span>Seleccionar fecha</span>
+                                  )}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={
+                                    watch("fechaIni")
+                                      ? new Date(
+                                          `${watch("fechaIni")}T12:00:00`
+                                        )
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const isoDate = format(
+                                        date,
+                                        "yyyy-MM-dd"
+                                      );
+                                      setValue("fechaIni", isoDate, {
+                                        shouldValidate: true,
+                                      });
+                                      setFechaIniOpen(false); // This closes the popover
                                     }
-                                    onSelect={(date) => {
-                                      if (date) {
-                                        const isoDate = date
-                                          .toISOString()
-                                          .split("T")[0];
-                                        setValue(field, isoDate, {
-                                          shouldValidate: true,
-                                        });
-                                      }
-                                    }}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            ) : (
-                              <Input
-                                id={field}
-                                type="text"
-                                placeholder={`Ingrese ${fieldNames[
-                                  field
-                                ].toLowerCase()}`}
-                                {...register(field)}
-                                className={cn(
-                                  "w-full",
-                                  errors[field] &&
-                                    "border-red-500 focus:ring-red-500"
-                                )}
-                              />
-                            )}
-
-                            {errors[field] && !field.includes("hora") && (
+                                  }}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            {errors.fechaIni && (
                               <p className="text-red-500 text-xs flex items-center mt-1">
                                 <AlertCircle size={12} className="mr-1" />
-                                {errors[field]?.message?.toString()}
+                                {errors.fechaIni?.message?.toString()}
                               </p>
                             )}
                           </div>
                         </div>
-                      ))}
+
+                        {/* Fecha de finalización */}
+                        <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
+                          <div className="flex flex-col space-y-2">
+                            <Label
+                              htmlFor="fechaFin"
+                              className="flex items-center text-sm font-medium"
+                            >
+                              {fieldIcons.fechaFin}
+                              <span className="ml-2">
+                                {fieldNames.fechaFin}
+                              </span>
+                              <span className="text-red-500 ml-1">*</span>
+                            </Label>
+                            <Popover
+                              open={fechaFinOpen}
+                              onOpenChange={setFechaFinOpen}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="fechaFin"
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !watch("fechaFin") &&
+                                      "text-muted-foreground",
+                                    errors.fechaFin && "border-red-500"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {watch("fechaFin") ? (
+                                    formatLocalDate(watch("fechaFin"))
+                                  ) : (
+                                    <span>Seleccionar fecha</span>
+                                  )}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={
+                                    watch("fechaFin")
+                                      ? new Date(
+                                          `${watch("fechaFin")}T12:00:00`
+                                        )
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const isoDate = format(
+                                        date,
+                                        "yyyy-MM-dd"
+                                      );
+                                      setValue("fechaFin", isoDate, {
+                                        shouldValidate: true,
+                                      });
+                                      setFechaFinOpen(false); // This closes the popover
+                                    }
+                                  }}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            {errors.fechaFin && (
+                              <p className="text-red-500 text-xs flex items-center mt-1">
+                                <AlertCircle size={12} className="mr-1" />
+                                {errors.fechaFin?.message?.toString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Duration info panel */}
+                    {activityType === 1 &&
+                      watch("fechaIni") &&
+                      watch("fechaFin") && (
+                        <div className="p-3 border-l-4 border-primary bg-primary/5 rounded-md mb-4">
+                          <div className="flex items-center gap-2">
+                            <Clock size={16} className="text-primary" />
+                            <p className="text-sm">
+                              <span className="font-medium">
+                                Duración del viaje:
+                              </span>{" "}
+                              {calculateDuration(
+                                watch("fechaIni"),
+                                watch("fechaFin")
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Standard fields rendering */}
+                    {activityType &&
+                      fieldsByActivityType[activityType]?.map((field) => {
+                        // Skip fecha fields for activity type 1, as we're rendering them separately
+                        if (
+                          activityType === 1 &&
+                          (field === "fechaIni" || field === "fechaFin")
+                        ) {
+                          return null;
+                        }
+
+                        return (
+                          <div
+                            key={field}
+                            className="p-3 border rounded-md hover:border-primary transition-colors duration-200"
+                          >
+                            <div className="flex flex-col space-y-2">
+                              <Label
+                                htmlFor={field}
+                                className="flex items-center text-sm font-medium"
+                              >
+                                {fieldIcons[field]}
+                                <span className="ml-2">
+                                  {fieldNames[field]}
+                                </span>
+                                <span className="text-red-500 ml-1">*</span>
+                              </Label>
+                              {field.includes("hora") ? (
+                                // Use our custom TimePicker for time fields
+                                <TimePicker
+                                  fechaActividad={fechaActividad}
+                                  id={field}
+                                  value={watch(field) || ""}
+                                  onChange={(value: string) =>
+                                    setValue(field, value, {
+                                      shouldValidate: true,
+                                    })
+                                  }
+                                  error={errors[field]?.message?.toString()}
+                                />
+                              ) : field.includes("fecha") ? (
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      id={field}
+                                      variant="outline"
+                                      className={cn(
+                                        "w-full justify-start text-left font-normal",
+                                        !watch(field as keyof FormData) &&
+                                          "text-muted-foreground",
+                                        errors[field as keyof FormData] &&
+                                          "border-red-500"
+                                      )}
+                                    >
+                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      {watch(field as keyof FormData) ? (
+                                        format(
+                                          new Date(
+                                            String(
+                                              watch(field as keyof FormData)
+                                            )
+                                          ),
+                                          "PPP",
+                                          { locale: es }
+                                        )
+                                      ) : (
+                                        <span>Seleccionar fecha</span>
+                                      )}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-auto p-0"
+                                    align="start"
+                                  >
+                                    <Calendar
+                                      mode="single"
+                                      selected={
+                                        watch(field as keyof FormData)
+                                          ? new Date(
+                                              String(
+                                                watch(field as keyof FormData)
+                                              )
+                                            )
+                                          : undefined
+                                      }
+                                      onSelect={(date) => {
+                                        if (date) {
+                                          const isoDate = date
+                                            .toISOString()
+                                            .split("T")[0];
+                                          setValue(field, isoDate, {
+                                            shouldValidate: true,
+                                          });
+                                          setFechaFinOpen(false);
+                                        }
+                                      }}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              ) : (
+                                <Input
+                                  id={field}
+                                  type="text"
+                                  placeholder={`Ingrese ${fieldNames[
+                                    field
+                                  ].toLowerCase()}`}
+                                  {...register(field)}
+                                  className={cn(
+                                    "w-full",
+                                    errors[field] &&
+                                      "border-red-500 focus:ring-red-500"
+                                  )}
+                                />
+                              )}
+                              {errors[field] && !field.includes("hora") && (
+                                <p className="text-red-500 text-xs flex items-center mt-1">
+                                  <AlertCircle size={12} className="mr-1" />
+                                  {errors[field]?.message?.toString()}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 </form>
               </div>
-
               {/* Fixed footer */}
               <DialogFooter className="flex-shrink-0 border-t pt-4 mt-auto justify-between">
                 <Button variant="outline" onClick={handleBack} type="button">

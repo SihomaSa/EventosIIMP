@@ -530,18 +530,3 @@ export default function EditActivityDetailModal({
     </Dialog>
   );
 }
-
-// Add this function to your services file if it doesn't exist
-// export const updateActivityDetail = async (
-//   activityId: number,
-//   updatedData: Partial<ActivityDetail>
-// ): Promise<ActivityDetail> => {
-//   const response = await fetch(`${API_URL}/activities/${activityId}`, {
-//     method: "PUT",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(updatedData),
-//   });
-//
-//   if (!response.ok) throw new Error("Error al actualizar la actividad");
-//   return response.json();
-// };
