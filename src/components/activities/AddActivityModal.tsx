@@ -55,16 +55,16 @@ import { es } from "date-fns/locale";
 import { TimePicker } from "@/components/TimePicker";
 import { ActivityDay } from "@/types/activityTypes";
 
-interface EditActivityModalProps {
+interface AddActivityModalProps {
   activity: ActivityDay;
   onAdd: () => void;
   onClose: () => void;
 }
 
-export default function EditActivityModal({
+export default function AddActivityModal({
   activity,
   onAdd,
-}: EditActivityModalProps) {
+}: AddActivityModalProps) {
   const { fechaActividad } = activity;
   const [activityTypes, setActivityTypes] = useState<ActivityType[] | []>([]);
   const { selectedEvent } = useEventStore();
@@ -184,6 +184,7 @@ export default function EditActivityModal({
     });
     return z.object(schemaFields);
   };
+
   const schema = createDynamicSchema();
   type FormData = z.infer<typeof schema>;
   const {
@@ -197,6 +198,7 @@ export default function EditActivityModal({
     resolver: zodResolver(schema),
     mode: "onChange", // Validate on change for immediate feedback
   });
+
   const handleSelectActivity = (value: number) => {
     setActivityType(value);
     reset(); // Reset form fields when activity type changes
@@ -208,6 +210,7 @@ export default function EditActivityModal({
         setActivityTypes(data);
       } catch (err) {
         setError("Error al obtener las categorías de actividades");
+        console.log(err);
       } finally {
         setLoadingTypes(false);
       }
@@ -586,14 +589,14 @@ export default function EditActivityModal({
                                     variant="outline"
                                     className={cn(
                                       "w-full justify-start text-left font-normal",
-                                      !watch(field) && "text-muted-foreground",
-                                      errors[field] && "border-red-500"
+                                      !(watch(field as keyof FormData)) && "text-muted-foreground",
+                                      errors[field as keyof FormData] && "border-red-500"
                                     )}
                                   >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {watch(field) ? (
+                                    {watch(field as keyof FormData) ? (
                                       format(
-                                        new Date(String(watch(field))),
+                                        new Date(String(watch(field as keyof FormData))),
                                         "PPP",
                                         { locale: es }
                                       )
@@ -609,8 +612,8 @@ export default function EditActivityModal({
                                   <Calendar
                                     mode="single"
                                     selected={
-                                      watch(field)
-                                        ? new Date(String(watch(field)))
+                                      watch(field as keyof FormData)
+                                        ? new Date(String(watch(field as keyof FormData)))
                                         : undefined
                                     }
                                     onSelect={(date) => {

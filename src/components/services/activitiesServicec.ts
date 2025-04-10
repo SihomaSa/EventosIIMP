@@ -15,7 +15,7 @@ const API_POST_URL =
 const API_PUT_URL =
   "https://nl62yyb5a0.execute-api.us-east-1.amazonaws.com/web/activity/event";
 const API_DELETE_URL =
-  "https://nl62yyb5a0.execute-api.us-east-1.amazonaws.com/web/activity"; // Base URL for DELETE
+  "https://nl62yyb5a0.execute-api.us-east-1.amazonaws.com/web/activity";
 
 export const getActivityTypes = async (): Promise<ActivityType[]> => {
   const response = await fetch(API_GET_TYPE_URL);
@@ -52,6 +52,20 @@ export const updateSponsor = async (
   });
 
   if (!response.ok) throw new Error("Error al actualizar el auspiciador");
+  return response.json();
+};
+
+export const updateActivityDetail = async (
+  activityId: number,
+  updatedData: Partial<ActivityDetail>
+): Promise<ActivityDetail> => {
+  const response = await fetch(`${API_PUT_URL}/${activityId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updatedData),
+  });
+
+  if (!response.ok) throw new Error("Error al actualizar la actividad");
   return response.json();
 };
 

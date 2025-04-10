@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, useCallback, useMemo } from "react";
 import { CalendarDays, Plus, RefreshCw, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -15,68 +15,134 @@ export default function Expositors() {
   const [activities, setActivities] = useState<ActivityDay[] | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(
+    new Date().toLocaleTimeString()
+  );
 
-  const fetchActivities = async () => {
+  // Memoize the fetchActivities function to prevent unnecessary re-renders
+  const fetchActivities = useCallback(async () => {
     try {
       setIsRefreshing(true);
       const data = await getActivities();
-      console.log(data, "<= data");
       setActivities(data);
       if (error) setError(null);
+      setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       setError("Error al obtener las actividades");
-      console.log(err);
+      console.error(err); // Using console.error instead of console.log for errors
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [error]);
 
+  // Only run effect when expositorsUpdated changes, not on every render
   useEffect(() => {
     fetchActivities();
-  }, [expositorsUpdated]);
+  }, [expositorsUpdated, fetchActivities]);
 
-  const handleChange = (field: keyof ActivityDetail, value: string) => {
-    setActivities(
-      (prev) =>
-        prev &&
-        prev.map((activity, index) =>
-          index === 0 ? { ...activity, [field]: value } : activity
-        )
-    );
-  };
+  // Optimize the handleChange function with useCallback
+  const handleChange = useCallback(
+    (field: keyof ActivityDetail, value: string) => {
+      setActivities(
+        (prev) =>
+          prev &&
+          prev.map((activity, index) =>
+            index === 0 ? { ...activity, [field]: value } : activity
+          )
+      );
+    },
+    []
+  );
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  };
+  }, []);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     fetchActivities();
-  };
+  }, [fetchActivities]);
 
-  const filteredActivities = activities
-    ? activities.filter((activity) => {
-        const dateMatch = activity.fechaActividad
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+  // Optimize filtering with useMemo to avoid recomputing on every render
+  const filteredActivities = useMemo(() => {
+    if (!activities) return [];
 
-        const detailsMatch =
-          Array.isArray(activity.detalles) &&
-          activity.detalles.some((detail: ActivityDetail) => {
-            return Object.entries(detail)
-              .filter(([, value]) => value !== null && value !== undefined)
-              .some(([, value]) =>
-                String(value).toLowerCase().includes(searchTerm.toLowerCase())
-              );
-          });
+    return activities.filter((activity) => {
+      if (!searchTerm) return true;
 
-        return dateMatch || detailsMatch;
-      })
-    : [];
+      const lowerSearchTerm = searchTerm.toLowerCase();
 
-  const handleActivityDeleted = () => {
-    setExpositorsUpdated((prev) => prev + 1); // This will trigger a refresh
-  };
+      // Check date match
+      if (
+        activity.fechaActividad &&
+        activity.fechaActividad.toLowerCase().includes(lowerSearchTerm)
+      ) {
+        return true;
+      }
+
+      // Check details match
+      if (Array.isArray(activity.detalles)) {
+        return activity.detalles.some(
+          (detail) =>
+            detail.titulo &&
+            detail.titulo.toLowerCase().includes(lowerSearchTerm)
+        );
+      }
+
+      return false;
+    });
+  }, [activities, searchTerm]);
+
+  const handleActivityDeleted = useCallback(() => {
+    setExpositorsUpdated((prev) => prev + 1);
+  }, []);
+
+  // Memoize empty state to avoid re-renders
+  const emptyState = useMemo(
+    () => (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <CalendarDays size={48} className="text-gray-300 mb-4" />
+        <h3 className="text-lg font-medium text-gray-700 mb-2">
+          No hay actividades
+        </h3>
+        <p className="text-gray-500 max-w-md mb-6">
+          {searchTerm
+            ? "No se encontraron actividades con ese término de búsqueda"
+            : "Aún no hay actividades programadas para este evento. Haga clic en el botón 'Agregar nueva fecha' para comenzar."}
+        </p>
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="cursor-pointer bg-primary hover:bg-primary/90"
+        >
+          <Plus size={16} className="mr-1" />
+          Agregar nueva fecha
+        </Button>
+      </div>
+    ),
+    [searchTerm]
+  );
+
+  // Memoize loading skeletons
+  const loadingSkeletons = useMemo(
+    () => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl bg-primary/30" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full bg-primary/30" />
+              <Skeleton className="h-4 w-3/4 bg-primary/30" />
+              <Skeleton className="h-4 w-2/3 bg-primary/30" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-full bg-primary/30" />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+    []
+  );
 
   return (
     <div className="p-4 md:p-6 flex flex-col">
@@ -110,7 +176,7 @@ export default function Expositors() {
           >
             <RefreshCw
               size={16}
-              className={`${isRefreshing ? "animate-spin" : ""}`}
+              className={isRefreshing ? "animate-spin" : ""}
             />
             <span className="hidden md:inline">Actualizar</span>
           </Button>
@@ -144,50 +210,13 @@ export default function Expositors() {
       )}
 
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
-        {!loading && filteredActivities.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CalendarDays size={48} className="text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">
-              No hay actividades
-            </h3>
-            <p className="text-gray-500 max-w-md mb-6">
-              {searchTerm
-                ? "No se encontraron actividades con ese término de búsqueda"
-                : "Aún no hay actividades programadas para este evento. Haga clic en el botón 'Agregar nueva fecha' para comenzar."}
-            </p>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="cursor-pointer bg-primary hover:bg-primary/90"
-            >
-              <Plus size={16} className="mr-1" />
-              Agregar nueva fecha
-            </Button>
-          </div>
-        )}
-
-        {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex flex-col space-y-3">
-                <Skeleton className="h-[125px] w-full rounded-xl bg-primary/30" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full bg-primary/30" />
-                  <Skeleton className="h-4 w-3/4 bg-primary/30" />
-                  <Skeleton className="h-4 w-2/3 bg-primary/30" />
-                </div>
-                <div className="space-y-2">
-                  <Skeleton className="h-7 w-full bg-primary/30" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
+        {!loading && filteredActivities.length === 0 && emptyState}
+        {loading && loadingSkeletons}
         {!loading && filteredActivities.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredActivities.map((activity, index) => (
               <ActivityDayCard
-                key={index}
+                key={`activity-${index}-${activity.fechaActividad}`}
                 activity={activity}
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
@@ -206,9 +235,7 @@ export default function Expositors() {
               }`
             : ""}
         </span>
-        <span className="text-xs">
-          Última actualización: {new Date().toLocaleTimeString()}
-        </span>
+        <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
       {/* Modal would go here */}

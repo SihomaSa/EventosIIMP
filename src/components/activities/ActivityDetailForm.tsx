@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { deleteActivity } from "@/components/services/activitiesServicec";
+import EditActivityDetailModal from "./EditActivityDetailModal";
 
 interface ActivityDetailFormProps {
   details: ActivityDetail;
@@ -33,12 +34,13 @@ interface ActivityDetailFormProps {
 const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
   details,
   onDelete,
-  // handleChange,
+  handleChange,
   handleSubmit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Format date from YYYY-MM-DD to DD/MM/YYYY
   const formatDate = (dateString: string | null) => {
@@ -64,6 +66,10 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
       console.error("Error al eliminar actividad:", error);
       return Promise.reject(error);
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -334,6 +340,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
               </Button>
               <Button
                 size="sm"
+                onClick={handleEdit}
                 className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
               >
                 <Edit size={14} />
@@ -343,6 +350,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
           </CollapsibleContent>
         </Card>
       </Collapsible>
+
       <ConfirmDeleteDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -351,6 +359,18 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
           details.titulo || details.desTipoActividad
         }"`}
       />
+
+      {/* Edit modal */}
+      {isEditModalOpen && (
+        <EditActivityDetailModal
+          activityDetail={details}
+          onSave={() => {
+            onDelete();
+            setIsEditModalOpen(false);
+          }}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </>
   );
 };

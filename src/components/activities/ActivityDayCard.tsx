@@ -2,7 +2,7 @@ import React, { FormEvent } from "react";
 import { ActivityDay, ActivityDetail } from "@/types/activityTypes";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import ActivityDetailForm from "./ActivityDetailForm";
-import EditActivityModal from "./EditActivityModal";
+import AddActivityModal from "./AddActivityModal";
 
 interface ActivityDetailFormProps {
   activity: ActivityDay;
@@ -136,7 +136,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
             </div>
           )}
 
-          <EditActivityModal
+          <AddActivityModal
             activity={activity}
             onAdd={onActivityDeleted}
             onClose={() => {}}
