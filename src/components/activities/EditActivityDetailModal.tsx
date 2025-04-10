@@ -50,17 +50,18 @@ export default function EditActivityDetailModal({
   const [error, setError] = useState<string | null>(null);
   const { selectedEvent } = useEventStore();
   const [open, setOpen] = useState(true);
+  const [fechaIniOpen, setFechaIniOpen] = useState(false);
+  const [fechaFinOpen, setFechaFinOpen] = useState(false);
 
   // Get the date part of the activity (needed for TimePicker)
   const getActivityDate = (): string => {
-    // Try to get date from fechaIni, horaIni, or from fechaActividad
     if (activityDetail.fechaIni) {
       return activityDetail.fechaIni.split("T")[0];
     }
     if (activityDetail.horaIni && activityDetail.horaIni.includes("T")) {
       return activityDetail.horaIni.split("T")[0];
     }
-    return new Date().toISOString().split("T")[0]; // Fallback to today
+    return new Date().toISOString().split("T")[0];
   };
 
   // Extract idIdioma or use prefijoIdioma to determine language
@@ -69,43 +70,66 @@ export default function EditActivityDetailModal({
     if (activityDetail.idIdioma === "2") return "2";
     if (activityDetail.prefijoIdioma === "EN") return "1";
     if (activityDetail.prefijoIdioma === "SP") return "2";
-    return "2"; // Default to Spanish
+    return "2";
   };
 
   // Create a dynamic schema based on the activity fields
   const createSchema = () => {
     const schemaFields: Record<string, z.ZodTypeAny> = {};
 
-    // Add fields that exist in the activity detail
     if (activityDetail.titulo !== undefined) {
-      schemaFields.titulo = z.string().min(3, "El título es requerido y debe tener al menos 3 caracteres");
+      schemaFields.titulo = z
+        .string()
+        .min(3, "El título es requerido y debe tener al menos 3 caracteres");
     }
 
-    if (activityDetail.responsable !== undefined && activityDetail.responsable !== null) {
-      schemaFields.responsable = z.string().min(2, "El responsable es requerido");
+    if (
+      activityDetail.responsable !== undefined &&
+      activityDetail.responsable !== null
+    ) {
+      schemaFields.responsable = z
+        .string()
+        .min(2, "El responsable es requerido");
     }
 
     if (activityDetail.lugar !== undefined && activityDetail.lugar !== null) {
       schemaFields.lugar = z.string().min(2, "El lugar es requerido");
     }
 
-    if (activityDetail.fechaIni !== undefined && activityDetail.fechaIni !== null) {
-      schemaFields.fechaIni = z.string().min(1, "La fecha de inicio es requerida");
+    if (
+      activityDetail.fechaIni !== undefined &&
+      activityDetail.fechaIni !== null
+    ) {
+      schemaFields.fechaIni = z
+        .string()
+        .min(1, "La fecha de inicio es requerida");
     }
 
-    if (activityDetail.fechaFin !== undefined && activityDetail.fechaFin !== null) {
-      schemaFields.fechaFin = z.string().min(1, "La fecha de finalización es requerida");
+    if (
+      activityDetail.fechaFin !== undefined &&
+      activityDetail.fechaFin !== null
+    ) {
+      schemaFields.fechaFin = z
+        .string()
+        .min(1, "La fecha de finalización es requerida");
     }
 
     if (activityDetail.horaIni !== undefined) {
-      schemaFields.horaIni = z.string().min(1, "La hora de inicio es requerida");
+      schemaFields.horaIni = z
+        .string()
+        .min(1, "La hora de inicio es requerida");
     }
 
     if (activityDetail.horaFin !== undefined) {
-      schemaFields.horaFin = z.string().min(1, "La hora de finalización es requerida");
+      schemaFields.horaFin = z
+        .string()
+        .min(1, "La hora de finalización es requerida");
     }
 
-    if (activityDetail.duracion !== undefined && activityDetail.duracion !== null) {
+    if (
+      activityDetail.duracion !== undefined &&
+      activityDetail.duracion !== null
+    ) {
       schemaFields.duracion = z.string().min(1, "La duración es requerida");
     }
 
@@ -115,7 +139,6 @@ export default function EditActivityDetailModal({
   const schema = createSchema();
   type FormData = z.infer<typeof schema>;
 
-  // Set default values for the form
   const defaultValues: Partial<FormData> = {
     titulo: activityDetail.titulo || "",
     responsable: activityDetail.responsable || "",
@@ -139,7 +162,6 @@ export default function EditActivityDetailModal({
     mode: "onChange",
   });
 
-  // Field icons for visual cues
   const fieldIcons: Record<string, React.ReactNode> = {
     titulo: <Info size={16} className="text-primary" />,
     responsable: <User size={16} className="text-primary" />,
@@ -151,7 +173,6 @@ export default function EditActivityDetailModal({
     duracion: <Clock size={16} className="text-primary" />,
   };
 
-  // Field friendly names for labels
   const fieldNames: Record<string, string> = {
     titulo: "Título",
     responsable: "Responsable",
@@ -163,6 +184,25 @@ export default function EditActivityDetailModal({
     duracion: "Duración",
   };
 
+  const formatLocalDate = (dateString: string) => {
+    const [year, month, day] = dateString.split("-");
+    const date = new Date(Number(year), Number(month) - 1, Number(day), 12);
+    return format(date, "PPP", { locale: es });
+  };
+
+  const calculateDuration = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Calculate difference in days
+    const diffTime = end.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "1 día";
+    if (diffDays === 1) return "1 día";
+    return `${diffDays} días`;
+  };
+
   const onSubmit = async (data: FormData) => {
     if (!selectedEvent) return;
 
@@ -170,7 +210,6 @@ export default function EditActivityDetailModal({
       setLoading(true);
       setError(null);
 
-      // Create updated activity data
       const updatedActivity = {
         ...activityDetail,
         ...data,
@@ -201,7 +240,8 @@ export default function EditActivityDetailModal({
       <DialogContent className="max-w-md md:max-w-2xl w-full flex flex-col max-h-[90vh]">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>
-            Editar Actividad: {activityDetail.titulo || activityDetail.desTipoActividad}
+            Editar Actividad:{" "}
+            {activityDetail.titulo || activityDetail.desTipoActividad}
           </DialogTitle>
           <DialogDescription>
             Actualice los campos de la actividad.
@@ -240,7 +280,10 @@ export default function EditActivityDetailModal({
               {activityDetail.titulo !== undefined && (
                 <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
                   <div className="flex flex-col space-y-2">
-                    <Label htmlFor="titulo" className="flex items-center text-sm font-medium">
+                    <Label
+                      htmlFor="titulo"
+                      className="flex items-center text-sm font-medium"
+                    >
                       {fieldIcons.titulo}
                       <span className="ml-2">{fieldNames.titulo}</span>
                       <span className="text-red-500 ml-1">*</span>
@@ -266,167 +309,213 @@ export default function EditActivityDetailModal({
               )}
 
               {/* Responsable */}
-              {activityDetail.responsable !== undefined && activityDetail.responsable !== null && (
-                <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="responsable" className="flex items-center text-sm font-medium">
-                      {fieldIcons.responsable}
-                      <span className="ml-2">{fieldNames.responsable}</span>
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Input
-                      id="responsable"
-                      type="text"
-                      placeholder="Ingrese responsable"
-                      {...register("responsable")}
-                      className={cn(
-                        "w-full",
-                        errors.responsable && "border-red-500 focus:ring-red-500"
+              {activityDetail.responsable !== undefined &&
+                activityDetail.responsable !== null && (
+                  <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
+                    <div className="flex flex-col space-y-2">
+                      <Label
+                        htmlFor="responsable"
+                        className="flex items-center text-sm font-medium"
+                      >
+                        {fieldIcons.responsable}
+                        <span className="ml-2">{fieldNames.responsable}</span>
+                        <span className="text-red-500 ml-1">*</span>
+                      </Label>
+                      <Input
+                        id="responsable"
+                        type="text"
+                        placeholder="Ingrese responsable"
+                        {...register("responsable")}
+                        className={cn(
+                          "w-full",
+                          errors.responsable &&
+                            "border-red-500 focus:ring-red-500"
+                        )}
+                      />
+                      {errors.responsable && (
+                        <p className="text-red-500 text-xs flex items-center mt-1">
+                          <AlertCircle size={12} className="mr-1" />
+                          {errors.responsable.message}
+                        </p>
                       )}
-                    />
-                    {errors.responsable && (
-                      <p className="text-red-500 text-xs flex items-center mt-1">
-                        <AlertCircle size={12} className="mr-1" />
-                        {errors.responsable.message}
-                      </p>
-                    )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Lugar */}
-              {activityDetail.lugar !== undefined && activityDetail.lugar !== null && (
-                <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="lugar" className="flex items-center text-sm font-medium">
-                      {fieldIcons.lugar}
-                      <span className="ml-2">{fieldNames.lugar}</span>
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Input
-                      id="lugar"
-                      type="text"
-                      placeholder="Ingrese lugar"
-                      {...register("lugar")}
-                      className={cn(
-                        "w-full",
-                        errors.lugar && "border-red-500 focus:ring-red-500"
+              {activityDetail.lugar !== undefined &&
+                activityDetail.lugar !== null && (
+                  <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
+                    <div className="flex flex-col space-y-2">
+                      <Label
+                        htmlFor="lugar"
+                        className="flex items-center text-sm font-medium"
+                      >
+                        {fieldIcons.lugar}
+                        <span className="ml-2">{fieldNames.lugar}</span>
+                        <span className="text-red-500 ml-1">*</span>
+                      </Label>
+                      <Input
+                        id="lugar"
+                        type="text"
+                        placeholder="Ingrese lugar"
+                        {...register("lugar")}
+                        className={cn(
+                          "w-full",
+                          errors.lugar && "border-red-500 focus:ring-red-500"
+                        )}
+                      />
+                      {errors.lugar && (
+                        <p className="text-red-500 text-xs flex items-center mt-1">
+                          <AlertCircle size={12} className="mr-1" />
+                          {errors.lugar.message}
+                        </p>
                       )}
-                    />
-                    {errors.lugar && (
-                      <p className="text-red-500 text-xs flex items-center mt-1">
-                        <AlertCircle size={12} className="mr-1" />
-                        {errors.lugar.message}
-                      </p>
-                    )}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Fecha Inicio */}
-              {activityDetail.fechaIni !== undefined && activityDetail.fechaIni !== null && (
-                <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="fechaIni" className="flex items-center text-sm font-medium">
-                      {fieldIcons.fechaIni}
-                      <span className="ml-2">{fieldNames.fechaIni}</span>
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="fechaIni"
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !watch("fechaIni") && "text-muted-foreground",
-                            errors.fechaIni && "border-red-500"
-                          )}
+                )}
+              <div className="flex gap-4">
+                {/* Fecha Inicio */}
+                {activityDetail.fechaIni !== undefined &&
+                  activityDetail.fechaIni !== null && (
+                    <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200 w-full">
+                      <div className="flex flex-col space-y-2">
+                        <Label
+                          htmlFor="fechaIni"
+                          className="flex items-center text-sm font-medium"
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("fechaIni") ? (
-                            format(new Date(String(watch("fechaIni"))), "PPP", { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={watch("fechaIni") ? new Date(String(watch("fechaIni"))) : undefined}
-                          onSelect={(date) => {
-                            if (date) {
-                              const isoDate = date.toISOString().split("T")[0];
-                              setValue("fechaIni", isoDate, {
-                                shouldValidate: true,
-                              });
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {errors.fechaIni && (
-                      <p className="text-red-500 text-xs flex items-center mt-1">
-                        <AlertCircle size={12} className="mr-1" />
-                        {errors.fechaIni.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Fecha Fin */}
-              {activityDetail.fechaFin !== undefined && activityDetail.fechaFin !== null && (
-                <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="fechaFin" className="flex items-center text-sm font-medium">
-                      {fieldIcons.fechaFin}
-                      <span className="ml-2">{fieldNames.fechaFin}</span>
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="fechaFin"
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !watch("fechaFin") && "text-muted-foreground",
-                            errors.fechaFin && "border-red-500"
-                          )}
+                          {fieldIcons.fechaIni}
+                          <span className="ml-2">{fieldNames.fechaIni}</span>
+                          <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Popover
+                          open={fechaIniOpen}
+                          onOpenChange={setFechaIniOpen}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {watch("fechaFin") ? (
-                            format(new Date(String(watch("fechaFin"))), "PPP", { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={watch("fechaFin") ? new Date(String(watch("fechaFin"))) : undefined}
-                          onSelect={(date) => {
-                            if (date) {
-                              const isoDate = date.toISOString().split("T")[0];
-                              setValue("fechaFin", isoDate, {
-                                shouldValidate: true,
-                              });
-                            }
-                          }}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {errors.fechaFin && (
-                      <p className="text-red-500 text-xs flex items-center mt-1">
-                        <AlertCircle size={12} className="mr-1" />
-                        {errors.fechaFin.message}
-                      </p>
-                    )}
+                          <PopoverTrigger asChild>
+                            <Button
+                              id="fechaIni"
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !watch("fechaIni") && "text-muted-foreground",
+                                errors.fechaIni && "border-red-500"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {watch("fechaIni") ? (
+                                formatLocalDate(watch("fechaIni"))
+                              ) : (
+                                <span>Seleccionar fecha</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={
+                                watch("fechaIni")
+                                  ? new Date(`${watch("fechaIni")}T12:00:00`)
+                                  : undefined
+                              }
+                              onSelect={(date) => {
+                                if (date) {
+                                  const isoDate = format(date, "yyyy-MM-dd");
+                                  setValue("fechaIni", isoDate, {
+                                    shouldValidate: true,
+                                  });
+                                  setFechaIniOpen(false);
+                                }
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {errors.fechaIni && (
+                          <p className="text-red-500 text-xs flex items-center mt-1">
+                            <AlertCircle size={12} className="mr-1" />
+                            {errors.fechaIni.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Fecha Fin */}
+                {activityDetail.fechaFin !== undefined &&
+                  activityDetail.fechaFin !== null && (
+                    <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200 w-full">
+                      <div className="flex flex-col space-y-2">
+                        <Label
+                          htmlFor="fechaFin"
+                          className="flex items-center text-sm font-medium"
+                        >
+                          {fieldIcons.fechaFin}
+                          <span className="ml-2">{fieldNames.fechaFin}</span>
+                          <span className="text-red-500 ml-1">*</span>
+                        </Label>
+                        <Popover
+                          open={fechaFinOpen}
+                          onOpenChange={setFechaFinOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              id="fechaFin"
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !watch("fechaFin") && "text-muted-foreground",
+                                errors.fechaFin && "border-red-500"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {watch("fechaFin") ? (
+                                formatLocalDate(watch("fechaFin"))
+                              ) : (
+                                <span>Seleccionar fecha</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={
+                                watch("fechaFin")
+                                  ? new Date(`${watch("fechaFin")}T12:00:00`)
+                                  : undefined
+                              }
+                              onSelect={(date) => {
+                                if (date) {
+                                  const isoDate = format(date, "yyyy-MM-dd");
+                                  setValue("fechaFin", isoDate, {
+                                    shouldValidate: true,
+                                  });
+                                  setFechaFinOpen(false);
+                                }
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        {errors.fechaFin && (
+                          <p className="text-red-500 text-xs flex items-center mt-1">
+                            <AlertCircle size={12} className="mr-1" />
+                            {errors.fechaFin.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+              </div>
+              {/* Duration info panel */}
+              {activityDetail.fechaIni && activityDetail.fechaFin && (
+                <div className="p-3 border-l-4 border-primary bg-primary/5 rounded-md mb-4">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} className="text-primary" />
+                    <p className="text-sm">
+                      <span className="font-medium">Duración del viaje:</span>{" "}
+                      {calculateDuration(watch("fechaIni"), watch("fechaFin"))}
+                    </p>
                   </div>
                 </div>
               )}
@@ -435,7 +524,10 @@ export default function EditActivityDetailModal({
               {activityDetail.horaIni !== undefined && (
                 <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
                   <div className="flex flex-col space-y-2">
-                    <Label htmlFor="horaIni" className="flex items-center text-sm font-medium">
+                    <Label
+                      htmlFor="horaIni"
+                      className="flex items-center text-sm font-medium"
+                    >
                       {fieldIcons.horaIni}
                       <span className="ml-2">{fieldNames.horaIni}</span>
                       <span className="text-red-500 ml-1">*</span>
@@ -459,7 +551,10 @@ export default function EditActivityDetailModal({
               {activityDetail.horaFin !== undefined && (
                 <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
                   <div className="flex flex-col space-y-2">
-                    <Label htmlFor="horaFin" className="flex items-center text-sm font-medium">
+                    <Label
+                      htmlFor="horaFin"
+                      className="flex items-center text-sm font-medium"
+                    >
                       {fieldIcons.horaFin}
                       <span className="ml-2">{fieldNames.horaFin}</span>
                       <span className="text-red-500 ml-1">*</span>
@@ -480,33 +575,37 @@ export default function EditActivityDetailModal({
               )}
 
               {/* Duración */}
-              {activityDetail.duracion !== undefined && activityDetail.duracion !== null && (
-                <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
-                  <div className="flex flex-col space-y-2">
-                    <Label htmlFor="duracion" className="flex items-center text-sm font-medium">
-                      {fieldIcons.duracion}
-                      <span className="ml-2">{fieldNames.duracion}</span>
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <Input
-                      id="duracion"
-                      type="text"
-                      placeholder="Ingrese duración"
-                      {...register("duracion")}
-                      className={cn(
-                        "w-full",
-                        errors.duracion && "border-red-500 focus:ring-red-500"
+              {activityDetail.duracion !== undefined &&
+                activityDetail.duracion !== null && (
+                  <div className="p-3 border rounded-md hover:border-primary transition-colors duration-200">
+                    <div className="flex flex-col space-y-2">
+                      <Label
+                        htmlFor="duracion"
+                        className="flex items-center text-sm font-medium"
+                      >
+                        {fieldIcons.duracion}
+                        <span className="ml-2">{fieldNames.duracion}</span>
+                        <span className="text-red-500 ml-1">*</span>
+                      </Label>
+                      <Input
+                        id="duracion"
+                        type="text"
+                        placeholder="Ingrese duración"
+                        {...register("duracion")}
+                        className={cn(
+                          "w-full",
+                          errors.duracion && "border-red-500 focus:ring-red-500"
+                        )}
+                      />
+                      {errors.duracion && (
+                        <p className="text-red-500 text-xs flex items-center mt-1">
+                          <AlertCircle size={12} className="mr-1" />
+                          {errors.duracion.message}
+                        </p>
                       )}
-                    />
-                    {errors.duracion && (
-                      <p className="text-red-500 text-xs flex items-center mt-1">
-                        <AlertCircle size={12} className="mr-1" />
-                        {errors.duracion.message}
-                      </p>
-                    )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </form>
         </div>
