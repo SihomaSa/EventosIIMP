@@ -22,6 +22,14 @@ export interface ActivityDetail {
   horaIni?: string;
   horaFin?: string;
   idioma?: string | null;
+  estadoActi?: number;
+  fechaIni?: string | null;
+  idTipoActividad?: number;
+  titulo?: string;
+  fechaFin?: string | null;
+  prefijoIdioma?: string;
+  idIdioma?: string;
+  duracion?: string;
 }
 
 export interface ActivityDay {

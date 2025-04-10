@@ -21,7 +21,7 @@ export default function Expositors() {
       setIsRefreshing(true);
       const data = await getActivities();
       setActivities(data);
-			console.log(data)
+      console.log(data, "<=");
       if (error) setError(null);
     } catch (err) {
       setError("Error al obtener las actividades");
@@ -74,6 +74,10 @@ export default function Expositors() {
         return dateMatch || detailsMatch;
       })
     : [];
+
+  const handleActivityDeleted = () => {
+    setExpositorsUpdated((prev) => prev + 1); // This will trigger a refresh
+  };
 
   return (
     <div className="p-4 md:p-6 flex flex-col">
@@ -188,6 +192,7 @@ export default function Expositors() {
                 activity={activity}
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
+                onActivityDeleted={handleActivityDeleted}
               />
             ))}
           </div>
