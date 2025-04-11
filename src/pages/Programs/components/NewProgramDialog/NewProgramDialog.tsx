@@ -55,7 +55,7 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
           Crear programa
         </Button>
       </DialogTrigger>
-      <DialogContent className="!max-w-[960px]">
+      <DialogContent className="!max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Crear programa</DialogTitle>
         </DialogHeader>

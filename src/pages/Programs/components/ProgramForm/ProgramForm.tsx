@@ -110,7 +110,7 @@ const ProgramForm: FC<Props> = ({
           <>
             <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
             <MultiSelect
-              className="w-fit"
+              className="w-fit max-w-3xs"
               placeholder="Autores"
               selected={idAutor ? idAutor.split(",") : []}
               onChange={(selected) =>

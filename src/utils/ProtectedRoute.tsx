@@ -11,6 +11,8 @@ import { useAuth } from "@/Contexts/authContext";
 export default function ProtectedRoute() {
   const { user, loading } = useAuth();
 
+  return <Outlet />;
+
   if (loading) {
     return <div>Cargando...</div>; // Puedes personalizarlo con un spinner o pantalla de carga
   }

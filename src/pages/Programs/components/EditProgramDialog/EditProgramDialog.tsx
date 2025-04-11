@@ -56,7 +56,7 @@ const EditProgramDialog: FC<Props> = ({ programCategories, program }) => {
           Editar
         </Button>
       </DialogTrigger>
-      <DialogContent className="!max-w-[960px]">
+      <DialogContent className="!max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Editar programa</DialogTitle>
         </DialogHeader>

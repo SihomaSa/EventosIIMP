@@ -59,7 +59,7 @@ export function MultiSelect({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -76,7 +76,7 @@ export function MultiSelect({
               return (
                 <Badge key={value} variant="secondary" className="mr-1 mb-1">
                   {option?.label}
-                  <button
+                  <div
                     className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -90,7 +90,7 @@ export function MultiSelect({
                     onClick={() => handleUnselect(value)}
                   >
                     <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                  </button>
+                  </div>
                 </Badge>
               );
             })}
