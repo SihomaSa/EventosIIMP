@@ -117,9 +117,9 @@ export default function Expositors() {
   }, []);
 
   // Open modal for editing an activity
-  const handleEditActivity = useCallback((activity: ActivityDetail) => {
+  const handleEditActivity = useCallback((activity: ActivityDetail, activityDate: string) => {
     setSelectedActivityToEdit(activity);
-    setInitialDate(null);
+    setInitialDate(activityDate);
     setIsModalOpen(true);
   }, []);
 

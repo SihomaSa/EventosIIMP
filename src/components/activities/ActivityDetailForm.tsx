@@ -326,7 +326,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
               </form>
             </CardContent>
 
-            <CardFooter className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between pt-2">
+            <CardFooter className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between pt-2!">
               <Button
                 variant="outline"
                 size="sm"

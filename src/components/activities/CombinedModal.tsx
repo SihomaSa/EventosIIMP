@@ -462,19 +462,42 @@ export default memo(function CombinedModal({
 
   const calculateDuration = useCallback(
     (startDate: string, endDate: string): string => {
-      if (!startDate || !endDate) return "";
+      if (
+        !startDate ||
+        !endDate ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(endDate)
+      ) {
+        console.warn(
+          "Invalid input format for duration calculation:",
+          startDate,
+          endDate
+        );
+        return "Fechas inválidas";
+      }
       try {
-        const start = new Date(`${startDate}T12:00:00`);
-        const end = new Date(`${endDate}T12:00:00`);
-        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start)
+        const startUTC = new Date(`${startDate}T12:00:00Z`);
+        const endUTC = new Date(`${endDate}T12:00:00Z`);
+
+        if (isNaN(startUTC.getTime()) || isNaN(endUTC.getTime())) {
+          console.warn("Invalid dates after parsing:", startDate, endDate);
           return "Fechas inválidas";
+        }
+        if (endUTC < startUTC) {
+          return "Fecha final anterior a inicial";
+        }
 
-        const diffTime = end.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const diffTime = endUTC.getTime() - startUTC.getTime();
+        const msPerDay = 1000 * 60 * 60 * 24;
 
-        if (diffDays <= 0) return "Fechas inválidas";
-        if (diffDays === 1) return "1 día";
-        return `${diffDays} días`;
+        const dayDifference = Math.round(diffTime / msPerDay);
+
+        if (dayDifference === 0) {
+          return "1 día";
+        } else {
+          const inclusiveDays = dayDifference;
+          return `${inclusiveDays} días`;
+        }
       } catch (e) {
         console.error("Error calculating duration:", e);
         return "Error";
@@ -611,13 +634,25 @@ export default memo(function CombinedModal({
         }
 
         if (mode === MODAL_MODES.ACTIVITY_EDIT && editActivity) {
-          detalles.idActividad = editActivity.idActividad;
+          const formattedHoraIni = data.horaIni ? `${initialDate}T${data.horaIni}` : null;
+          const formattedHoraFin = data.horaFin ? `${initialDate}T${data.horaFin}` : null;
 
-          await updateActivityDetail({
-            ...detalles,
-            idTipoActividad: activityType,
-            fechaActividad: selectedDate,
-          });
+          detalles.idDetalleAct = editActivity.idDetalleAct;
+
+          detalles.horaIni = formattedHoraIni;
+          detalles.horaFin = formattedHoraFin;
+
+          const updateActivityDet = [
+            {
+              fechaActividad: initialDate,
+              idEvento: selectedEvent.idEvent,
+              idTipoActividad: activityType,
+              idActividad: editActivity.idActividad,
+              detalles: [detalles],
+            },
+          ];
+
+          await updateActivityDetail(updateActivityDet);
           toast("✅ La actividad ha sido actualizada satisfactoriamente");
         } else if (mode === MODAL_MODES.ACTIVITY_ADD && selectedDate) {
           const newActivityDet = [
@@ -676,27 +711,13 @@ export default memo(function CombinedModal({
     return foundType?.des_actividad?.toUpperCase() || "";
   }, [activityType, selectedLanguage, activityTypes]);
 
-  const formatLocalDate = useCallback(
-    (dateString: string | null | undefined): string => {
-      if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-        return "";
-      }
-      try {
-        const [year, month, day] = dateString.split("-");
-        const date = new Date(
-          Date.UTC(Number(year), Number(month) - 1, Number(day))
-        );
-        if (isNaN(date.getTime())) {
-          return "";
-        }
-        return format(date, "PPP", { locale: es });
-      } catch (e) {
-        console.error("Error formatting local date:", dateString, e);
-        return "";
-      }
-    },
-    []
-  );
+  const formatLocalDate = useCallback((dateString: string) => {
+    if (!dateString) return "";
+
+    const [year, month, day] = dateString.split("-");
+    const date = new Date(Number(year), Number(month) - 1, Number(day), 12);
+    return format(date, "PPP", { locale: es });
+  }, []);
 
   const renderLanguageSelector = useMemo(
     () => (
@@ -1092,7 +1113,6 @@ export default memo(function CombinedModal({
   }, [
     activityType,
     errors,
-    setValue,
     control,
     register,
     watch,

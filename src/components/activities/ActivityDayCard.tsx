@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 interface ActivityDayCardProps {
   activity: ActivityDay;
   onActivityDeleted: () => void;
-  onEditActivity: (activity: ActivityDetail) => void;
+  onEditActivity: (activity: ActivityDetail, date: string) => void;
   onAddActivity: () => void;
   handleChange: (field: keyof ActivityDetail, value: string) => void;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -40,20 +40,26 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
     return meses[+date.split("-")[1] - 1];
   };
 
-  const detalles: ActivityDetail[] = Array.isArray(activity.detalles) ? activity.detalles : [];
+  const detalles: ActivityDetail[] = Array.isArray(activity.detalles)
+    ? activity.detalles
+    : [];
 
   const englishActivities: ActivityDetail[] = detalles.filter(
-    (detail: ActivityDetail) => detail.idIdioma === "1" || detail.prefijoIdioma === "EN"
+    (detail: ActivityDetail) =>
+      detail.idIdioma === "1" || detail.prefijoIdioma === "EN"
   );
 
   const spanishActivities: ActivityDetail[] = detalles.filter(
-    (detail: ActivityDetail) => detail.idIdioma === "2" || detail.prefijoIdioma === "SP"
+    (detail: ActivityDetail) =>
+      detail.idIdioma === "2" || detail.prefijoIdioma === "SP"
   );
 
   const otherActivities: ActivityDetail[] = detalles.filter(
     (detail: ActivityDetail) =>
-      (detail.idIdioma !== "1" && detail.idIdioma !== "2") &&
-      (detail.prefijoIdioma !== "EN" && detail.prefijoIdioma !== "SP")
+      detail.idIdioma !== "1" &&
+      detail.idIdioma !== "2" &&
+      detail.prefijoIdioma !== "EN" &&
+      detail.prefijoIdioma !== "SP"
   );
 
   return (
@@ -67,12 +73,14 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
           {englishActivities.length > 0 && spanishActivities.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-y-3">
-                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">English</h3>
+                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
+                  English
+                </h3>
                 {englishActivities.map((det: ActivityDetail, index: number) => (
                   <ActivityDetailForm
                     key={`en-${index}`}
                     onDelete={onActivityDeleted}
-                    onEdit={() => onEditActivity(det)}
+                    onEdit={() => onEditActivity(det, activity.fechaActividad)}
                     details={det}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
@@ -81,12 +89,14 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
               </div>
 
               <div className="flex flex-col gap-y-3">
-                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Español</h3>
+                <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
+                  Español
+                </h3>
                 {spanishActivities.map((det: ActivityDetail, index: number) => (
                   <ActivityDetailForm
                     key={`es-${index}`}
                     onDelete={onActivityDeleted}
-                    onEdit={() => onEditActivity(det)}
+                    onEdit={() => onEditActivity(det, activity.fechaActividad)}
                     details={det}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
@@ -98,33 +108,45 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
             <>
               {englishActivities.length > 0 && (
                 <div className="flex flex-col gap-y-3">
-                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">English</h3>
-                  {englishActivities.map((det: ActivityDetail, index: number) => (
-                    <ActivityDetailForm
-                      key={`en-${index}`}
-                      onDelete={onActivityDeleted}
-                      onEdit={() => onEditActivity(det)}
-                      details={det}
-                      handleChange={handleChange}
-                      handleSubmit={handleSubmit}
-                    />
-                  ))}
+                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
+                    English
+                  </h3>
+                  {englishActivities.map(
+                    (det: ActivityDetail, index: number) => (
+                      <ActivityDetailForm
+                        key={`en-${index}`}
+                        onDelete={onActivityDeleted}
+                        onEdit={() =>
+                          onEditActivity(det, activity.fechaActividad)
+                        }
+                        details={det}
+                        handleChange={handleChange}
+                        handleSubmit={handleSubmit}
+                      />
+                    )
+                  )}
                 </div>
               )}
 
               {spanishActivities.length > 0 && (
                 <div className="flex flex-col gap-y-3">
-                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Español</h3>
-                  {spanishActivities.map((det: ActivityDetail, index: number) => (
-                    <ActivityDetailForm
-                      key={`es-${index}`}
-                      onDelete={onActivityDeleted}
-                      onEdit={() => onEditActivity(det)}
-                      details={det}
-                      handleChange={handleChange}
-                      handleSubmit={handleSubmit}
-                    />
-                  ))}
+                  <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
+                    Español
+                  </h3>
+                  {spanishActivities.map(
+                    (det: ActivityDetail, index: number) => (
+                      <ActivityDetailForm
+                        key={`es-${index}`}
+                        onDelete={onActivityDeleted}
+                        onEdit={() =>
+                          onEditActivity(det, activity.fechaActividad)
+                        }
+                        details={det}
+                        handleChange={handleChange}
+                        handleSubmit={handleSubmit}
+                      />
+                    )
+                  )}
                 </div>
               )}
             </>
@@ -132,12 +154,14 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
 
           {otherActivities.length > 0 && (
             <div className="flex flex-col gap-y-3 mt-4">
-              <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">Other Activities</h3>
+              <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
+                Other Activities
+              </h3>
               {otherActivities.map((det: ActivityDetail, index: number) => (
                 <ActivityDetailForm
                   key={`other-${index}`}
                   onDelete={onActivityDeleted}
-                  onEdit={() => onEditActivity(det)}
+                  onEdit={() => onEditActivity(det, activity.fechaActividad)}
                   details={det}
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
