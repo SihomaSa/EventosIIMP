@@ -1,25 +1,40 @@
-export interface SponsorType {
+import { LanguageType } from "./languageTypes";
+
+export interface SponsorType { //GET
 	idSponsor: number;
-	url: string;
-	descripcionIdioma: string;
+	prefijoIdioma: string;
+	foto: string;
 	categoria: string;
 	nombre: string;
-	foto: string;
-	prefijoIdioma: string;
-}
-
-export interface NewSponsorType {
-	descripcion: string;
-	foto: string;
 	url: string;
-	categoria: string;
-	idioma: string;
+	descripcionIdioma: string;
 }
-export interface NewSponsorRequestType {
-	descripcion: string;
-	foto: string;
+export interface NewSponsorRequestType {//POST
+    descripcion: string;
+    foto: string;
 	url: string;
 	idEvento: string;
 	categoria: string;
-	idioma: string;
+    idioma: LanguageType;
+  }
+
+  export interface UpdateSponsorRequestType {  //PUT
+	descripcion: string;
+	foto: string;
+	url: string;
+	idEvento:string ;
+	categoria: string;
+	idioma: LanguageType;
+	estado: string;
+	idSponsor: number;
+  }
+
+
+  export interface NewSponsorType {
+	idEvento: number;
+	descripcion: string;
+	foto: string;
+	url: string;
+	categoria: string;
+	idioma: LanguageType;
 }

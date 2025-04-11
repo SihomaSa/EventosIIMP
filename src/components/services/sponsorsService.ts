@@ -1,4 +1,5 @@
-import { SponsorType,NewSponsorRequestType } from "@/types/sponsorTypes";  // NewSponsorType, 
+
+import { SponsorType,NewSponsorRequestType, UpdateSponsorRequestType} from "@/types/sponsorTypes";  // NewSponsorType, 
 
 const API_GET_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event/1";
 const API_POST_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
@@ -11,25 +12,25 @@ export const getSponsors = async (): Promise<SponsorType[]> => {
   return response.json();
 };
 
-export const createSponsor = async (newAd: NewSponsorRequestType): Promise<SponsorType> => {
+export const createSponsor = async (newSponsor:NewSponsorRequestType): Promise<SponsorType> => {
   const response = await fetch(API_POST_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newAd),
+    body: JSON.stringify(newSponsor),
   });
 
-  if (!response.ok) throw new Error("Error al crear el auspiciador");
+  if (!response.ok) throw new Error("Error al crear el publicidad");
   return response.json();
 };
 
-export const updateSponsor = async (updatedAd: NewSponsorRequestType): Promise<SponsorType> => {
+export const updateSponsors = async (updatedSponsor: UpdateSponsorRequestType): Promise<SponsorType> => {
   const response = await fetch(API_PUT_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedAd),
+    body: JSON.stringify(updatedSponsor),
   });
 
-  if (!response.ok) throw new Error("Error al actualizar el auspiciador");
+  if (!response.ok) throw new Error("Error al actualizar el publicidad");
   return response.json();
 };
 

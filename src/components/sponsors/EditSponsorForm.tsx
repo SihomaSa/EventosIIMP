@@ -1,21 +1,16 @@
-import { useForm } from "react-hook-form";
+// EditSponsorForm.tsx
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "../ui/card";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { NewSponsorRequestType } from "@/types/sponsorTypes";
-import { createSponsor } from "../services/sponsorsService";
-import { useEventStore } from "@/stores/eventStore";
-import { fileToBase64 } from "@/utils/fileToBase64";
-import { Loader2 } from "lucide-react";
-import { LanguageType } from "@/types/languageTypes";
-import { useEffect, useState } from "react";
-import { getSponsorCategories } from "../services/sponsorCategoriesService";
-import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
-import { ImageInput } from "../ImageInput";
+import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Select,
 	SelectContent,
@@ -24,10 +19,18 @@ import {
 	SelectLabel,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { toast } from "sonner";
+} from "@/components/ui/select";
 
-// ✅ Esquema de validación con Zod
+import { ImageInput } from "@/components/ImageInput";
+import { createSponsor } from "../services/sponsorsService";
+import { getSponsorCategories } from "../services/sponsorCategoriesService";
+import { useEventStore } from "@/stores/eventStore";
+import { fileToBase64 } from "@/utils/fileToBase64";
+
+import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
+import { LanguageType } from "@/types/languageTypes";
+
+// 🧠 Zod Schema
 const SponsorSchema = z.object({
 	descripcion: z.string().min(1, "El nombre es obligatorio"),
 	foto: z.instanceof(File, { message: "Debe seleccionar una imagen válida" }),
@@ -38,7 +41,6 @@ const SponsorSchema = z.object({
 	}),
 });
 
-// ✅ Tipo basado en Zod
 type SponsorFormValues = z.infer<typeof SponsorSchema>;
 
 export default function EditSponsorForm({
@@ -49,6 +51,7 @@ export default function EditSponsorForm({
 	onClose: () => void;
 }) {
 	const { selectedEvent } = useEventStore();
+
 	const {
 		register,
 		handleSubmit,
@@ -56,115 +59,102 @@ export default function EditSponsorForm({
 		reset,
 		setValue,
 		watch,
+		control,
 	} = useForm<SponsorFormValues>({
 		resolver: zodResolver(SponsorSchema),
 		defaultValues: {
 			descripcion: "",
 			foto: undefined,
 			url: "",
-			categoria: "colaborador",
+			categoria: "",
 			idioma: "2",
 		},
 	});
 
 	const [preview, setPreview] = useState<string | null>(null);
 	const [fileName, setFileName] = useState<string | null>(null);
-	const [sponsorCategories, setSponsorCategories] = useState<
-		SponsorCategoryType[] | null
-	>(null);
+	const [sponsorCategories, setSponsorCategories] = useState<SponsorCategoryType[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [language, setlanguage] = useState("2");
-	const [filteredCategories, setFilteredCategories] = useState<
-		SponsorCategoryType[] | null
-	>(null);
 
+	const idiomaSeleccionado = watch("idioma");
+
+	// 🚀 Cargar categorías
 	useEffect(() => {
 		(async () => {
 			try {
 				const data = await getSponsorCategories();
 				setSponsorCategories(data || []);
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			} catch (err) {
-				setError("Error al obtener las categorías de auspiciadores");
 			} finally {
 				setLoading(false);
 			}
 		})();
 	}, []);
-	
-	useEffect(() => {
-		setFilteredCategories(
-			sponsorCategories?.filter((cat) => cat.idIdioma === language) || []
-		);
-	}, [language, sponsorCategories]);
 
-	const handleLanguageChange = (value: LanguageType) => {
-		setValue("idioma", value, { shouldValidate: true });
-		setlanguage(value);
-	};
+	const filteredCategories = sponsorCategories.filter(
+		(cat) => cat.idIdioma === idiomaSeleccionado
+	);
 
+	// 📦 Envío del formulario
 	const onSubmit = async (data: SponsorFormValues) => {
-		if (selectedEvent) {
-			try {
-				const base64Image = await fileToBase64(data.foto);
-				const newSponsor: NewSponsorRequestType = {
-					descripcion: data.descripcion,
-					foto: base64Image,
-					url: data.url,
-					idEvento: String(selectedEvent.idEvent),
-					categoria: String(data.categoria),
-					idioma: data.idioma,
-				};
+		const toastId = toast.loading("Procesando auspiciador...");
+		try {
+			if (!selectedEvent) throw new Error("No hay evento seleccionado");
 
-				await createSponsor(newSponsor);
-				toast("El auspiciador ha sido creada satisfactoriamente ✅");
-				onAdd();
-				reset(); // Resetea el formulario
-				onClose(); // Cierra el modal
-				setPreview(null);
-			} catch (error) {
-				console.error("Error al convertir imagen", error);
-			}
+			const base64Image = await fileToBase64(data.foto);
+
+			const sponsorData = {
+				descripcion: data.descripcion,
+				idEvento: String(selectedEvent.idEvent),
+				foto: base64Image,
+				url: data.url,
+				categoria: data.categoria,
+				idioma: data.idioma,
+			};
+
+			await createSponsor(sponsorData);
+
+			toast.success("Auspiciador creado exitosamente ✅", { id: toastId });
+			onAdd();
+			reset();
+			onClose();
+		} catch (error) {
+			console.error("Error en el proceso:", {
+				error,
+				inputData: { ...data, foto: "[BASE64_REDUCIDO]" },
+			});
+			toast.error("Error al crear auspiciador", { id: toastId });
 		}
 	};
-
-	// ERROR al cargar categorias
-	if (error) return <p className="text-red-500">{error}</p>;
 
 	return (
 		<Card>
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
 				<h2 className="text-xl">Editar Auspiciador</h2>
 
+				{/* Nombre */}
 				<div>
-					<Label htmlFor="nombre" className="mb-2">
-						Nombre
-					</Label>
-					<Input id="nombre" {...register("descripcion")} />
+					<Label htmlFor="descripcion">Nombre</Label>
+					<Input id="descripcion" {...register("descripcion")} />
 					{errors.descripcion && (
 						<p className="text-red-500 text-sm">{errors.descripcion.message}</p>
 					)}
 				</div>
 
+				{/* URL */}
 				<div>
-					<Label htmlFor="url" className="mb-2">
-						Enlace
-					</Label>
+					<Label htmlFor="url">Enlace</Label>
 					<Input id="url" {...register("url")} />
 					{errors.url && (
 						<p className="text-red-500 text-sm">{errors.url.message}</p>
 					)}
 				</div>
 
-				{/* Selector de idioma */}
+				{/* Idioma */}
 				<div>
-					<Label htmlFor="idioma" className="mb-2">
-						Idioma
-					</Label>
+					<Label>Idioma</Label>
 					<RadioGroup
-						onValueChange={handleLanguageChange}
-						value={watch("idioma")}
+						value={idiomaSeleccionado}
+						onValueChange={(value: LanguageType) => setValue("idioma", value)}
 					>
 						<div className="flex items-center space-x-2">
 							<RadioGroupItem value="1" id="EN" />
@@ -180,39 +170,49 @@ export default function EditSponsorForm({
 					)}
 				</div>
 
-				{/* Selector de categoría */}
+				{/* Categoría */}
 				<div>
-					<Label htmlFor="categoria" className="mb-2">
-						Categoría
-					</Label>
-					<Select {...register("categoria")} disabled={loading}>
-						<SelectTrigger className="w-55">
-							<SelectValue placeholder="Seleccione una categoría" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Categoría</SelectLabel>
-								{filteredCategories?.map(({ idCategoriaAus, descripcion }) => (
-									<SelectItem
-										key={idCategoriaAus}
-										value={String(idCategoriaAus)}
-									>
-										{descripcion}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+					<Label>Categoría</Label>
+					<Controller
+						name="categoria"
+						control={control}
+						render={({ field }) => (
+							<Select
+								{...field}
+								disabled={loading}
+								onValueChange={field.onChange}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Seleccione una categoría" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Categoría</SelectLabel>
+										{filteredCategories.map((cat) => (
+											<SelectItem
+												key={cat.idCategoriaAus}
+												value={String(cat.idCategoriaAus)}
+											>
+												{cat.descripcion}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						)}
+					/>
 					{loading && (
-						<div className="flex">
-							<Loader2 className="animate-spin inline-block mr-2" />
-							Cargando caterogías...
+						<div className="flex items-center text-sm text-muted-foreground mt-1">
+							<Loader2 className="animate-spin mr-2 h-4 w-4" />
+							Cargando categorías...
 						</div>
 					)}
 					{errors.categoria && (
 						<p className="text-red-500 text-sm">{errors.categoria.message}</p>
 					)}
 				</div>
+
+				{/* Imagen */}
 				<ImageInput
 					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
 					preview={preview}
@@ -220,6 +220,9 @@ export default function EditSponsorForm({
 					setPreview={setPreview}
 					setFileName={setFileName}
 				/>
+				{errors.foto && (
+					<p className="text-red-500 text-sm">{errors.foto.message}</p>
+				)}
 
 				<div className="flex justify-between">
 					<Button type="button" variant="outline" onClick={onClose}>
