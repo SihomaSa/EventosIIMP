@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User, setPersistence, browserLocalPersistence, } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
 
 interface AuthContextType {
@@ -15,7 +15,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true); // Nuevo estado para manejar carga
+  useEffect(() => {
+    let logoutTimer: NodeJS.Timeout;
 
+    if (user) {
+      logoutTimer = setTimeout(() => {
+        logout();
+      }, 21600000);
+    }
+
+    return () => clearTimeout(logoutTimer);
+  }, [user]);
   // Verifica si hay un usuario autenticado al cargar la app
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -36,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Iniciar sesión con email y contraseña
   const login = async (email: string, password: string) => {
+    await setPersistence(auth, browserLocalPersistence);
     await signInWithEmailAndPassword(auth, email, password);
   };
 
