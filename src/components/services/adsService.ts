@@ -32,6 +32,7 @@ export const updateAd = async (updatedAd: UpdateAdRequestType): Promise<AdType> 
   if (!response.ok) throw new Error("Error al actualizar el publicidad");
   return response.json();
 };
+
 export const deleteAd = async (adId: string): Promise<void> => {
   const response = await fetch(`${API_DELETE_URL}/${adId}`, {
     method: "DELETE",

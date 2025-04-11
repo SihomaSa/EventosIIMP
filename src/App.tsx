@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import { useEffect } from "react";
 import "./App.css";
 import { AuthProvider } from "./Contexts/authContext";
 import NotFound from "./pages/NotFound";
@@ -18,6 +19,8 @@ import { ThemeProvider } from "./Contexts/themeContext";
 import Activities from "./pages/Activities";
 import Programs from "./pages/Programs/page";
 
+
+
 function App() {
   return (
     <>
@@ -25,24 +28,25 @@ function App() {
         <AuthProvider>
           <EventProvider>
             <Router>
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/events" element={<Events />} />
-                  <Route path="/home" element={<HomeLayout />}>
-                    <Route path="sponsors" element={<Sponsors />} />
-                    <Route path="bulletins" element={<Bulletins />} />
-                    <Route path="press" element={<PressNotes />} />
-                    <Route path="ads" element={<Ads />} />
-                    <Route path="expositors" element={<Expositors />} />
-                    <Route path="activities" element={<Activities />} />
-                    <Route path="programs" element={<Programs />} />
+       
+                <Routes>
+                  <Route path="/" element={<Login />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/events" element={<Events />} />
+                    <Route path="/home" element={<HomeLayout />}>
+                      <Route path="sponsors" element={<Sponsors />} />
+                      <Route path="bulletins" element={<Bulletins />} />
+                      <Route path="press" element={<PressNotes />} />
+                      <Route path="ads" element={<Ads />} />
+                      <Route path="expositors" element={<Expositors />} />
+                      <Route path="activities" element={<Activities />} />
+                      <Route path="programs" element={<Programs />} />
+                    </Route>
+                    <Route path="/home" element={<Home children={undefined} />} />
                   </Route>
-                  <Route path="/home" element={<Home children={undefined} />} />
-                </Route>
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  <Route path="/about" element={<About />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
             </Router>
           </EventProvider>
         </AuthProvider>

@@ -6,12 +6,25 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  loading: boolean;
+  
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // Nuevo estado para manejar carga
+
+  // Verifica si hay un usuario autenticado al cargar la app
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false); // Desactiva carga cuando ya verificó sesión
+    });
+
+    return () => unsubscribe(); // Limpieza del listener
+  }, []);
 
   // Verifica si hay un usuario autenticado al cargar la app
   useEffect(() => {
@@ -32,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout,  loading}}>
       {children}
     </AuthContext.Provider>
   );
