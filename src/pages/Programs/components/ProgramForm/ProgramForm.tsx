@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ProgramDatePicker from "./components/ProgramDatePicker";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,14 @@ import {
 import { ProgramCategory } from "../../types/Program";
 import { ExpositorType } from "@/types/expositorTypes";
 import { MultiSelect } from "@/components/ui-custom/multi-select";
+import { getExpositors } from "@/components/services/expositorsService";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   form: UseFormReturn<ProgramFormType, undefined, ProgramFormType>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
-  expositors: ExpositorType[];
 };
 
 const ProgramForm: FC<Props> = ({
@@ -32,10 +33,27 @@ const ProgramForm: FC<Props> = ({
   onSubmit,
   disabled,
   programCategories,
-  expositors,
 }) => {
   const dateStr = watch("fechaPrograma");
   const details = watch("detalles");
+  const [loading, setLoading] = useState(false);
+  const [expositors, setExpositors] = useState<ExpositorType[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadExpositors() {
+      try {
+        setLoading(true);
+        const expositors = await getExpositors();
+        setExpositors(expositors);
+      } catch {
+        setError("Error al cargar expositores");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadExpositors();
+  }, []);
 
   function handleSetDate(newDate?: Date) {
     let parsedDate = "";
@@ -108,6 +126,16 @@ const ProgramForm: FC<Props> = ({
       </>
     );
   }
+
+  if (loading)
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <Skeleton className="h-6 w-1/3 bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+      </div>
+    );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -183,10 +211,10 @@ const ProgramForm: FC<Props> = ({
         Añadir horario
       </Button>
 
+      {error && <p className="bg-destructive">{error}</p>}
+
       <DialogFooter>
-        <Button type="submit" disabled>
-          Crear
-        </Button>
+        <Button type="submit">Crear</Button>
       </DialogFooter>
     </form>
   );

@@ -11,11 +11,10 @@ import {
 import ProgramForm from "../ProgramForm/ProgramForm";
 import useProgramForm from "../ProgramForm/hooks/useProgramFrom";
 import ProgramsService from "../../services/ProgramsService";
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { ProgramForm as ProgramFormType } from "../ProgramForm/types/ProgramForm";
 import { ProgramCategory } from "../../types/Program";
-import { getExpositors } from "@/components/services/expositorsService";
-import { ExpositorType } from "@/types/expositorTypes";
+import { useEventStore } from "@/stores/eventStore";
 
 type Props = {
   programCategories: ProgramCategory[];
@@ -25,27 +24,18 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
   const form = useProgramForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
-  const [expositors, setExpositors] = useState<ExpositorType[]>([]);
-
-  useEffect(() => {
-    async function loadExpositors() {
-      try {
-        setLoading(true);
-        const expositors = await getExpositors();
-        setExpositors(expositors);
-      } catch {
-        setError("Error al cargar expositores");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadExpositors();
-  }, []);
+  const { selectedEvent } = useEventStore();
 
   async function onSubmit(program: ProgramFormType) {
     try {
       setLoading(true);
-      await ProgramsService.addProgram(program);
+      if (!selectedEvent) {
+        return;
+      }
+      await ProgramsService.addProgram({
+        ...program,
+        idEvento: selectedEvent.idEvent,
+      });
     } catch {
       setError("Error al crear programa");
     } finally {
@@ -71,11 +61,10 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
         </DialogHeader>
         {!error && (
           <ProgramForm
-            programCategories={programCategories}
             form={form}
+            programCategories={programCategories}
             onSubmit={onSubmit}
             disabled={loading}
-            expositors={expositors}
           />
         )}
         {error && (
