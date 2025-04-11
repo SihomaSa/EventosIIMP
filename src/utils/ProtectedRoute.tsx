@@ -11,9 +11,9 @@ import { useAuth } from "@/Contexts/authContext";
 export default function ProtectedRoute() {
   const { user } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/" replace />;
-  }
+  // if (!user) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <Outlet />;
 }

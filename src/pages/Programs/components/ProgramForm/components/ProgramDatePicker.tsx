@@ -27,7 +27,7 @@ const ProgramDatePicker: FC<Props> = ({
   setDate,
 }) => {
   return (
-    <Popover>
+    <Popover modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -38,7 +38,7 @@ const ProgramDatePicker: FC<Props> = ({
             !date && "text-muted-foreground"
           )}
         >
-          <CalendarIcon />
+          <CalendarIcon className="h-4 w-4" />
           {date ? format(date, "PPP") : <span>Seleccionar fecha</span>}
         </Button>
       </PopoverTrigger>

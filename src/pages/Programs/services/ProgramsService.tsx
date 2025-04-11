@@ -24,6 +24,13 @@ const ProgramsService = {
     });
     if (!res.ok) throw new Error("Error adding program");
   },
+  updateProgram: async (program: ProgramForm) => {
+    const res = await fetch(`${BASE_URL}/web/program/event`, {
+      method: "PUT",
+      body: JSON.stringify([program]),
+    });
+    if (!res.ok) throw new Error("Error updating program");
+  },
 };
 
 export default ProgramsService;

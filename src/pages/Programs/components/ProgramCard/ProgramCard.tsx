@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/table";
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
+import EditProgramDialog from "../EditProgramDialog/EditProgramDialog";
 
 type Props = {
   program: Program;
@@ -37,10 +38,10 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
           <div className="w-[400px] sticky top-4 flex flex-col gap-2">
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
-              <Button size="sm" className="text-xs">
-                <Edit />
-                Editar
-              </Button>
+              <EditProgramDialog
+                program={program}
+                programCategories={programCategories}
+              />
               <Button variant="outline" size="sm" className="text-xs">
                 <Trash />
                 Eliminar
