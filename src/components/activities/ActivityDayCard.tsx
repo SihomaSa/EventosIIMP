@@ -2,18 +2,23 @@ import React, { FormEvent } from "react";
 import { ActivityDay, ActivityDetail } from "@/types/activityTypes";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import ActivityDetailForm from "./ActivityDetailForm";
-import AddActivityModal from "./AddActivityModal";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
 
-interface ActivityDetailFormProps {
+interface ActivityDayCardProps {
   activity: ActivityDay;
   onActivityDeleted: () => void;
+  onEditActivity: (activity: ActivityDetail) => void;
+  onAddActivity: () => void;
   handleChange: (field: keyof ActivityDetail, value: string) => void;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
-const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
+const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
   activity,
   onActivityDeleted,
+  onEditActivity,
+  onAddActivity,
   handleChange,
   handleSubmit,
 }) => {
@@ -67,6 +72,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
                   <ActivityDetailForm
                     key={`en-${index}`}
                     onDelete={onActivityDeleted}
+                    onEdit={() => onEditActivity(det)}
                     details={det}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
@@ -80,6 +86,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
                   <ActivityDetailForm
                     key={`es-${index}`}
                     onDelete={onActivityDeleted}
+                    onEdit={() => onEditActivity(det)}
                     details={det}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
@@ -96,6 +103,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
                     <ActivityDetailForm
                       key={`en-${index}`}
                       onDelete={onActivityDeleted}
+                      onEdit={() => onEditActivity(det)}
                       details={det}
                       handleChange={handleChange}
                       handleSubmit={handleSubmit}
@@ -111,6 +119,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
                     <ActivityDetailForm
                       key={`es-${index}`}
                       onDelete={onActivityDeleted}
+                      onEdit={() => onEditActivity(det)}
                       details={det}
                       handleChange={handleChange}
                       handleSubmit={handleSubmit}
@@ -128,6 +137,7 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
                 <ActivityDetailForm
                   key={`other-${index}`}
                   onDelete={onActivityDeleted}
+                  onEdit={() => onEditActivity(det)}
                   details={det}
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
@@ -136,11 +146,14 @@ const ActivityDayCard: React.FC<ActivityDetailFormProps> = ({
             </div>
           )}
 
-          <AddActivityModal
-            activity={activity}
-            onAdd={onActivityDeleted}
-            onClose={() => {}}
-          />
+          {/* Add Activity Button */}
+          <div
+            className="text-primary rounded-lg p-3 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow transition-all duration-200 hover:bg-primary/5 h-full"
+            onClick={onAddActivity}
+          >
+            <Plus size={24} className="mb-1" />
+            <h3 className="text-sm font-medium">Agregar Actividad</h3>
+          </div>
         </CardContent>
       </Card>
     </div>

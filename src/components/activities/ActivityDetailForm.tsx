@@ -22,11 +22,11 @@ import {
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { deleteActivity } from "@/components/services/activitiesServicec";
-import EditActivityDetailModal from "./EditActivityDetailModal";
 
 interface ActivityDetailFormProps {
   details: ActivityDetail;
   onDelete: () => void;
+  onEdit: () => void;
   handleChange: (field: keyof ActivityDetail, value: string) => void;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
@@ -34,13 +34,12 @@ interface ActivityDetailFormProps {
 const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
   details,
   onDelete,
-  handleChange,
+  onEdit,
   handleSubmit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Format date from YYYY-MM-DD to DD/MM/YYYY
   const formatDate = (dateString: string | null) => {
@@ -49,27 +48,27 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
     return `${day}/${month}/${year}`;
   };
 
-  // Format time from ISO string to HH:MM
   const formatTime = (timeString: string | null) => {
     if (!timeString) return "Sin asignar";
-    return timeString.includes("T")
-      ? timeString.split("T")[1].substring(0, 5)
-      : timeString.substring(0, 5);
+    return timeString;
   };
 
   const handleDelete = async () => {
     try {
+      setIsDeleting(true);
       await deleteActivity(details.idActividad);
       onDelete();
       return Promise.resolve();
     } catch (error) {
       console.error("Error al eliminar actividad:", error);
       return Promise.reject(error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const handleEdit = () => {
-    setIsEditModalOpen(true);
+  const handleEditClick = () => {
+    onEdit();
   };
 
   return (
@@ -117,7 +116,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
                       </Label>
                       <Input
                         id="titulo"
-                        value={details.titulo}
+                        value={details.titulo || ""}
                         disabled
                         className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
                       />
@@ -138,7 +137,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
                     </Label>
                     <Input
                       id="desTipoActividad"
-                      value={details.desTipoActividad}
+                      value={details.desTipoActividad || ""}
                       disabled
                       className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
                     />
@@ -327,7 +326,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
               </form>
             </CardContent>
 
-            <CardFooter className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between pt-2!">
+            <CardFooter className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between pt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -340,7 +339,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
               </Button>
               <Button
                 size="sm"
-                onClick={handleEdit}
+                onClick={handleEditClick}
                 className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
               >
                 <Edit size={14} />
@@ -359,18 +358,6 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
           details.titulo || details.desTipoActividad
         }"`}
       />
-
-      {/* Edit modal */}
-      {isEditModalOpen && (
-        <EditActivityDetailModal
-          activityDetail={details}
-          onSave={() => {
-            onDelete();
-            setIsEditModalOpen(false);
-          }}
-          onClose={() => setIsEditModalOpen(false)}
-        />
-      )}
     </>
   );
 };

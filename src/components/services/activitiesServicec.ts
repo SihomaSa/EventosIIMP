@@ -56,10 +56,9 @@ export const updateSponsor = async (
 };
 
 export const updateActivityDetail = async (
-  activityId: number,
   updatedData: Partial<ActivityDetail>
 ): Promise<ActivityDetail> => {
-  const response = await fetch(`${API_PUT_URL}/${activityId}`, {
+  const response = await fetch(`${API_PUT_URL}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updatedData),

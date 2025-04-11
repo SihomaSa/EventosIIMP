@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -10,10 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Generate hour options (00-23)
-const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0"));
-// Generate minute options (00-59)
-const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
+// Move these outside the component
+const HOURS = Array.from({ length: 24 }, (_, i) =>
+  i.toString().padStart(2, "0")
+);
+const MINUTES = Array.from({ length: 60 }, (_, i) =>
+  i.toString().padStart(2, "0")
+);
 
 interface TimePickerProps {
   fechaActividad?: string;
@@ -35,46 +38,53 @@ export function TimePicker({
   className,
   ...props
 }: TimePickerProps & React.HTMLAttributes<HTMLDivElement>) {
-  let hour = "";
-  let minute = "";
+  // Use state to track hour and minute values
+  const [hour, setHour] = useState<string>("");
+  const [minute, setMinute] = useState<string>("");
 
-  if (value) {
-    if (value.includes("T")) {
-      const timePart = value.split("T")[1];
-      [hour, minute] = timePart.split(":");
-    } else {
-      [hour, minute] = value.split(":");
+  // Parse time whenever value changes
+  useEffect(() => {
+    if (!value) {
+      setHour("");
+      setMinute("");
+      return;
     }
-  }
+
+    // Check if the value is in the expected format (HH:mm)
+    const [h, m] = value.split(":");
+
+    if (h && !isNaN(Number(h))) {
+      setHour(h.padStart(2, "0"));
+    }
+
+    if (m && !isNaN(Number(m))) {
+      setMinute(m.padStart(2, "0"));
+    }
+  }, [value]);
 
   const handleTimeChange = (type: "hour" | "minute", newValue: string) => {
-    let newHour = hour;
-    let newMinute = minute;
-
     if (type === "hour") {
-      newHour = newValue;
+      setHour(newValue);
+      if (newValue && minute) {
+        emitChange(newValue, minute);
+      } else if (newValue) {
+        emitChange(newValue, "00");
+      }
     } else {
-      newMinute = newValue;
+      setMinute(newValue);
+      if (hour && newValue) {
+        emitChange(hour, newValue);
+      } else if (newValue) {
+        emitChange("00", newValue);
+      }
     }
+  };
 
-    if (newHour && newMinute) {
-      if (fechaActividad) {
-        onChange(`${fechaActividad}T${newHour}:${newMinute}`);
-      } else {
-        onChange(`${newHour}:${newMinute}`);
-      }
-    } else if (newHour) {
-      if (fechaActividad) {
-        onChange(`${fechaActividad}T${newHour}:00`);
-      } else {
-        onChange(`${newHour}:00`);
-      }
-    } else if (newMinute) {
-      if (fechaActividad) {
-        onChange(`${fechaActividad}T00:${newMinute}`);
-      } else {
-        onChange(`00:${newMinute}`);
-      }
+  const emitChange = (h: string, m: string) => {
+    if (fechaActividad) {
+      onChange(`${fechaActividad}T${h}:${m}`);
+    } else {
+      onChange(`${h}:${m}`);
     }
   };
 
@@ -98,7 +108,7 @@ export function TimePicker({
                 <SelectValue placeholder="HH" />
               </SelectTrigger>
               <SelectContent>
-                {hours.map((h) => (
+                {HOURS.map((h) => (
                   <SelectItem key={h} value={h}>
                     {h}
                   </SelectItem>
@@ -118,7 +128,7 @@ export function TimePicker({
                 <SelectValue placeholder="MM" />
               </SelectTrigger>
               <SelectContent>
-                {minutes.map((m) => (
+                {MINUTES.map((m) => (
                   <SelectItem key={m} value={m}>
                     {m}
                   </SelectItem>
@@ -128,9 +138,7 @@ export function TimePicker({
           </div>
         </div>
       </div>
-      {error && (
-        <p className="text-red-500 text-xs mt-1">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 }

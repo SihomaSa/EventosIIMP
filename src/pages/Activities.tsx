@@ -6,11 +6,14 @@ import { getActivities } from "@/components/services/activitiesServicec";
 import { ActivityDay, ActivityDetail } from "../types/activityTypes";
 import ActivityDayCard from "@/components/activities/ActivityDayCard";
 import { Input } from "@/components/ui/input";
+import CombinedModal from "@/components/activities/CombinedModal";
 
 export default function Expositors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedActivityToEdit, setSelectedActivityToEdit] = useState<ActivityDetail | null>(null);
+  const [initialDate, setInitialDate] = useState<string | null>(null);
   const [expositorsUpdated, setExpositorsUpdated] = useState(0);
   const [activities, setActivities] = useState<ActivityDay[] | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,15 +66,18 @@ export default function Expositors() {
     fetchActivities();
   }, [fetchActivities]);
 
+  // Extract existing dates from activities for calendar disabling
+  const existingDates = useMemo(() => {
+    if (!activities) return [];
+    return activities.map(activity => activity.fechaActividad);
+  }, [activities]);
+
   // Optimize filtering with useMemo to avoid recomputing on every render
   const filteredActivities = useMemo(() => {
     if (!activities) return [];
-
     return activities.filter((activity) => {
       if (!searchTerm) return true;
-
       const lowerSearchTerm = searchTerm.toLowerCase();
-
       // Check date match
       if (
         activity.fechaActividad &&
@@ -79,7 +85,6 @@ export default function Expositors() {
       ) {
         return true;
       }
-
       // Check details match
       if (Array.isArray(activity.detalles)) {
         return activity.detalles.some(
@@ -88,13 +93,41 @@ export default function Expositors() {
             detail.titulo.toLowerCase().includes(lowerSearchTerm)
         );
       }
-
       return false;
     });
   }, [activities, searchTerm]);
 
+  // Called when an activity is deleted, edited, or added
   const handleActivityDeleted = useCallback(() => {
     setExpositorsUpdated((prev) => prev + 1);
+  }, []);
+
+  // Open modal for adding a new date
+  const handleAddDate = useCallback(() => {
+    setSelectedActivityToEdit(null);
+    setInitialDate(null);
+    setIsModalOpen(true);
+  }, []);
+
+  // Open modal for adding an activity to an existing date
+  const handleAddActivity = useCallback((date: string) => {
+    setSelectedActivityToEdit(null);
+    setInitialDate(date);
+    setIsModalOpen(true);
+  }, []);
+
+  // Open modal for editing an activity
+  const handleEditActivity = useCallback((activity: ActivityDetail) => {
+    setSelectedActivityToEdit(activity);
+    setInitialDate(null);
+    setIsModalOpen(true);
+  }, []);
+
+  // Close the modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedActivityToEdit(null);
+    setInitialDate(null);
   }, []);
 
   // Memoize empty state to avoid re-renders
@@ -111,7 +144,7 @@ export default function Expositors() {
             : "Aún no hay actividades programadas para este evento. Haga clic en el botón 'Agregar nueva fecha' para comenzar."}
         </p>
         <Button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={handleAddDate}
           className="cursor-pointer bg-primary hover:bg-primary/90"
         >
           <Plus size={16} className="mr-1" />
@@ -119,7 +152,7 @@ export default function Expositors() {
         </Button>
       </div>
     ),
-    [searchTerm]
+    [searchTerm, handleAddDate]
   );
 
   // Memoize loading skeletons
@@ -165,7 +198,6 @@ export default function Expositors() {
             className="pl-8 bg-gray-50 border-gray-200 w-full"
           />
         </div>
-
         <div className="flex gap-2 w-full md:w-auto">
           <Button
             variant="outline"
@@ -182,7 +214,7 @@ export default function Expositors() {
           </Button>
           <Button
             size="sm"
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={handleAddDate}
             className="cursor-pointer bg-primary hover:bg-primary/90 text-white ml-auto flex items-center gap-1"
           >
             <CalendarDays size={16} />
@@ -221,6 +253,8 @@ export default function Expositors() {
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
                 onActivityDeleted={handleActivityDeleted}
+                onEditActivity={handleEditActivity}
+                onAddActivity={() => handleAddActivity(activity.fechaActividad)}
               />
             ))}
           </div>
@@ -238,18 +272,18 @@ export default function Expositors() {
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
-      {/* Modal would go here */}
-      {/*
-      {isAddModalOpen && (
-        <AddActivityModal
-          onAdd={() => {
-            setExpositorsUpdated(prev => prev + 1);
-            setIsAddModalOpen(false);
-          }}
-          onClose={() => setIsAddModalOpen(false)}
-        />
-      )}
-      */}
+      {/* Combined Modal for Adding Date, Adding Activity, and Editing Activity */}
+      <CombinedModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAdd={() => {
+          setExpositorsUpdated(prev => prev + 1);
+          handleCloseModal();
+        }}
+        existingDates={existingDates}
+        editActivity={selectedActivityToEdit || undefined}
+        initialDate={initialDate || undefined}
+      />
     </div>
   );
 }
