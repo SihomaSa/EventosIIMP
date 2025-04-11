@@ -65,8 +65,14 @@ export default function UpdateAdsModal({
 	});
 
 	useEffect(() => {
-	  console.log("idioma", ad.prefijoIdioma)
-	}, [ad.prefijoIdioma]);
+		if (ad) {
+		  console.log("Cargando datos en el formulario:", ad);
+		  setValue("url", ad.url);
+		  setValue("idioma", ad.prefijoIdioma === "EN" ? "1" : "2");
+		  setValue("estado", ad.estado);
+		  setImagePreview(ad.foto || null);
+		}
+	  }, [ad, setValue]);
 	
 
 	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,30 +88,34 @@ export default function UpdateAdsModal({
 
 	const onSubmit = async (data: AdFormValues) => {
 		try {
-			const formFoto =
-				fotoUpdated !== 0 && data.foto
-					? await fileToBase64(data.foto)
-					: ad.foto;
-
-			const editAd: UpdateAdRequestType = {
-				foto: formFoto,
-				url: data.url,
-				idioma: data.idioma,
-				evento: String(ad.idEvento),
-				estado: String(data.estado),
-				idPublicidad: String(ad.idPublicidad),
-			};
-
-			await updateAd(editAd);
-			alert("Ad creado exitosamente"); // TODO cambiar por un toast
-			onUpdate();
-			reset(); // Resetea el formulario
-			onClose(); // Cierra el modal
-			setImagePreview(null);
+		  console.log("Datos antes de enviar:", data);
+	  
+		  const formFoto =
+			fotoUpdated !== 0 && data.foto
+			  ? await fileToBase64(data.foto)
+			  : ad.foto;
+	  
+		  const editAd: UpdateAdRequestType = {
+			idPublicidad: String(ad.idPublicidad), // 📌 Se asegura que `idPublicidad` está presente
+			foto: formFoto,
+			url: data.url,
+			idioma: data.idioma,
+			evento: String(ad.idEvento),
+			estado: String(data.estado),
+		  };
+	  
+		  console.log("Actualizando publicidad con:", editAd);
+		  await updateAd(editAd);
+	  
+		  alert("Publicidad actualizada correctamente");
+		  onUpdate();
+		  reset();
+		  onClose();
+		  setImagePreview(null);
 		} catch (error) {
-			console.error(error);
+		  console.error("Error al actualizar publicidad:", error);
 		}
-	};
+	  };
 
 	return (
 		<Dialog open={open} onOpenChange={onClose}>

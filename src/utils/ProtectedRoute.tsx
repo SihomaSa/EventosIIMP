@@ -9,11 +9,11 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/Contexts/authContext";
 
 export default function ProtectedRoute() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/" replace />;
+  if (loading) {
+    return <div>Cargando...</div>; // Puedes personalizarlo con un spinner o pantalla de carga
   }
 
-  return <Outlet />;
+  return user ? <Outlet /> : <Navigate to="/" />;
 }
