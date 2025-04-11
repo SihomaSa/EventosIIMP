@@ -2,7 +2,6 @@ import React, { FormEvent } from "react";
 import { ActivityDay, ActivityDetail } from "@/types/activityTypes";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import ActivityDetailForm from "./ActivityDetailForm";
-import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 
 interface ActivityDayCardProps {

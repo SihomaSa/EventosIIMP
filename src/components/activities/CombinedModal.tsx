@@ -101,50 +101,31 @@ const FIELDS_BY_ACTIVITY_TYPE = {
 };
 
 const ACTIVITY_TYPE_NAMES = {
-  "1": {
-    "1": "Field Trip",
-    "2": "Viaje de Campo",
-  },
-  "2": {
-    "1": "Short Course",
-    "2": "Curso Corto",
-  },
-  "3": {
-    "1": "Coffee Break",
-    "2": "Pausa Café",
-  },
-  "4": {
-    "1": "Lunch",
-    "2": "Almuerzo",
-  },
-  "5": {
-    "1": "Exhibition Ribbon Cutting",
-    "2": "Corte de Cinta de Exhibición",
-  },
-  "6": {
-    "1": "Closing",
-    "2": "Clausura",
-  },
-  "7": {
-    "1": "Others",
-    "2": "Otros",
-  },
-  "8": {
-    "1": "Congress Inauguration",
-    "2": "Inauguración del Congreso",
-  },
-  "9": {
-    "1": "Gratitude Dinner",
-    "2": "Cena de Agradecimiento",
-  },
-  "10": {
-    "1": "Magisterial Conference",
-    "2": "Conferencia Magistral",
-  },
-  "11": {
-    "1": "Round Table",
-    "2": "Mesa Redonda",
-  },
+  // Spanish (1-11)
+  "1": "VIAJE DE CAMPO",
+  "2": "CURSO CORTO",
+  "3": "PAUSA CAFE",
+  "4": "ALMUERZO",
+  "5": "CORTE DE CINTA DE EXHIBICION",
+  "6": "CLAUSURA",
+  "7": "OTROS",
+  "8": "INAUGURACIÓN DEL CONGRESO",
+  "9": "CENA DE AGRADECIMIENTO",
+  "10": "CONFERENCIA MAGISTRAL",
+  "11": "MESA REDONDA",
+
+  // English (12-22)
+  "12": "FIELD TRIP",
+  "13": "COURSE",
+  "14": "COFFEE BREAK",
+  "15": "LUNCH",
+  "16": "RIBBON CUTTING",
+  "17": "CLOSING",
+  "18": "OTHERS",
+  "19": "CONGRESS OPENING",
+  "20": "THANK YOU DINNER",
+  "21": "KEYNOTE CONFERENCE",
+  "22": "ROUND TABLE",
 };
 
 interface CombinedModalProps {
@@ -155,6 +136,13 @@ interface CombinedModalProps {
   editActivity?: ActivityDetail;
   initialDate?: string;
 }
+
+const getLocalizedActivityTypeId = (baseTypeId: number, language: string) => {
+  if (language === "1") {
+    return baseTypeId + 11;
+  }
+  return baseTypeId;
+};
 
 export default memo(function CombinedModal({
   isOpen,
@@ -361,23 +349,33 @@ export default memo(function CombinedModal({
         !formPopulatedRef.current &&
         previousEditActivityRef.current !== editActivity
       ) {
-        const typeId = Number(editActivity.idTipoActividad);
-        if (typeId && !isNaN(typeId) && FIELDS_BY_ACTIVITY_TYPE[typeId]) {
-          setActivityType(typeId);
+        let typeId = Number(editActivity.idTipoActividad);
 
-          if (editActivity.idIdioma) {
-            setSelectedLanguage(editActivity.idIdioma as "1" | "2");
-          } else if (editActivity.prefijoIdioma === "EN") {
-            setSelectedLanguage("1");
-          } else if (editActivity.prefijoIdioma === "SP") {
-            setSelectedLanguage("2");
-          }
+        // Determine if it's an English activity (ID 12-22)
+        let languageToSet = "2"; // Default to Spanish
+        let baseTypeId = typeId;
 
+        if (typeId >= 12 && typeId <= 22) {
+          // This is an English activity
+          languageToSet = "1";
+          // Convert to base type (1-11)
+          baseTypeId = typeId - 11;
+        }
+
+        // Set the language first
+        setSelectedLanguage(languageToSet as "1" | "2");
+
+        if (
+          baseTypeId &&
+          !isNaN(baseTypeId) &&
+          FIELDS_BY_ACTIVITY_TYPE[baseTypeId]
+        ) {
+          setActivityType(baseTypeId);
           setStep(2);
 
           setTimeout(() => {
-            if (editActivity && FIELDS_BY_ACTIVITY_TYPE[typeId]) {
-              const fields = FIELDS_BY_ACTIVITY_TYPE[typeId];
+            if (editActivity && FIELDS_BY_ACTIVITY_TYPE[baseTypeId]) {
+              const fields = FIELDS_BY_ACTIVITY_TYPE[baseTypeId];
               fields.forEach((field) => {
                 const rawValue = editActivity[field];
                 let valueToSet: string | undefined;
@@ -406,12 +404,13 @@ export default memo(function CombinedModal({
                   });
                 }
               });
+
               formPopulatedRef.current = true;
               previousEditActivityRef.current = editActivity;
             }
-          }, 150); // Increased timeout slightly
-        } else if (typeId && !isNaN(typeId)) {
-          console.warn(`Fields for activity type ${typeId} not found.`);
+          }, 150);
+        } else if (baseTypeId && !isNaN(baseTypeId)) {
+          console.warn(`Fields for activity type ${baseTypeId} not found.`);
         } else {
           console.error(
             "Invalid or missing activity type ID in editActivity:",
@@ -570,15 +569,21 @@ export default memo(function CombinedModal({
 
       try {
         setLoading(true);
+
+        const localizedActivityTypeId = getLocalizedActivityTypeId(
+          activityType,
+          selectedLanguage
+        );
+
         let detalles: any = {
-          // Use 'any' carefully or create a union type
           titulo: data.titulo,
           horaIni: data.horaIni,
           horaFin: data.horaFin,
           idIdioma: selectedLanguage as LanguageType,
         };
 
-        const requiredFields = FIELDS_BY_ACTIVITY_TYPE[activityType] || [];
+        detalles.desTipoActividad =
+          ACTIVITY_TYPE_NAMES[localizedActivityTypeId];
 
         if (activityType === 1 && isFieldTripRequest(data)) {
           const calculatedDuration = calculateDuration(
@@ -634,8 +639,12 @@ export default memo(function CombinedModal({
         }
 
         if (mode === MODAL_MODES.ACTIVITY_EDIT && editActivity) {
-          const formattedHoraIni = data.horaIni ? `${initialDate}T${data.horaIni}` : null;
-          const formattedHoraFin = data.horaFin ? `${initialDate}T${data.horaFin}` : null;
+          const formattedHoraIni = data.horaIni
+            ? `${initialDate}T${data.horaIni}`
+            : null;
+          const formattedHoraFin = data.horaFin
+            ? `${initialDate}T${data.horaFin}`
+            : null;
 
           detalles.idDetalleAct = editActivity.idDetalleAct;
 
@@ -646,7 +655,7 @@ export default memo(function CombinedModal({
             {
               fechaActividad: initialDate,
               idEvento: selectedEvent.idEvent,
-              idTipoActividad: activityType,
+              idTipoActividad: localizedActivityTypeId,
               idActividad: editActivity.idActividad,
               detalles: [detalles],
             },
@@ -659,7 +668,7 @@ export default memo(function CombinedModal({
             {
               fechaActividad: selectedDate,
               idEvento: selectedEvent.idEvent,
-              idTipoActividad: activityType,
+              idTipoActividad: localizedActivityTypeId,
               detalles: [detalles],
             },
           ];
@@ -702,9 +711,14 @@ export default memo(function CombinedModal({
 
   const getCurrentActivityTypeName = useMemo(() => {
     if (!activityType) return "";
-    if (ACTIVITY_TYPE_NAMES[activityType]?.[selectedLanguage]) {
-      return ACTIVITY_TYPE_NAMES[activityType][selectedLanguage].toUpperCase();
-    }
+    const localizedTypeId = getLocalizedActivityTypeId(
+      activityType,
+      selectedLanguage
+    );
+
+    const activityName = ACTIVITY_TYPE_NAMES[localizedTypeId];
+    if (activityName) return activityName.toUpperCase();
+
     const foundType = activityTypes.find(
       (type) => type.idTipoActividad === activityType
     );
@@ -805,29 +819,34 @@ export default memo(function CombinedModal({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {activityTypes.map((option) => {
+          const baseTypeId = option.idTipoActividad;
+
+          if (baseTypeId < 1 || baseTypeId > 11) return null;
+
           const activityName =
-            ACTIVITY_TYPE_NAMES[option.idTipoActividad]?.[selectedLanguage];
+            ACTIVITY_TYPE_NAMES[
+              getLocalizedActivityTypeId(baseTypeId, selectedLanguage)
+            ];
+
           if (!activityName) return null;
 
           return (
             <Button
-              key={option.idTipoActividad}
-              variant={
-                activityType === option.idTipoActividad ? "default" : "outline"
-              }
+              key={baseTypeId}
+              variant={activityType === baseTypeId ? "default" : "outline"}
               className={cn(
                 "text-xs sm:text-sm py-2 px-2 h-auto text-center break-words whitespace-normal",
-                activityType === option.idTipoActividad
+                activityType === baseTypeId
                   ? "bg-primary text-white"
                   : "hover:bg-primary/10",
                 mode === MODAL_MODES.ACTIVITY_EDIT &&
-                  activityType !== option.idTipoActividad &&
+                  activityType !== baseTypeId &&
                   "opacity-50 cursor-not-allowed"
               )}
               onClick={() => {
                 if (mode !== MODAL_MODES.ACTIVITY_EDIT) {
                   // Allow selection only if not editing
-                  handleSelectActivity(option.idTipoActividad);
+                  handleSelectActivity(baseTypeId);
                 }
               }}
               disabled={mode === MODAL_MODES.ACTIVITY_EDIT}
