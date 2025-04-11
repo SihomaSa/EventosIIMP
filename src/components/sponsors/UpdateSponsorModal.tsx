@@ -1,116 +1,179 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SponsorType } from "@/types/sponsorTypes";
+import { AdType, UpdateAdRequestType } from "@/types/adTypes";
+import { LanguageType } from "@/types/languageTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { useState, useEffect } from 'react';
+import { fileToBase64 } from "@/utils/fileToBase64";
+import { updateAd } from "../services/adsService";
 
-const sponsorSchema = z.object({
-	nombre: z.string().min(1, "El nombre es obligatorio"),
-	foto: z.string().url("Debe ser una URL válida").optional(),
-	prefijoIdioma: z.enum(["SP", "EN"], { message: "Seleccione un idioma válido" }),
-	descripcionIdioma: z.enum(["ESPAÑOL", "INGLÉS"], { message: "Seleccione un idioma válido" }),
-	url: z.string().url("Debe ser una URL válida"),
-	categoria: z.enum(["socio estratégico", "oro", "plata", "cobre", "colaborador", "agradecimiento"], {
-	  message: "Seleccione una categoría válida",
+const adSchema = z.object({
+	foto: z.instanceof(File).optional(),
+	url: z.string().url({ message: "Debe ser una URL válida" }),
+	idioma: z.enum(["1", "2"], {
+		message: "Selecciona un idioma válido",
 	}),
-  });
+	estado: z
+		.number()
+		.int()
+		.min(0)
+		.max(1, { message: "El estado debe ser inactivo o activo" }),
+});
 
+type AdFormValues = z.infer<typeof adSchema>;
 
-type SponsorFormValues = z.infer<typeof sponsorSchema>;
-
-interface UpdateSponsorModalProps {
-  onUpdate: (updated: SponsorType) => void;
-  onClose: () => void;
-  sponsor: SponsorType;
-  open: boolean;
+interface UpdateAdsModalProps {
+	onAdd: () => void;
+	onClose: () => void;
+	ad: AdType;
+	onUpdate: () => void;
+	open: boolean;
 }
 
-export default function UpdateSponsorModal({ onClose, sponsor, onUpdate, open }: UpdateSponsorModalProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<SponsorFormValues>({
-    resolver: zodResolver(sponsorSchema),
-	defaultValues: {
-		nombre: sponsor.nombre,
-		foto: sponsor.foto || "",
-		prefijoIdioma: sponsor.prefijoIdioma as "SP" | "EN",
-		descripcionIdioma: sponsor.descripcionIdioma as "ESPAÑOL" | "INGLÉS",
-		url: sponsor.url,
-		categoria: sponsor.categoria,
-	  }
-  });
+export default function UpdateAdsModal({
+	onClose,
+	ad,
+	onUpdate,
+	open,
+}: UpdateAdsModalProps) {
+	const [imagePreview, setImagePreview] = useState<string | null>(
+		typeof ad.foto === "string" ? ad.foto : null
+	);
 
-  const onSubmit = (data: SponsorFormValues) => {
-    const updatedSponsor: SponsorType = { ...sponsor, ...data };
-    onUpdate(updatedSponsor);
-    reset();
-    onClose();
-  };
+	const [fotoUpdated, setFotoUpdated] = useState(0);
 
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Editar Auspiciador</DialogTitle>
-        </DialogHeader>
-        <Card>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-            <h2 className="text-xl">Editar Auspiciador</h2>
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+		setValue,
+		watch,
+	} = useForm<AdFormValues>({
+		resolver: zodResolver(adSchema),
+		defaultValues: {
+			foto: undefined,
+			url: ad.url,
+			idioma: ad.prefijoIdioma === "EN" ? "1" : "2",
+			estado: ad.estado,
+		},
+	});
 
-            <div>
-              <Label htmlFor="nombre" className="mb-2">Nombre</Label>
-              <Input id="nombre" {...register("nombre")} />
-              {errors.nombre && <p className="text-red-500 text-sm">{errors.nombre.message}</p>}
-            </div>
+	useEffect(() => {
+	  console.log("idioma", ad.prefijoIdioma)
+	}, [ad.prefijoIdioma]);
 
-            <div>
-              <Label htmlFor="foto" className="mb-2">Imagen (URL)</Label>
-              <Input id="foto" {...register("foto")} />
-              {errors.foto && <p className="text-red-500 text-sm">{errors.foto.message}</p>}
-            </div>
 
-            <div>
-              <Label htmlFor="url" className="mb-2">Enlace</Label>
-              <Input id="url" {...register("url")} />
-              {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
-            </div>
+	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			setImagePreview(URL.createObjectURL(file));
+		}
+		setFotoUpdated((prev) => prev + 1);
+	};
+	const handleLanguageChange = (value: LanguageType) => {
+		setValue("idioma", value, { shouldValidate: true });
+	};
 
-            <div>
-              <Label className="mb-2">Categoría</Label>
-              <Input id="categoria" {...register("categoria")} />
-              {errors.categoria && <p className="text-red-500 text-sm">{errors.categoria.message}</p>}
-            </div>
+	const onSubmit = async (data: AdFormValues) => {
+		try {
+			const formFoto =
+				fotoUpdated !== 0 && data.foto
+					? await fileToBase64(data.foto)
+					: ad.foto;
 
-            <div>
-              <Label className="mb-2">Idioma</Label>
-              <RadioGroup defaultValue={sponsor.prefijoIdioma} {...register("prefijoIdioma")}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="SP" id="SP" />
-                  <Label htmlFor="SP">Español</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="EN" id="EN" />
-                  <Label htmlFor="EN">Inglés</Label>
-                </div>
-              </RadioGroup>
-              {errors.prefijoIdioma && <p className="text-red-500 text-sm">{errors.prefijoIdioma.message}</p>}
-            </div>
+			const editAd: UpdateAdRequestType = {
+				foto: formFoto,
+				url: data.url,
+				idioma: data.idioma,
+				evento: String(ad.idEvento),
+				estado: String(data.estado),
+				idPublicidad: String(ad.idPublicidad),
+			};
 
-            <div className="flex justify-between">
-              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-              <Button type="submit">Guardar</Button>
-            </div>
-          </form>
-        </Card>
-      </DialogContent>
-    </Dialog>
-  );
+			await updateAd(editAd);
+			alert("Ad creado exitosamente"); // TODO cambiar por un toast
+			onUpdate();
+			reset(); // Resetea el formulario
+			onClose(); // Cierra el modal
+			setImagePreview(null);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	return (
+		<Dialog open={open} onOpenChange={onClose}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Editar Publicidad</DialogTitle>
+					<DialogDescription>
+					Actualiza los detalles de la publicidad y guarda los cambios.
+					</DialogDescription>
+				</DialogHeader>
+					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+								<div>
+									<Label htmlFor="url" className="mb-2 font-bold">
+										Enlace
+									</Label>
+									<Input id="url" {...register("url")} />
+									{errors.url && (
+										<p className="text-red-500 text-sm">{errors.url.message}</p>
+									)}
+								</div>
+						<div>
+							<Label htmlFor="foto" className="mb-2 font-bold">
+								Imagen
+							</Label>
+							<Input
+								id="foto"
+								type="file"
+								accept="image/*"
+								onChange={onFileChange}
+							/>
+							{imagePreview && (
+								<img
+									src={imagePreview}
+									alt="Vista previa"
+									className="mt-2 max-w-xs rounded"
+								/>
+							)}
+						</div>
+
+
+						<div>
+							<Label className="mb-2 font-bold">Idioma</Label>
+							<RadioGroup
+								onValueChange={handleLanguageChange}
+								value={watch("idioma")}
+							>
+								<div className="flex items-center space-x-2">
+									<RadioGroupItem value="1" id="EN" />
+									<Label htmlFor="EN">Inglés</Label>
+								</div>
+								<div className="flex items-center space-x-2">
+									<RadioGroupItem value="2" id="SP" />
+									<Label htmlFor="SP">Español</Label>
+								</div>
+							</RadioGroup>
+							{errors.idioma && (
+								<p className="text-red-500 text-sm">{errors.idioma.message}</p>
+							)}
+						</div>
+
+						<div className="flex justify-between">
+							<Button type="button" variant="outline" onClick={onClose}>
+								Cancelar
+							</Button>
+							<Button type="submit">Guardar</Button>
+						</div>
+					</form>
+			</DialogContent>
+		</Dialog>
+	);
 }
