@@ -1,4 +1,4 @@
-import { SponsorType, NewSponsorType, NewSponsorRequestType } from "@/types/sponsorTypes";
+import { SponsorType,NewSponsorRequestType } from "@/types/sponsorTypes";  // NewSponsorType, 
 
 const API_GET_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event/1";
 const API_POST_URL = "https://hikjaj4xs7.execute-api.us-east-1.amazonaws.com/web/sponsor/event";
@@ -11,7 +11,7 @@ export const getSponsors = async (): Promise<SponsorType[]> => {
   return response.json();
 };
 
-export const createSponsor = async (newAd: NewSponsorType): Promise<SponsorType> => {
+export const createSponsor = async (newAd: NewSponsorRequestType): Promise<SponsorType> => {
   const response = await fetch(API_POST_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,10 +34,9 @@ export const updateSponsor = async (updatedAd: NewSponsorRequestType): Promise<S
 };
 
 export const deleteSponsor = async (sponsorId: string): Promise<void> => {
-  const response = await fetch(`${API_DELETE_URL}/${sponsorId}`, {
+    const response = await fetch(`${API_DELETE_URL}/${sponsorId}`, {
     method: "DELETE",
   });
 
   if (!response.ok) throw new Error("Error al eliminar el auspiciador");
 };
-

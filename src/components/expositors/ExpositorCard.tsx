@@ -18,8 +18,6 @@ export default function ExpositorCard({
   openUpdateModal,
   onDelete = () => {}, // <-- valor por defecto si no se pasa
 }: ExpositorCardProps) {
-
-
   const [error, setError] = useState<string | null>(null);
   
   const deleteSelectedExpositor = async (id: string) => {
