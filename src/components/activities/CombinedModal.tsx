@@ -19,6 +19,7 @@ import {
   NewGratitudDinnerRequest,
   NewMagisterialConferenceRequest,
   NewRoundTableRequest,
+  ActivityTypeId,
 } from "@/types/activityTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,7 +87,7 @@ const FIELD_ICONS = {
   duracion: <Clock size={16} className="text-primary" />,
 };
 
-const FIELDS_BY_ACTIVITY_TYPE = {
+const FIELDS_BY_ACTIVITY_TYPE: Record<ActivityTypeId, string[]> = {
   1: ["titulo", "responsable", "fechaIni", "fechaFin", "horaIni", "horaFin"],
   2: ["titulo", "responsable", "horaIni", "horaFin", "lugar"],
   3: ["titulo", "horaIni", "horaFin"],
@@ -169,7 +170,7 @@ export default memo(function CombinedModal({
   );
   const [selectedLanguage, setSelectedLanguage] = useState<"1" | "2">("2");
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
-  const [activityType, setActivityType] = useState<number | null>(null);
+  const [activityType, setActivityType] = useState<ActivityTypeId | null>(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingTypes, setLoadingTypes] = useState(false);
@@ -179,9 +180,11 @@ export default memo(function CombinedModal({
   const [fechaFinOpen, setFechaFinOpen] = useState(false);
 
   const createDynamicSchema = useCallback(() => {
-    if (!activityType) return z.object({});
+    if (!activityType) return z.object({ fechaIni: z.string().optional() });
     const fields = FIELDS_BY_ACTIVITY_TYPE[activityType] || [];
-    const schemaFields: Record<string, z.ZodTypeAny> = {};
+    const schemaFields: Record<string, z.ZodTypeAny> = {
+      fechaIni: z.string().optional(),
+    };
 
     fields.forEach((field) => {
       if (field === "titulo") {
@@ -349,7 +352,7 @@ export default memo(function CombinedModal({
         !formPopulatedRef.current &&
         previousEditActivityRef.current !== editActivity
       ) {
-        let typeId = Number(editActivity.idTipoActividad);
+        const typeId = Number(editActivity.idTipoActividad);
 
         // Determine if it's an English activity (ID 12-22)
         let languageToSet = "2"; // Default to Spanish
@@ -368,41 +371,37 @@ export default memo(function CombinedModal({
         if (
           baseTypeId &&
           !isNaN(baseTypeId) &&
-          FIELDS_BY_ACTIVITY_TYPE[baseTypeId]
+          FIELDS_BY_ACTIVITY_TYPE[baseTypeId as ActivityTypeId]
         ) {
-          setActivityType(baseTypeId);
+          setActivityType(baseTypeId as ActivityTypeId);
           setStep(2);
 
           setTimeout(() => {
-            if (editActivity && FIELDS_BY_ACTIVITY_TYPE[baseTypeId]) {
-              const fields = FIELDS_BY_ACTIVITY_TYPE[baseTypeId];
+            if (
+              editActivity &&
+              FIELDS_BY_ACTIVITY_TYPE[baseTypeId as ActivityTypeId]
+            ) {
+              const fields =
+                FIELDS_BY_ACTIVITY_TYPE[baseTypeId as ActivityTypeId];
               fields.forEach((field) => {
-                const rawValue = editActivity[field];
-                let valueToSet: string | undefined;
+                const rawValue = editActivity[field as keyof ActivityDetail];
 
-                if (rawValue !== undefined && rawValue !== null) {
-                  if (field === "horaIni" || field === "horaFin") {
-                    valueToSet = formatTimeValue(rawValue);
-                  } else if (field === "fechaIni" || field === "fechaFin") {
-                    valueToSet = formatDateValue(rawValue);
-                  } else {
-                    valueToSet = String(rawValue);
+                const valueToSet = (() => {
+                  if (rawValue !== undefined && rawValue !== null) {
+                    if (field === "horaIni" || field === "horaFin") {
+                      return formatTimeValue(String(rawValue)) || "";
+                    } else if (field === "fechaIni" || field === "fechaFin") {
+                      return formatDateValue(String(rawValue)) || "";
+                    } else {
+                      return String(rawValue);
+                    }
                   }
+                  return "";
+                })();
 
-                  if (valueToSet !== undefined) {
-                    setValue(field as keyof FormData, valueToSet, {
-                      shouldValidate: true,
-                    });
-                  } else {
-                    setValue(field as keyof FormData, "", {
-                      shouldValidate: true,
-                    });
-                  }
-                } else {
-                  setValue(field as keyof FormData, "", {
-                    shouldValidate: true,
-                  });
-                }
+                setValue(field as keyof FormData, valueToSet, {
+                  shouldValidate: true,
+                });
               });
 
               formPopulatedRef.current = true;
@@ -424,9 +423,11 @@ export default memo(function CombinedModal({
 
   const handleSelectActivity = useCallback(
     (value: number) => {
-      setActivityType(value);
-      reset({}, { keepDefaultValues: true });
-      formPopulatedRef.current = false;
+      if (value >= 1 && value <= 11) {
+        setActivityType(value as ActivityTypeId);
+        reset({}, { keepDefaultValues: true });
+        formPopulatedRef.current = false;
+      }
     },
     [reset]
   );
@@ -495,7 +496,7 @@ export default memo(function CombinedModal({
           return "1 día";
         } else {
           const inclusiveDays = dayDifference;
-          return `${inclusiveDays} días`;
+          return `${inclusiveDays}`;
         }
       } catch (e) {
         console.error("Error calculating duration:", e);
@@ -505,62 +506,119 @@ export default memo(function CombinedModal({
     []
   );
 
-  const isFieldTripRequest = (data: any): data is NewFieldTripRequest => {
+  const isFieldTripRequest = (data: unknown): data is NewFieldTripRequest => {
     return (
+      typeof data === "object" &&
+      data !== null &&
+      "responsable" in data &&
       typeof data.responsable === "string" &&
+      "fechaIni" in data &&
       typeof data.fechaIni === "string" &&
+      "fechaFin" in data &&
       typeof data.fechaFin === "string"
     );
   };
 
-  const isCourseRequest = (data: any): data is NewCourseRequest => {
+  const isCourseRequest = (data: unknown): data is NewCourseRequest => {
     return (
-      typeof data.responsable === "string" && typeof data.lugar === "string"
+      typeof data === "object" &&
+      data !== null &&
+      "responsable" in data &&
+      typeof data.responsable === "string" &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
     );
   };
 
   const isExhibitionRibbonCuttingRequest = (
-    data: any
+    data: unknown
   ): data is NewExhibitionRibbonCuttingRequest => {
-    return typeof data.lugar === "string";
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
+    );
   };
 
-  const isCoffeeBreakRequest = (data: any): data is NewCoffeeBreakRequest => {
-    return typeof data.titulo === "string";
+  const isCoffeeBreakRequest = (
+    data: unknown
+  ): data is NewCoffeeBreakRequest => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "titulo" in data &&
+      typeof data.titulo === "string"
+    );
   };
 
-  const isLunchRequest = (data: any): data is NewLunchRequest => {
-    return typeof data.titulo === "string";
+  const isLunchRequest = (data: unknown): data is NewLunchRequest => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "titulo" in data &&
+      typeof data.titulo === "string"
+    );
   };
 
-  const isClosingRequest = (data: any): data is NewClosingRequest => {
-    return typeof data.lugar === "string";
+  const isClosingRequest = (data: unknown): data is NewClosingRequest => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
+    );
   };
 
-  const isOthersRequest = (data: any): data is NewOthersRequest => {
-    return typeof data.responsable === "string";
+  const isOthersRequest = (data: unknown): data is NewOthersRequest => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "responsable" in data &&
+      typeof data.responsable === "string"
+    );
   };
 
   const isCongressInaugurationRequest = (
-    data: any
+    data: unknown
   ): data is NewCongressInaugurationRequest => {
-    return typeof data.lugar === "string";
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
+    );
   };
 
   const isGratitudDinnerRequest = (
-    data: any
+    data: unknown
   ): data is NewGratitudDinnerRequest => {
-    return typeof data.titulo === "string";
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "titulo" in data &&
+      typeof data.titulo === "string"
+    );
   };
 
   const isMagisterialConferenceRequest = (
-    data: any
+    data: unknown
   ): data is NewMagisterialConferenceRequest => {
-    return typeof data.titulo === "string";
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "titulo" in data &&
+      typeof data.titulo === "string"
+    );
   };
 
-  const isRoundTableRequest = (data: any): data is NewRoundTableRequest => {
-    return typeof data.titulo === "string";
+  const isRoundTableRequest = (data: unknown): data is NewRoundTableRequest => {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "titulo" in data &&
+      typeof data.titulo === "string"
+    );
   };
 
   const onSubmit = useCallback(
@@ -575,15 +633,29 @@ export default memo(function CombinedModal({
           selectedLanguage
         );
 
-        let detalles: any = {
-          titulo: data.titulo,
-          horaIni: data.horaIni,
-          horaFin: data.horaFin,
+        let detalles: {
+          titulo: string;
+          horaIni?: string | null;
+          horaFin?: string | null;
+          idIdioma: LanguageType;
+          desTipoActividad?: string;
+          responsable?: string;
+          fechaIni?: string;
+          fechaFin?: string;
+          duracion?: string;
+          lugar?: string;
+          idDetalleAct?: number;
+        } = {
+          titulo: (data as { titulo: string }).titulo,
+          horaIni: (data as { horaIni?: string }).horaIni,
+          horaFin: (data as { horaFin?: string }).horaFin,
           idIdioma: selectedLanguage as LanguageType,
         };
 
         detalles.desTipoActividad =
-          ACTIVITY_TYPE_NAMES[localizedActivityTypeId];
+          ACTIVITY_TYPE_NAMES[
+            localizedActivityTypeId.toString() as keyof typeof ACTIVITY_TYPE_NAMES
+          ];
 
         if (activityType === 1 && isFieldTripRequest(data)) {
           const calculatedDuration = calculateDuration(
@@ -651,7 +723,7 @@ export default memo(function CombinedModal({
           detalles.horaIni = formattedHoraIni;
           detalles.horaFin = formattedHoraFin;
 
-          const updateActivityDet = [
+          await updateActivityDetail([
             {
               fechaActividad: initialDate,
               idEvento: selectedEvent.idEvent,
@@ -659,9 +731,8 @@ export default memo(function CombinedModal({
               idActividad: editActivity.idActividad,
               detalles: [detalles],
             },
-          ];
+          ] as Partial<ActivityDetail>);
 
-          await updateActivityDetail(updateActivityDet);
           toast("✅ La actividad ha sido actualizada satisfactoriamente");
         } else if (mode === MODAL_MODES.ACTIVITY_ADD && selectedDate) {
           const newActivityDet = [
@@ -706,6 +777,7 @@ export default memo(function CombinedModal({
       calculateDuration,
       onAdd,
       onClose,
+      initialDate,
     ]
   );
 
@@ -716,7 +788,11 @@ export default memo(function CombinedModal({
       selectedLanguage
     );
 
-    const activityName = ACTIVITY_TYPE_NAMES[localizedTypeId];
+    const activityName =
+      ACTIVITY_TYPE_NAMES[
+        localizedTypeId.toString() as keyof typeof ACTIVITY_TYPE_NAMES
+      ];
+
     if (activityName) return activityName.toUpperCase();
 
     const foundType = activityTypes.find(
@@ -825,7 +901,10 @@ export default memo(function CombinedModal({
 
           const activityName =
             ACTIVITY_TYPE_NAMES[
-              getLocalizedActivityTypeId(baseTypeId, selectedLanguage)
+              getLocalizedActivityTypeId(
+                baseTypeId,
+                selectedLanguage
+              ).toString() as keyof typeof ACTIVITY_TYPE_NAMES
             ];
 
           if (!activityName) return null;
@@ -1049,7 +1128,8 @@ export default memo(function CombinedModal({
               <Clock size={16} className="text-primary" />
               <p className="text-sm">
                 <span className="font-medium">Duración del viaje:</span>{" "}
-                {calculateDuration(watch("fechaIni"), watch("fechaFin"))}
+                {calculateDuration(watch("fechaIni"), watch("fechaFin")) +
+                  " días"}
               </p>
             </div>
           </div>
@@ -1081,8 +1161,10 @@ export default memo(function CombinedModal({
                         htmlFor={field}
                         className="flex items-center text-sm font-medium"
                       >
-                        {FIELD_ICONS[field]}
-                        <span className="ml-2">{FIELD_NAMES[field]}</span>
+                        {FIELD_ICONS[field as keyof typeof FIELD_ICONS]}
+                        <span className="ml-2">
+                          {FIELD_NAMES[field as keyof typeof FIELD_NAMES]}
+                        </span>
                         <span className="text-red-500 ml-1">*</span>
                       </Label>
                       <TimePicker
@@ -1101,14 +1183,18 @@ export default memo(function CombinedModal({
                     htmlFor={field}
                     className="flex items-center text-sm font-medium"
                   >
-                    {FIELD_ICONS[field]}
-                    <span className="ml-2">{FIELD_NAMES[field]}</span>
+                    {FIELD_ICONS[field as keyof typeof FIELD_ICONS]}
+                    <span className="ml-2">
+                      {FIELD_NAMES[field as keyof typeof FIELD_NAMES]}
+                    </span>
                     <span className="text-red-500 ml-1">*</span>
                   </Label>
                   <Input
                     id={field}
                     type="text"
-                    placeholder={`Ingrese ${FIELD_NAMES[field].toLowerCase()}`}
+                    placeholder={`Ingrese ${FIELD_NAMES[
+                      field as keyof typeof FIELD_NAMES
+                    ].toLowerCase()}`}
                     {...register(field as keyof FormData)}
                     className={cn(
                       "w-full",

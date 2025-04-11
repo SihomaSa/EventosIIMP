@@ -30,6 +30,7 @@ export interface ActivityDetail {
   prefijoIdioma?: string;
   idIdioma?: string;
   duracion?: string;
+  fechaActividad?: string;
 }
 
 export interface ActivityDay {
@@ -51,110 +52,103 @@ export interface BaseActivityRequestType {
 export interface NewFieldTripRequest extends BaseActivityRequestType {
   // idTipoActividad: 1;
 
-    responsable: string;
-    titulo: string;
-    fechaFin: string;
-    fechaIni: string;
-    horaFin: string;
-    horaIni: string;
-    idIdioma: LanguageType;
-
+  responsable: string;
+  titulo: string;
+  fechaFin: string;
+  fechaIni: string;
+  horaFin: string;
+  horaIni: string;
+  idIdioma: LanguageType;
 }
 export interface NewCourseRequest extends BaseActivityRequestType {
   // idTipoActividad: 2;
 
-    titulo: string;
-    responsable: string;
-    traduccion: string;
-    horaFin: string;
-    horaIni: string;
-    idIdioma: LanguageType;
-    lugar: string;
-
+  titulo: string;
+  responsable: string;
+  traduccion: string;
+  horaFin: string;
+  horaIni: string;
+  idIdioma: LanguageType;
+  lugar: string;
 }
 export interface NewCoffeeBreakRequest extends BaseActivityRequestType {
   // idTipoActividad: 3;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
 export interface NewLunchRequest extends BaseActivityRequestType {
   // idTipoActividad: 4;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
-export interface NewExhibitionRibbonCuttingRequest extends BaseActivityRequestType {
+export interface NewExhibitionRibbonCuttingRequest
+  extends BaseActivityRequestType {
   // idTipoActividad: 5;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-    lugar: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
+  lugar: string;
 }
 export interface NewClosingRequest extends BaseActivityRequestType {
   // idTipoActividad: 6;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-    lugar: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
+  lugar: string;
 }
 export interface NewOthersRequest extends BaseActivityRequestType {
   // idTipoActividad: 7;
 
-    idIdioma: LanguageType;
-    responsable: string;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-
+  idIdioma: LanguageType;
+  responsable: string;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
-export interface NewCongressInaugurationRequest extends BaseActivityRequestType {
+export interface NewCongressInaugurationRequest
+  extends BaseActivityRequestType {
   // idTipoActividad: 8;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-    lugar: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
+  lugar: string;
 }
 export interface NewGratitudDinnerRequest extends BaseActivityRequestType {
   // idTipoActividad: 9;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
-export interface NewMagisterialConferenceRequest extends BaseActivityRequestType {
+export interface NewMagisterialConferenceRequest
+  extends BaseActivityRequestType {
   // idTipoActividad: 10;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
 export interface NewRoundTableRequest extends BaseActivityRequestType {
   // idTipoActividad: 11;
 
-    idIdioma: LanguageType;
-    titulo: string;
-    horaFin: string;
-    horaIni: string;
-
+  idIdioma: LanguageType;
+  titulo: string;
+  horaFin: string;
+  horaIni: string;
 }
 export interface NewActivityDet {
   fechaActividad: string; // formato "YYYY-MM-DD"
@@ -166,31 +160,33 @@ export interface GenericActivityDet {
   fechaActividad: string; // formato "YYYY-MM-DD"
   idEvento: number;
   idTipoActividad: 2 | 1 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
-  detalles: [{
-    responsable?: string,
-    fechaIni?: string,
-    lugar?: string,
-    titulo?: string,
-    horaIni?: string,
-    fechaFin?: string,
-    horaFin?: string,
-    traduccion?: string,
-    duracion?: string,
-    idIdioma: LanguageType
-  }];
+  detalles: [
+    {
+      responsable?: string;
+      fechaIni?: string;
+      lugar?: string;
+      titulo?: string;
+      horaIni?: string;
+      fechaFin?: string;
+      horaFin?: string;
+      traduccion?: string;
+      duracion?: string;
+      idIdioma: LanguageType;
+    }
+  ];
 }
 
 export interface GenericActivityOnlyDet {
-    responsable?: string,
-    fechaIni?: string,
-    lugar?: string,
-    titulo?: string,
-    horaIni?: string,
-    fechaFin?: string,
-    horaFin?: string,
-    traduccion?: string,
-    duracion?: string,
-    idIdioma: LanguageType
+  responsable?: string;
+  fechaIni?: string;
+  lugar?: string;
+  titulo?: string;
+  horaIni?: string;
+  fechaFin?: string;
+  horaFin?: string;
+  traduccion?: string;
+  duracion?: string;
+  idIdioma: LanguageType;
 }
 export type NewActivityRequest =
   | NewFieldTripRequest
@@ -202,3 +198,5 @@ export type NewActivityRequest =
   | NewOthersRequest
   | NewCongressInaugurationRequest
   | NewGratitudDinnerRequest;
+
+export type ActivityTypeId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
