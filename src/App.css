@@ -170,11 +170,28 @@ blockquote::after {
   font: 1.8rem/1.4 Georgia, serif;
 }
 @media screen {
-  
+
 }
 @media screen and (min-width: 480px) {
   blockquote {
     quotes: "“" "”" "‘" "’";
   }
-  
+
+}
+
+@keyframes collapsibleDown {
+  from {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-collapsible-down {
+  animation: collapsibleDown 300ms ease-out;
 }

@@ -67,7 +67,7 @@ export default function UpdateAdsModal({
 	useEffect(() => {
 	  console.log("idioma", ad.prefijoIdioma)
 	}, [ad.prefijoIdioma]);
-	
+  
 
 	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
