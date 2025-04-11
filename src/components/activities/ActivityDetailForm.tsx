@@ -50,6 +50,11 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
 
   const formatTime = (timeString: string | null) => {
     if (!timeString) return "Sin asignar";
+
+    if (timeString.includes('T')) {
+      return timeString.split('T')[1];
+    }
+
     return timeString;
   };
 
