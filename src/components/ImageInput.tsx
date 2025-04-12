@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImagePlus } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 interface ImageInputProps {
   onChange: (file: File) => void;
@@ -14,10 +14,17 @@ interface ImageInputProps {
 
 export function ImageInput({ onChange, preview, fileName, setPreview, setFileName }: ImageInputProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ Estado para errores
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validación del tamaño: 1MB = 1024 * 1024 bytes
+      if (file.size > 1024 * 1024) {
+        setErrorMessage("La imagen excede el tamaño máximo permitido de 1MB.");
+        e.target.value = ""; // Limpia el input
+        return;
+      }
+      setErrorMessage(null);
       setPreview(URL.createObjectURL(file));
       setFileName(file.name);
       onChange(file);
@@ -47,6 +54,7 @@ export function ImageInput({ onChange, preview, fileName, setPreview, setFileNam
           </span>
         </Button>
       </Label>
+      {errorMessage && (<p className="text-red-500 text-sm mt-2">{errorMessage}</p>)}
       {preview && <img src={preview} alt="Vista previa" className="mt-2 w-full h-auto rounded" />}
     </div>
   );
