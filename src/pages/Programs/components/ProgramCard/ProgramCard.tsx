@@ -39,7 +39,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
               <EditProgramDialog
-                program={program}
+                programDetail={detalle}
                 programCategories={programCategories}
               />
               <Button variant="outline" size="sm" className="text-xs">

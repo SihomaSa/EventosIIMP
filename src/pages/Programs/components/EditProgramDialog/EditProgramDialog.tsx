@@ -13,17 +13,17 @@ import useProgramForm from "../ProgramForm/hooks/useProgramFrom";
 import ProgramsService from "../../services/ProgramsService";
 import { FC, useState } from "react";
 import { ProgramForm as ProgramFormType } from "../ProgramForm/types/ProgramForm";
-import { Program, ProgramCategory } from "../../types/Program";
+import { ProgramCategory, ProgramDetail } from "../../types/Program";
 import { useEventStore } from "@/stores/eventStore";
-import { mapProgramToForm } from "../ProgramForm/utils/mapProgramToForm";
+import { mapProgramDetailToForm } from "../ProgramForm/utils/mapProgramDetailToForm";
 
 type Props = {
   programCategories: ProgramCategory[];
-  program: Program;
+  programDetail: ProgramDetail;
 };
 
-const EditProgramDialog: FC<Props> = ({ programCategories, program }) => {
-  const form = useProgramForm(mapProgramToForm(program));
+const EditProgramDialog: FC<Props> = ({ programCategories, programDetail }) => {
+  const form = useProgramForm(mapProgramDetailToForm(programDetail));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
   const { selectedEvent } = useEventStore();

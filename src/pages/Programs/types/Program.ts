@@ -1,11 +1,13 @@
 export type Program = {
   fechaPrograma: string;
-  detalles: {
-    descripcion: string;
-    idPrograma: number;
-    idEvento: number;
-    detalleAdicional: DetalleAdicional[];
-  }[];
+  detalles: ProgramDetail[];
+};
+
+export type ProgramDetail = {
+  descripcion: string;
+  idPrograma: number;
+  idEvento: number;
+  detalleAdicional: DetalleAdicional[];
 };
 
 type DetalleAdicional = {
