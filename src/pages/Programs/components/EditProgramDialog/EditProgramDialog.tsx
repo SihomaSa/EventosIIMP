@@ -13,16 +13,17 @@ import useProgramForm from "../ProgramForm/hooks/useProgramFrom";
 import ProgramsService from "../../services/ProgramsService";
 import { FC, useState } from "react";
 import { ProgramForm as ProgramFormType } from "../ProgramForm/types/ProgramForm";
-import { ProgramCategory } from "../../types/Program";
+import { Program, ProgramCategory } from "../../types/Program";
 import { useEventStore } from "@/stores/eventStore";
+import { mapProgramToForm } from "../ProgramForm/utils/mapProgramToForm";
 
 type Props = {
   programCategories: ProgramCategory[];
-  program: ProgramFormType;
+  program: Program;
 };
 
 const EditProgramDialog: FC<Props> = ({ programCategories, program }) => {
-  const form = useProgramForm(program);
+  const form = useProgramForm(mapProgramToForm(program));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
   const { selectedEvent } = useEventStore();
@@ -62,6 +63,7 @@ const EditProgramDialog: FC<Props> = ({ programCategories, program }) => {
         </DialogHeader>
         {!error && (
           <ProgramForm
+            forEdit
             form={form}
             programCategories={programCategories}
             onSubmit={onSubmit}

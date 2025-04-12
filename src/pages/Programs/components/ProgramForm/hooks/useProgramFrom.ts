@@ -10,25 +10,6 @@ const defaultValue: Partial<ProgramForm> = {
       horaIni: "",
     },
   ],
-  // fechaPrograma: "2025-05-05",
-  // detalles: [
-  //   {
-  //     descripcionBody: "TEST",
-  //     horaFin: "14:20",
-  //     horaIni: "11:20",
-  //     tipoPrograma: 1,
-  //     idIdioma: 1,
-  //   },
-  //   {
-  //     horaFin: "22:00",
-  //     horaIni: "19:00",
-  //     tipoPrograma: 3,
-  //     descripcionBody: "TEST2",
-  //     sala: "TEST2",
-  //     idIdioma: 3,
-  //   },
-  // ],
-  // descripcionPro: "TEST",
 };
 
 function useProgramForm(initialValue?: ProgramForm) {

@@ -22,10 +22,12 @@ import { getExpositors } from "@/components/services/expositorsService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
-  form: UseFormReturn<ProgramFormType, undefined, ProgramFormType>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<ProgramFormType, any, undefined>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
+  forEdit?: boolean;
 };
 
 const ProgramForm: FC<Props> = ({
@@ -33,6 +35,7 @@ const ProgramForm: FC<Props> = ({
   onSubmit,
   disabled,
   programCategories,
+  forEdit,
 }) => {
   const dateStr = watch("fechaPrograma");
   const details = watch("detalles");
@@ -88,26 +91,25 @@ const ProgramForm: FC<Props> = ({
           {...register(`detalles.${index}.descripcionBody`)}
           placeholder="Descripción"
         />
-        <Select
-          value={idIdioma ? `${idIdioma}` : undefined}
-          onValueChange={(value) =>
-            setValue(`detalles.${index}.idIdioma`, Number(value))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Idioma" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Idioma</SelectLabel>
-              <SelectItem value="1">Español</SelectItem>
-              <SelectItem value="2">Inglés</SelectItem>
-              <SelectItem value="3">Español / Inglés</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
         {tipoPrograma === 3 && (
           <>
+            <Select
+              value={idIdioma ? `${idIdioma}` : undefined}
+              onValueChange={(value) =>
+                setValue(`detalles.${index}.idIdioma`, Number(value))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Idioma" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Idioma</SelectLabel>
+                  <SelectItem value="2">Español</SelectItem>
+                  <SelectItem value="1">Inglés</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
             <MultiSelect
               className="w-fit max-w-3xs"
@@ -185,6 +187,7 @@ const ProgramForm: FC<Props> = ({
             onValueChange={(value) =>
               setValue(`detalles.${index}.tipoPrograma`, Number(value))
             }
+            disabled={forEdit}
           >
             <SelectTrigger>
               <SelectValue placeholder="Tipo de programa" />
