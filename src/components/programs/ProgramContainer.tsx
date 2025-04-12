@@ -9,6 +9,7 @@ type Props = {
   programs: Program[];
   programCategories: ProgramCategory[];
   showNewProgramButton?: boolean;
+  selectedDate: string | null;
 };
 
 type LanguageTab = "all" | "en" | "sp";
@@ -16,30 +17,100 @@ type LanguageTab = "all" | "en" | "sp";
 const ProgramContainer: FC<Props> = ({
   programs,
   programCategories,
-  showNewProgramButton = true
+  selectedDate,
 }) => {
   const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
 
-  // Group programs by language
   const programsByLanguage = useMemo(() => {
-    const english = programs.filter(program =>
-      program.detalles?.some(detail => detail.prefijoIdioma === "EN" || detail.idIdioma === "1")
+    const programsForSelectedDate = programs.filter(
+      (program) => program.fechaPrograma === selectedDate
     );
 
-    const spanish = programs.filter(program =>
-      program.detalles?.some(detail => detail.prefijoIdioma === "SP" || detail.idIdioma === "2")
+    // Create a deep copy of programs to avoid mutating the original data
+    const programsWithFilteredDetails = programsForSelectedDate.map(
+      (program) => {
+        const filteredProgram = { ...program };
+
+        // Filter details for each language
+        filteredProgram.detalles = filteredProgram.detalles?.map((detail) => ({
+          ...detail,
+          detalleAdicional: detail.detalleAdicional?.filter(
+            (subDetail) => subDetail.idIdioma === 1 || subDetail.idIdioma === 2
+          ),
+        }));
+
+        return filteredProgram;
+      }
     );
+
+    // Separate programs by language
+    const english = programsWithFilteredDetails
+      .map((program) => ({
+        ...program,
+        detalles: program.detalles
+          ?.map((detail) => ({
+            ...detail,
+            detalleAdicional: detail.detalleAdicional?.filter(
+              (subDetail) => subDetail.idIdioma === 1
+            ),
+          }))
+          .filter((detail) => detail.detalleAdicional?.length > 0),
+      }))
+      .filter(
+        (program) =>
+          program.detalles &&
+          program.detalles.some((detail) => detail.detalleAdicional?.length > 0)
+      );
+
+    const spanish = programsWithFilteredDetails
+      .map((program) => ({
+        ...program,
+        detalles: program.detalles
+          ?.map((detail) => ({
+            ...detail,
+            detalleAdicional: detail.detalleAdicional?.filter(
+              (subDetail) => subDetail.idIdioma === 2
+            ),
+          }))
+          .filter((detail) => detail.detalleAdicional?.length > 0),
+      }))
+      .filter(
+        (program) =>
+          program.detalles &&
+          program.detalles.some((detail) => detail.detalleAdicional?.length > 0)
+      );
 
     return {
-      all: programs,
+      all: programsWithFilteredDetails,
       en: english,
-      sp: spanish
+      sp: spanish,
     };
-  }, [programs]);
+  }, [programs, selectedDate]);
 
   // Helper function to get the count of programs by language
   const getLanguageCount = (language: LanguageTab) => {
-    return programsByLanguage[language].length;
+    if (language === "all")
+      return programsByLanguage.all.reduce(
+        (total, program) =>
+          total +
+          (program.detalles?.reduce(
+            (subtotal, detail) =>
+              subtotal + (detail.detalleAdicional?.length || 0),
+            0
+          ) || 0),
+        0
+      );
+
+    return programsByLanguage[language].reduce(
+      (total, program) =>
+        total +
+        (program.detalles?.reduce(
+          (subtotal, detail) =>
+            subtotal + (detail.detalleAdicional?.length || 0),
+          0
+        ) || 0),
+      0
+    );
   };
 
   return (
@@ -80,7 +151,10 @@ const ProgramContainer: FC<Props> = ({
           </div>
         </div>
 
-        <TabsContent value="all" className="mt-0 pt-2 flex flex-col space-y-4 w-full">
+        <TabsContent
+          value="all"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
           {programsByLanguage.all.length === 0 ? (
             <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
               <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -103,7 +177,10 @@ const ProgramContainer: FC<Props> = ({
           )}
         </TabsContent>
 
-        <TabsContent value="en" className="mt-0 pt-2 flex flex-col space-y-4 w-full">
+        <TabsContent
+          value="en"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
           {programsByLanguage.en.length === 0 ? (
             <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
               <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />
@@ -129,7 +206,10 @@ const ProgramContainer: FC<Props> = ({
           )}
         </TabsContent>
 
-        <TabsContent value="sp" className="mt-0 pt-2 flex flex-col space-y-4 w-full">
+        <TabsContent
+          value="sp"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
           {programsByLanguage.sp.length === 0 ? (
             <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
               <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />

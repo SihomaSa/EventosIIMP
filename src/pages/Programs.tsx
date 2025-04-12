@@ -171,7 +171,7 @@ export default function Expositors() {
             </p>
           </div>
         ) : (
-          <>
+          <div className="w-full overflow-x-auto">
             <ProgramDateNavigator
               dates={dates}
               selectedDate={selectedDate}
@@ -183,9 +183,10 @@ export default function Expositors() {
                 programs={filteredPrograms}
                 programCategories={programCategories}
                 showNewProgramButton={false}
+                selectedDate={selectedDate}
               />
             )}
-          </>
+          </div>
         )}
       </div>
 

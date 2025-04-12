@@ -94,55 +94,32 @@ const ProgramDateNavigator: FC<Props> = ({
           </Button>
         </div>
       </div>
-      <div
-        ref={scrollContainerRef}
-        className="relative"
-      >
-        {/* Gradient overlay for scrollable indication */}
+      <div className="w-full overflow-x-auto">
         <div
-          className="absolute top-0 left-0 w-8 h-full bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"
-          style={{ display: dates.length > 5 ? 'block' : 'none' }}
-        />
-        <div
-          className="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"
-          style={{ display: dates.length > 5 ? 'block' : 'none' }}
-        />
-
-        {/* Scrollable container with improved scrolling */}
-        <div
-          className="flex gap-1.5 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 pb-2 px-1"
-          style={{
-            scrollbarWidth: 'thin',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-            scrollSnapType: 'x mandatory', // Snap scrolling
-          }}
+          ref={scrollContainerRef}
+          className="flex gap-1.5 w-max min-w-full"
         >
           {dates.map((date) => {
             const { day, month, weekday } = extractDateParts(date);
             const isSelected = selectedDate === date;
             return (
-              <div
+              <Button
                 key={date}
-                className="scroll-snap-align-center flex-shrink-0"
+                ref={isSelected ? selectedButtonRef : null}
+                onClick={() => setSelectedDate(date)}
+                variant={isSelected ? "default" : "outline"}
+                className={`
+                  min-w-[70px] max-w-[90px] flex-shrink-0 gap-1 h-auto py-1.5 px-1 flex flex-col items-center transition-all duration-200
+                  ${isSelected
+                    ? "bg-primary text-white shadow-sm border-primary"
+                    : "hover:bg-gray-50 border-gray-200 text-gray-700"
+                  }
+                `}
               >
-                <Button
-                  ref={isSelected ? selectedButtonRef : null}
-                  onClick={() => setSelectedDate(date)}
-                  variant={isSelected ? "default" : "outline"}
-                  className={`
-                    min-w-[80px] max-w-[100px] gap-1 h-auto py-1.5 px-1 flex flex-col items-center transition-all duration-200
-                    ${isSelected
-                      ? "bg-primary text-white shadow-sm border-primary"
-                      : "hover:bg-gray-50 border-gray-200 text-gray-700"
-                    }
-                  `}
-                >
-                  <span className="text-xs font-medium capitalize">{weekday}</span>
-                  <span className="text-lg font-bold leading-tight">{day}</span>
-                  <span className="text-xs font-medium capitalize">{month}</span>
-                </Button>
-              </div>
+                <span className="text-xs font-medium capitalize">{weekday}</span>
+                <span className="text-lg font-bold leading-tight">{day}</span>
+                <span className="text-xs font-medium capitalize">{month}</span>
+              </Button>
             );
           })}
         </div>
