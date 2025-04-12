@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/select";
 import { ProgramCategory } from "../../types/Program";
 import { ExpositorType } from "@/types/expositorTypes";
-import { MultiSelect } from "@/components/ui-custom/multi-select";
 import { getExpositors } from "@/components/services/expositorsService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trash } from "lucide-react";
+import { ProgramMultiSelect } from "./components/ProgramMultiSelect";
 
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +69,7 @@ const ProgramForm: FC<Props> = ({
     setValue("fechaPrograma", parsedDate);
   }
 
-  function addSubProgram() {
+  function addDetail() {
     setValue("detalles", [
       ...details,
       {
@@ -114,7 +114,7 @@ const ProgramForm: FC<Props> = ({
               </SelectContent>
             </Select>
             <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
-            <MultiSelect
+            <ProgramMultiSelect
               className="w-fit max-w-3xs"
               placeholder="Autores"
               selected={idAutor ? idAutor.split(",") : []}
@@ -237,7 +237,7 @@ const ProgramForm: FC<Props> = ({
         ))}
       </div>
 
-      <Button onClick={addSubProgram} disabled={disabled}>
+      <Button onClick={addDetail} disabled={disabled}>
         Añadir horario
       </Button>
 

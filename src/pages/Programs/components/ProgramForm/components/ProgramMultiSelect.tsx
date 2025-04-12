@@ -25,7 +25,7 @@ export type Option = {
   label: string;
 };
 
-interface MultiSelectProps {
+interface ProgramMultiSelectProps {
   options: Option[];
   selected: string[];
   onChange: (selected: string[]) => void;
@@ -35,7 +35,7 @@ interface MultiSelectProps {
   searchPlaceholder?: string;
 }
 
-export function MultiSelect({
+export function ProgramMultiSelect({
   options,
   selected,
   onChange,
@@ -43,7 +43,7 @@ export function MultiSelect({
   className,
   emptyMessage = "No se encontraron opciones.",
   searchPlaceholder = "Buscar opciones...",
-}: MultiSelectProps) {
+}: ProgramMultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
   const handleUnselect = (value: string) => {
