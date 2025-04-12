@@ -4,7 +4,6 @@ import ProgramCard from "../../pages/Programs/components/ProgramCard/ProgramCard
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
 import { Languages, Globe } from "lucide-react";
-import ProgramsService from "../../pages/Programs/services/ProgramsService";
 
 type Props = {
   programs: Program[];

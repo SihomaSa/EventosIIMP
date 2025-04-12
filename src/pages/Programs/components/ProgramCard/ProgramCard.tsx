@@ -131,7 +131,7 @@ const ProgramCard: FC<Props> = ({
         </Button>
       </div>
 
-      <Card className="overflow-hidden border-primary/20 shadow-sm pt-0">
+      <Card className="overflow-hidden border-primary/20 shadow-sm py-0">
         {program.detalles.map((detalle) => (
           <div
             key={`card-${program.fechaPrograma}-${detalle.idPrograma}`}
