@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { Program, ProgramCategory } from "../../types/Program";
-import ProgramCard from "../ProgramCard/ProgramCard";
-import NewProgramDialog from "../NewProgramDialog/NewProgramDialog";
+import { Program, ProgramCategory } from "../../pages/Programs/types/Program";
+import ProgramCard from "../../pages/Programs/components/ProgramCard/ProgramCard";
+import NewProgramDialog from "./NewProgramDialog";
 
 type Props = {
   programs: Program[];

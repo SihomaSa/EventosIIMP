@@ -8,12 +8,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ProgramForm from "../ProgramForm/ProgramForm";
-import useProgramForm from "../ProgramForm/hooks/useProgramFrom";
-import ProgramsService from "../../services/ProgramsService";
+import ProgramForm from "../../pages/Programs/components/ProgramForm/ProgramForm";
+import useProgramForm from "../../pages/Programs/components/ProgramForm/hooks/useProgramFrom";
+import ProgramsService from "../../pages/Programs/services/ProgramsService";
 import { FC, useState } from "react";
-import { ProgramForm as ProgramFormType } from "../ProgramForm/types/ProgramForm";
-import { ProgramCategory } from "../../types/Program";
+import { ProgramForm as ProgramFormType } from "../../pages/Programs/components/ProgramForm/types/ProgramForm";
+import { ProgramCategory } from "../../pages/Programs/types/Program";
 import { useEventStore } from "@/stores/eventStore";
 
 type Props = {

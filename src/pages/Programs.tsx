@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import ProgramsService from "./services/ProgramsService";
-import { Program, ProgramCategory } from "./types/Program";
-import ProgramDateNavigator from "./components/ProgramDateNavigator/ProgramDateNavigator";
-import ProgramContainer from "./components/ProgramContainer/ProgramContainer";
+import ProgramsService from "./Programs/services/ProgramsService";
+import { Program, ProgramCategory } from "./Programs/types/Program";
+import ProgramDateNavigator from "./Programs/components/ProgramDateNavigator/ProgramDateNavigator";
+import ProgramContainer from "../components/programs/ProgramContainer";
 
 export default function Expositors() {
   const [loading, setLoading] = useState(true);

@@ -12,7 +12,7 @@ import {
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
-import EditProgramDialog from "../EditProgramDialog/EditProgramDialog";
+import EditProgramDialog from "../../../../components/programs/EditProgramDialog";
 import ProgramsService from "../../services/ProgramsService";
 
 type Props = {

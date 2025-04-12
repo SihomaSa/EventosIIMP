@@ -17,9 +17,7 @@ import PressNotes from "./pages/PressNotes";
 import Expositors from "./pages/Expositors";
 import { ThemeProvider } from "./Contexts/themeContext";
 import Activities from "./pages/Activities";
-import Programs from "./pages/Programs/page";
-
-
+import Programs from "./pages/Programs";
 
 function App() {
   return (
@@ -28,7 +26,7 @@ function App() {
         <AuthProvider>
           <EventProvider>
             <Router>
-       
+
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route element={<ProtectedRoute />}>
