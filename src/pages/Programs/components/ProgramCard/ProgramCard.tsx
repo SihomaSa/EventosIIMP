@@ -11,22 +11,37 @@ import {
 } from "@/components/ui/table";
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
+import EditProgramDialog from "../EditProgramDialog/EditProgramDialog";
+import ProgramsService from "../../services/ProgramsService";
 
 type Props = {
   program: Program;
   programCategories: ProgramCategory[];
+  date: string;
 };
 
 const ELLIPSE_CN = "overflow-ellipsis max-w-[120px] overflow-hidden";
 
-const ProgramCard: FC<Props> = ({ program, programCategories }) => {
+const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
   function mapCategory(id: number) {
     const category = programCategories.find(
       (category) => category.idTipoPrograma === id
     );
     return category ? category.descripcion : `ID-${id}`;
   }
+
+  async function deleteProgram(programId: number) {
+    const confirmed = window.confirm("¿Desea eliminar este programa?");
+    if (!confirmed) return;
+    try {
+      await ProgramsService.deleteProgram(programId);
+      window.location.reload();
+    } catch {
+      console.error("Error al eliminar programa");
+    }
+  }
+
   return (
     <Card>
       {program.detalles.map((detalle) => (
@@ -37,11 +52,17 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
           <div className="w-[400px] sticky top-4 flex flex-col gap-2">
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
-              <Button size="sm" className="text-xs">
-                <Edit />
-                Editar
-              </Button>
-              <Button variant="outline" size="sm" className="text-xs">
+              <EditProgramDialog
+                date={date}
+                programDetail={detalle}
+                programCategories={programCategories}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => deleteProgram(detalle.idPrograma)}
+              >
                 <Trash />
                 Eliminar
               </Button>
@@ -118,6 +139,10 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
           </Table>
         </div>
       ))}
+      <Button className="mx-4">
+        <Plus />
+        Añadir programa
+      </Button>
     </Card>
   );
 };

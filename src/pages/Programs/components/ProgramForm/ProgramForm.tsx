@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ProgramDatePicker from "./components/ProgramDatePicker";
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProgramCategory } from "../../types/Program";
+import { ExpositorType } from "@/types/expositorTypes";
+import { getExpositors } from "@/components/services/expositorsService";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Trash } from "lucide-react";
+import { ProgramMultiSelect } from "./components/ProgramMultiSelect";
 
 type Props = {
-  form: UseFormReturn<ProgramFormType, unknown, undefined>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<ProgramFormType, any, undefined>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
+  forEdit?: boolean;
 };
 
 const ProgramForm: FC<Props> = ({
@@ -29,23 +36,40 @@ const ProgramForm: FC<Props> = ({
   onSubmit,
   disabled,
   programCategories,
+  forEdit,
 }) => {
   const dateStr = watch("fechaPrograma");
   const details = watch("detalles");
+  const [loading, setLoading] = useState(false);
+  const [expositors, setExpositors] = useState<ExpositorType[]>([]);
+  const [error, setError] = useState("");
+  const detailsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function loadExpositors() {
+      try {
+        setLoading(true);
+        const expositors = await getExpositors();
+        setExpositors(expositors);
+      } catch {
+        setError("Error al cargar expositores");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadExpositors();
+  }, []);
 
   function handleSetDate(newDate?: Date) {
     let parsedDate = "";
     if (newDate) {
       const date = new Date(newDate);
-      const YYYY = date.getFullYear();
-      const MM = date.getMonth() + 1;
-      const DD = date.getDate();
-      parsedDate = `${YYYY}-${MM}-${DD}`;
+      parsedDate = date.toISOString().split("T")[0];
     }
     setValue("fechaPrograma", parsedDate);
   }
 
-  function addSubProgram() {
+  function addDetail() {
     setValue("detalles", [
       ...details,
       {
@@ -53,7 +77,70 @@ const ProgramForm: FC<Props> = ({
         horaIni: "",
       },
     ]);
+    detailsRef.current?.scroll({
+      top: detailsRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }
+
+  function detailFormByProgramId(index: number) {
+    const tipoPrograma = details[index]?.tipoPrograma;
+    if (!tipoPrograma) return;
+    const idIdioma = details[index]?.idIdioma;
+    const idAutor = details[index]?.idAutor;
+    return (
+      <>
+        <Input
+          {...register(`detalles.${index}.descripcionBody`)}
+          placeholder="Descripción"
+        />
+        {tipoPrograma === 3 && (
+          <>
+            <Select
+              value={idIdioma ? `${idIdioma}` : undefined}
+              onValueChange={(value) =>
+                setValue(`detalles.${index}.idIdioma`, Number(value))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Idioma" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Idioma</SelectLabel>
+                  <SelectItem value="2">Español</SelectItem>
+                  <SelectItem value="1">Inglés</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
+            <ProgramMultiSelect
+              className="w-fit max-w-3xs"
+              placeholder="Autores"
+              selected={idAutor ? idAutor.split(",") : []}
+              onChange={(selected) =>
+                setValue(`detalles.${index}.idAutor`, selected.join(","))
+              }
+              options={expositors.map((expositor) => ({
+                label: `${expositor.nombres}, ${expositor.apellidos}`,
+                value: `${expositor.idAutor}`,
+              }))}
+            />
+          </>
+        )}
+      </>
+    );
+  }
+
+  if (loading)
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <Skeleton className="h-6 w-1/3 bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+        <Skeleton className="h-6 w-full bg-primary/60" />
+      </div>
+    );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -67,7 +154,6 @@ const ProgramForm: FC<Props> = ({
           })}
           id="description"
           placeholder="..."
-          className="col-span-3"
           disabled={disabled}
         />
       </div>
@@ -77,62 +163,88 @@ const ProgramForm: FC<Props> = ({
         </Label>
         <ProgramDatePicker
           id="fechaPrograma"
-          className="col-span-3"
-          disabled={disabled}
-          date={dateStr ? new Date(dateStr) : undefined}
+          disabled={disabled || forEdit}
+          date={dateStr ? new Date(`${dateStr}T12:00:00`) : undefined}
           setDate={handleSetDate}
         />
       </div>
 
       <p className="text-sm">Hora de inicio / Hora de fin</p>
 
-      {details.map((_, index) => (
-        <div className="flex gap-2" key={index}>
-          <Input
-            {...register(`detalles.${index}.horaIni`)}
-            type="time"
-            className="w-22"
-            placeholder="Hora inicio"
-          />
-          <Input
-            {...register(`detalles.${index}.horaFin`)}
-            type="time"
-            className="w-22"
-            placeholder="Hora fin"
-          />
-          {/* tipoPrograma */}
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo de programa" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Tipo de programa</SelectLabel>
-                {programCategories.map((category) => (
-                  <SelectItem value={String(category.idTipoPrograma)}>
-                    {category.descripcion}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {/* descripcionBody */}
-          {/* <Input placeholder="Descripción" /> */}
-          {/* idAutor: string; // 1,2,3 */}
-          {/* <p>Autores</p> */}
-          {/* sala */}
-          {/* <Input placeholder="Sala" /> */}
-          {/* idIdioma */}
-          {/* <p>Idioma</p> */}
-        </div>
-      ))}
+      <div ref={detailsRef} className="grid gap-4 max-h-[40vh] overflow-auto">
+        {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
+          <div className="flex gap-2" key={index}>
+            <Button
+              type="button"
+              title="Eliminar"
+              variant="ghost"
+              className="!px-2"
+              onClick={() => {
+                setValue(
+                  "detalles",
+                  details.filter((_, i) => i !== index)
+                );
+              }}
+            >
+              <Trash className="text-destructive" />
+            </Button>
+            <Input
+              className="flex min-w-max max-w-[100px]"
+              value={horaIni.split("T")[1] ?? ""}
+              onChange={async (e) => {
+                const value = e.target.value;
+                setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
+              }}
+              type="time"
+              placeholder="Hora inicio"
+            />
+            <Input
+              className="flex min-w-max max-w-[100px]"
+              value={horaFin.split("T")[1] ?? ""}
+              onChange={async (e) => {
+                const value = e.target.value;
+                setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
+              }}
+              type="time"
+              placeholder="Hora fin"
+            />
+            <Select
+              value={tipoPrograma ? `${tipoPrograma}` : undefined}
+              onValueChange={(value) =>
+                setValue(`detalles.${index}.tipoPrograma`, Number(value))
+              }
+              disabled={disabled || forEdit}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de programa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Tipo de programa</SelectLabel>
+                  {programCategories.map((category) => (
+                    <SelectItem
+                      value={String(category.idTipoPrograma)}
+                      key={category.idTipoPrograma}
+                    >
+                      {category.descripcion}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {detailFormByProgramId(index)}
+          </div>
+        ))}
+      </div>
 
-      <Button onClick={addSubProgram}>Añadir horario</Button>
+      <Button onClick={addDetail} disabled={disabled}>
+        Añadir horario
+      </Button>
+
+      {error && <p className="text-destructive">{error}</p>}
 
       <DialogFooter>
-        <Button type="submit" disabled>
-          Crear
-        </Button>
+        <Button type="submit">{forEdit ? "Editar" : "Crear"}</Button>
       </DialogFooter>
     </form>
   );

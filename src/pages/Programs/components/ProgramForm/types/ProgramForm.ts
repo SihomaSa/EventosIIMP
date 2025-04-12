@@ -1,7 +1,7 @@
 export type ProgramForm = {
   fechaPrograma: string;
   descripcionPro: string;
-  idEvento: 1;
+  idEvento: number;
   detalles: {
     descripcionBody?: string;
     idAutor?: string; // 1,2,3

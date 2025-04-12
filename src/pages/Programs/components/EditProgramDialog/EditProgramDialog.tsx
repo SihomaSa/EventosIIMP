@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,15 +13,22 @@ import useProgramForm from "../ProgramForm/hooks/useProgramFrom";
 import ProgramsService from "../../services/ProgramsService";
 import { FC, useState } from "react";
 import { ProgramForm as ProgramFormType } from "../ProgramForm/types/ProgramForm";
-import { ProgramCategory } from "../../types/Program";
+import { ProgramCategory, ProgramDetail } from "../../types/Program";
 import { useEventStore } from "@/stores/eventStore";
+import { mapProgramDetailToForm } from "../ProgramForm/utils/mapProgramDetailToForm";
 
 type Props = {
   programCategories: ProgramCategory[];
+  programDetail: ProgramDetail;
+  date: string;
 };
 
-const NewProgramDialog: FC<Props> = ({ programCategories }) => {
-  const form = useProgramForm();
+const EditProgramDialog: FC<Props> = ({
+  programCategories,
+  programDetail,
+  date,
+}) => {
+  const form = useProgramForm(mapProgramDetailToForm(programDetail, date));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
   const { selectedEvent } = useEventStore();
@@ -32,14 +39,14 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
       if (!selectedEvent) {
         return;
       }
-      await ProgramsService.addProgram({
+      await ProgramsService.updateProgram({
         ...program,
         idEvento: selectedEvent.idEvent,
       });
-      alert("Programa creado correctamente");
+      alert("Programa editado correctamente");
       window.location.reload();
     } catch {
-      setError("Error al crear programa");
+      setError("Error al editar programa");
     } finally {
       setLoading(false);
     }
@@ -52,17 +59,18 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          Crear programa
+        <Button size="sm" className="text-xs">
+          <Edit />
+          Editar
         </Button>
       </DialogTrigger>
       <DialogContent className="!max-w-[1200px]">
         <DialogHeader>
-          <DialogTitle>Crear programa</DialogTitle>
+          <DialogTitle>Editar programa</DialogTitle>
         </DialogHeader>
         {!error && (
           <ProgramForm
+            forEdit
             form={form}
             programCategories={programCategories}
             onSubmit={onSubmit}
@@ -84,4 +92,4 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
   );
 };
 
-export default NewProgramDialog;
+export default EditProgramDialog;
