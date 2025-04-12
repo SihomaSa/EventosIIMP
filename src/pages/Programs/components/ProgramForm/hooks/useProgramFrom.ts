@@ -12,8 +12,29 @@ const defaultValue: Partial<ProgramForm> = {
   ],
 };
 
+// TODO:
+// const programSchema = z.object({
+//   fechaPrograma: z.string(),
+//   descripcionPro: z.string(),
+//   idEvento: z.number(),
+//   detalles: z.array(
+//     z.object({
+//       descripcionBody: z.string(),
+//       idAutor: z.string(),
+//       sala: z.string(),
+//       horaIni: z.string(),
+//       horaFin: z.string(),
+//       idIdioma: z.number(),
+//       tipoPrograma: z.number(),
+//     })
+//   ),
+// });
+
+// type ProgramFormZod = z.infer<typeof programSchema>;
+
 function useProgramForm(initialValue?: ProgramForm) {
   const form = useForm<ProgramForm>({
+    // resolver: zodResolver(programSchema),
     defaultValues: initialValue ? initialValue : defaultValue,
   });
   return form;

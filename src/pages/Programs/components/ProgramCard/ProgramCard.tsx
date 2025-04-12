@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import EditProgramDialog from "../EditProgramDialog/EditProgramDialog";
 import ProgramsService from "../../services/ProgramsService";
 
@@ -139,6 +139,10 @@ const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
           </Table>
         </div>
       ))}
+      <Button className="mx-4">
+        <Plus />
+        Añadir programa
+      </Button>
     </Card>
   );
 };

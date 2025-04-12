@@ -241,7 +241,7 @@ const ProgramForm: FC<Props> = ({
         Añadir horario
       </Button>
 
-      {error && <p className="bg-destructive">{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
 
       <DialogFooter>
         <Button type="submit">{forEdit ? "Editar" : "Crear"}</Button>
