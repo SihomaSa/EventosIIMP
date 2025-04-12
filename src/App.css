@@ -195,3 +195,16 @@ blockquote::after {
 .animate-collapsible-down {
   animation: collapsibleDown 300ms ease-out;
 }
+
+[data-state="active"][role="tabpanel"] {
+  overflow: visible !important;
+}
+
+.card-container {
+  contain: content;
+}
+
+.tabs-content-container {
+  overflow: visible !important;
+  transform: none !important;
+}
