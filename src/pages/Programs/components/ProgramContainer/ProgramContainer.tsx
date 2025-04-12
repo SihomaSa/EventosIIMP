@@ -14,6 +14,7 @@ const ProgramContainer: FC<Props> = ({ programs, programCategories }) => {
       <NewProgramDialog programCategories={programCategories} />
       {programs.map((program, index) => (
         <ProgramCard
+          date={program.fechaPrograma}
           program={program}
           programCategories={programCategories}
           key={`program-${program.fechaPrograma}-${index}`}

@@ -64,10 +64,12 @@ export default function Expositors() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
       />
-      <ProgramContainer
-        programs={programsByDate}
-        programCategories={programCategories}
-      />
+      {selectedDate && (
+        <ProgramContainer
+          programs={programsByDate}
+          programCategories={programCategories}
+        />
+      )}
     </div>
   );
 }

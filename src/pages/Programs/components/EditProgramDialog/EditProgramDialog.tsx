@@ -20,10 +20,15 @@ import { mapProgramDetailToForm } from "../ProgramForm/utils/mapProgramDetailToF
 type Props = {
   programCategories: ProgramCategory[];
   programDetail: ProgramDetail;
+  date: string;
 };
 
-const EditProgramDialog: FC<Props> = ({ programCategories, programDetail }) => {
-  const form = useProgramForm(mapProgramDetailToForm(programDetail));
+const EditProgramDialog: FC<Props> = ({
+  programCategories,
+  programDetail,
+  date,
+}) => {
+  const form = useProgramForm(mapProgramDetailToForm(programDetail, date));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
   const { selectedEvent } = useEventStore();

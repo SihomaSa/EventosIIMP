@@ -18,11 +18,12 @@ import ProgramsService from "../../services/ProgramsService";
 type Props = {
   program: Program;
   programCategories: ProgramCategory[];
+  date: string;
 };
 
 const ELLIPSE_CN = "overflow-ellipsis max-w-[120px] overflow-hidden";
 
-const ProgramCard: FC<Props> = ({ program, programCategories }) => {
+const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
   function mapCategory(id: number) {
     const category = programCategories.find(
       (category) => category.idTipoPrograma === id
@@ -52,6 +53,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
             <p>{detalle.descripcion}</p>
             <div className="flex justify-center gap-2 w-full">
               <EditProgramDialog
+                date={date}
                 programDetail={detalle}
                 programCategories={programCategories}
               />

@@ -62,10 +62,7 @@ const ProgramForm: FC<Props> = ({
     let parsedDate = "";
     if (newDate) {
       const date = new Date(newDate);
-      const YYYY = date.getFullYear();
-      const MM = date.getMonth() + 1;
-      const DD = date.getDate();
-      parsedDate = `${YYYY}-${MM}-${DD}`;
+      parsedDate = date.toISOString().split("T")[0];
     }
     setValue("fechaPrograma", parsedDate);
   }
@@ -168,17 +165,25 @@ const ProgramForm: FC<Props> = ({
 
       <p className="text-sm">Hora de inicio / Hora de fin</p>
 
-      {details.map(({ tipoPrograma }, index) => (
+      {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
         <div className="flex gap-2" key={index}>
           <Input
             className="flex min-w-max max-w-[100px]"
-            {...register(`detalles.${index}.horaIni`)}
+            value={horaIni.split("T")[1] ?? ""}
+            onChange={async (e) => {
+              const value = e.target.value;
+              setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
+            }}
             type="time"
             placeholder="Hora inicio"
           />
           <Input
             className="flex min-w-max max-w-[100px]"
-            {...register(`detalles.${index}.horaFin`)}
+            value={horaFin.split("T")[1] ?? ""}
+            onChange={async (e) => {
+              const value = e.target.value;
+              setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
+            }}
             type="time"
             placeholder="Hora fin"
           />
@@ -217,7 +222,7 @@ const ProgramForm: FC<Props> = ({
       {error && <p className="bg-destructive">{error}</p>}
 
       <DialogFooter>
-        <Button type="submit">Crear</Button>
+        <Button type="submit">{forEdit ? "Editar" : "Crear"}</Button>
       </DialogFooter>
     </form>
   );
