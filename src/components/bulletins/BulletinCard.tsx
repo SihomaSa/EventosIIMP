@@ -7,6 +7,7 @@ import { useState } from "react";
 import { deleteBulletin } from "../services/bulletinsService";
 import DeleteAlert from "../DeleteAlert";
 
+
 interface BulletinCardProps {
 	id: number;
 	foto: string;
@@ -15,7 +16,7 @@ interface BulletinCardProps {
 	idioma: string;
 	openUpdateModal: () => void;
 	onDelete: () => void;
-}
+  }
 
 export default function BulletinCard({
 	id,
@@ -24,7 +25,7 @@ export default function BulletinCard({
 	descripcion,
 	idioma,
 	openUpdateModal,
-	onDelete
+	onDelete,
 }: BulletinCardProps) {
 
 	const [error, setError] = useState<string | null>(null);
@@ -44,7 +45,7 @@ export default function BulletinCard({
 		<CardContent>
 		  <img
 			src={foto}
-			alt={titulo}
+			alt={`bolletin ${id}`}
 			className="object-cover w-full h-40 rounded-md"
 		  />
 		  <form className="p-2 space-y-2">
@@ -62,7 +63,6 @@ export default function BulletinCard({
 			</div>
 			<div className="flex justify-between">
             			<DeleteAlert id={String(id)} name="el boletín" deleteMethod={() => deleteSelectedBulletin(String(id))} />
-
 						<Button
 							onClick={(event) => {
 								event.preventDefault();

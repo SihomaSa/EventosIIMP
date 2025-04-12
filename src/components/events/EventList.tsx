@@ -115,7 +115,10 @@ export default function EventList() {
 					})}
 			</div>
 
-			<div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" onClick={() => setShowForm(!showForm)}>
+			<div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" 
+			    //  onClick={() => setShowForm(!showForm)} 
+				style={{ color: "var(--color-stone-400)", borderColor: "var(--color-stone-400)" }}
+				>
 				<h3 className="text-lg font-semibold">Agregar Evento</h3>
 				<Plus size={50} />
 			</div>

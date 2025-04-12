@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
+import { BulletinType } from "@/types/bulletinTypes";
 import { Plus } from "lucide-react";
-
 import { Skeleton } from "@/components/ui/skeleton";
+import BulletinCard from "@/components/bulletins/BulletinCard";
 import UpdateBulletinModal from "@/components/bulletins/UpdateBulletinModal";
 import EditBulletinForm from "@/components/bulletins/EditBulletinForm";
-import BulletinCard from "@/components/bulletins/BulletinCard";
-import { BulletinType } from "@/types/bulletinTypes";
-
 import { getBulletins } from "@/components/services/bulletinsService";
 
 export default function Bulletins() {
 	const [bulletins, setBulletins] = useState<BulletinType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-
 	const [selectedBulletin, setSelectedBulletin] = useState<BulletinType | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -23,7 +20,7 @@ export default function Bulletins() {
 		const fetchBulletins = async () => {
 			try {
 				const data = await getBulletins();
-				setBulletins(data?.filter((bulletin) => bulletin.idTipPre === 2) || []);
+				setBulletins(data);
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (err) {
 				setError("Error al obtener los boletines");
@@ -81,9 +78,9 @@ export default function Bulletins() {
 						</div>
 					)}
 					{bulletins?.length ? (
-					bulletins.map((bulletin, index) => (
+					bulletins.map((bulletin) => (
 						<BulletinCard
-						key={index}
+						key={bulletin.idPrensa}
 						id={bulletin.idPrensa}
 						foto={bulletin.foto}
 						titulo={bulletin.titulo}
@@ -119,6 +116,7 @@ export default function Bulletins() {
 				<UpdateBulletinModal
 					bulletin={selectedBulletin}
 					onUpdate={handleUpdateBulletin}
+					onBulletin={handleAddBulletin}
 					open={isUpdateModalOpen}
 					onClose={() => setIsUpdateModalOpen(false)}
 				/>

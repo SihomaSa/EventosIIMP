@@ -33,7 +33,7 @@ export interface BulletinType {//GET
     foto: string;//*
     idioma: LanguageType;//*
     idNews:string; //*
-    estado: string;  //*
+    estado: string;
   }
   export interface NewBulletinRequestType {
     titulo: string;

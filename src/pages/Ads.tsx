@@ -12,7 +12,6 @@ export default function Ads() {
 	const [ads, setAds] = useState<AdType[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-
 	const [selectedAd, setSelectedAd] = useState<AdType | null>(null);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
