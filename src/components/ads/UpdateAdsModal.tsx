@@ -75,13 +75,15 @@ export default function UpdateAdsModal({
 	  }, [ad, setValue]);
 	
 
-	const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
 			setImagePreview(URL.createObjectURL(file));
+			setValue("foto", file, { shouldValidate: true }); // ✅ CAMBIO
+			setFotoUpdated((prev) => prev + 1);
 		}
-		setFotoUpdated((prev) => prev + 1);
 	};
+
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
 	};
@@ -107,7 +109,7 @@ export default function UpdateAdsModal({
 		  console.log("Actualizando publicidad con:", editAd);
 		  await updateAd(editAd);
 	  
-		  alert("Publicidad actualizada correctamente");
+		  
 		  onUpdate();
 		  reset();
 		  onClose();

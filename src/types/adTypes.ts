@@ -1,6 +1,6 @@
 import { LanguageType } from "./languageTypes";
 
-export interface AdType {
+export interface AdType { //GET
     idPublicidad: number;
     idEvento: number;
     foto: string;
@@ -8,6 +8,12 @@ export interface AdType {
     estado: number;
     url: string;
     descripcionIdioma: string;
+  }
+  export interface NewAdRequestType {//POST
+    evento: string;
+    foto: string;
+    idioma: LanguageType;
+    url: string;
   }
   export interface NewAdType {
     idEvento: number;
@@ -17,15 +23,7 @@ export interface AdType {
     url: string;
     descripcionIdioma: string;
   }
-  
-  export interface NewAdRequestType {
-    evento: string;
-    foto: string;
-    idioma: LanguageType;
-    url: string;
-  }
-  
-  export interface UpdateAdRequestType {
+  export interface UpdateAdRequestType {//PUT
     foto: string;
     url: string;
     idioma: LanguageType;
