@@ -31,6 +31,12 @@ const ProgramsService = {
     });
     if (!res.ok) throw new Error("Error updating program");
   },
+  deleteProgram: async (id: number) => {
+    const res = await fetch(`${BASE_URL}/web/program/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Error deleting program");
+  },
 };
 
 export default ProgramsService;

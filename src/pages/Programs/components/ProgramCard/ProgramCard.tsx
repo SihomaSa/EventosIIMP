@@ -13,6 +13,7 @@ import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import EditProgramDialog from "../EditProgramDialog/EditProgramDialog";
+import ProgramsService from "../../services/ProgramsService";
 
 type Props = {
   program: Program;
@@ -28,6 +29,18 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
     );
     return category ? category.descripcion : `ID-${id}`;
   }
+
+  async function deleteProgram(programId: number) {
+    const confirmed = window.confirm("¿Desea eliminar este programa?");
+    if (!confirmed) return;
+    try {
+      await ProgramsService.deleteProgram(programId);
+      window.location.reload();
+    } catch {
+      console.error("Error al eliminar programa");
+    }
+  }
+
   return (
     <Card>
       {program.detalles.map((detalle) => (
@@ -42,7 +55,12 @@ const ProgramCard: FC<Props> = ({ program, programCategories }) => {
                 programDetail={detalle}
                 programCategories={programCategories}
               />
-              <Button variant="outline" size="sm" className="text-xs">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => deleteProgram(detalle.idPrograma)}
+              >
                 <Trash />
                 Eliminar
               </Button>
