@@ -4,12 +4,14 @@ import ProgramCard from "../../pages/Programs/components/ProgramCard/ProgramCard
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
 import { Languages, Globe } from "lucide-react";
+import ProgramsService from "../../pages/Programs/services/ProgramsService";
 
 type Props = {
   programs: Program[];
   programCategories: ProgramCategory[];
   showNewProgramButton?: boolean;
   selectedDate: string | null;
+  onRefreshPrograms?: () => Promise<void>; // Optional refresh function
 };
 
 type LanguageTab = "all" | "en" | "sp";
@@ -18,6 +20,7 @@ const ProgramContainer: FC<Props> = ({
   programs,
   programCategories,
   selectedDate,
+  onRefreshPrograms,
 }) => {
   const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
 
@@ -172,6 +175,7 @@ const ProgramContainer: FC<Props> = ({
                 program={program}
                 programCategories={programCategories}
                 key={`program-all-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
               />
             ))
           )}
@@ -201,6 +205,7 @@ const ProgramContainer: FC<Props> = ({
                 program={program}
                 programCategories={programCategories}
                 key={`program-en-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
               />
             ))
           )}
@@ -230,6 +235,7 @@ const ProgramContainer: FC<Props> = ({
                 program={program}
                 programCategories={programCategories}
                 key={`program-sp-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
               />
             ))
           )}

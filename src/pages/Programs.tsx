@@ -13,12 +13,16 @@ export default function Expositors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
+  const [programCategories, setProgramCategories] = useState<ProgramCategory[]>(
+    []
+  );
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
+  const [lastUpdated, setLastUpdated] = useState(
+    new Date().toLocaleTimeString()
+  );
 
   const loadData = useCallback(async () => {
     try {
@@ -30,7 +34,9 @@ export default function Expositors() {
       const programs = await ProgramsService.getPrograms();
       setPrograms(programs);
       // Extract unique dates
-      const uniqueDates = [...new Set(programs.map(program => program.fechaPrograma))].sort();
+      const uniqueDates = [
+        ...new Set(programs.map((program) => program.fechaPrograma)),
+      ].sort();
       setDates(uniqueDates);
       // Select first date if available and none selected
       if (uniqueDates.length > 0 && !selectedDate) {
@@ -53,27 +59,46 @@ export default function Expositors() {
     loadData();
   }, [loadData]);
 
+  const handleRefreshPrograms = useCallback(async () => {
+    try {
+      const programs = await ProgramsService.getPrograms();
+      setPrograms(programs);
+    } catch (err) {
+      console.error("Error refreshing programs:", err);
+    }
+  }, []);
+
   // Filter programs by selected date and search term
   const filteredPrograms = useMemo(() => {
     if (!selectedDate) return [];
 
-    let filtered = programs.filter(program => program.fechaPrograma === selectedDate);
+    let filtered = programs.filter(
+      (program) => program.fechaPrograma === selectedDate
+    );
 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(program => {
+      filtered = filtered.filter((program) => {
         // Search in program title
-        if (program.titulo && program.titulo.toLowerCase().includes(term)) return true;
+        if (program.titulo && program.titulo.toLowerCase().includes(term))
+          return true;
 
         // Search in program description
-        if (program.descripcion && program.descripcion.toLowerCase().includes(term)) return true;
+        if (
+          program.descripcion &&
+          program.descripcion.toLowerCase().includes(term)
+        )
+          return true;
 
         // Search in program details
         if (program.detalles && Array.isArray(program.detalles)) {
-          return program.detalles.some(detail =>
-            (detail.titulo && detail.titulo.toLowerCase().includes(term)) ||
-            (detail.descripcion && detail.descripcion.toLowerCase().includes(term)) ||
-            (detail.responsable && detail.responsable.toLowerCase().includes(term))
+          return program.detalles.some(
+            (detail) =>
+              (detail.titulo && detail.titulo.toLowerCase().includes(term)) ||
+              (detail.descripcion &&
+                detail.descripcion.toLowerCase().includes(term)) ||
+              (detail.responsable &&
+                detail.responsable.toLowerCase().includes(term))
           );
         }
 
@@ -105,7 +130,10 @@ export default function Expositors() {
           </div>
           <div className="grid grid-cols-1 gap-4">
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-48 w-full bg-primary/30 rounded-lg" />
+              <Skeleton
+                key={i}
+                className="h-48 w-full bg-primary/30 rounded-lg"
+              />
             ))}
           </div>
         </div>
@@ -167,7 +195,8 @@ export default function Expositors() {
               No hay programación disponible
             </h3>
             <p className="text-gray-500 max-w-md mb-6">
-              Aún no hay fechas programadas para este evento. Haga clic en el botón 'Crear programa' para comenzar.
+              Aún no hay fechas programadas para este evento. Haga clic en el
+              botón 'Crear programa' para comenzar.
             </p>
           </div>
         ) : (
@@ -184,6 +213,7 @@ export default function Expositors() {
                 programCategories={programCategories}
                 showNewProgramButton={false}
                 selectedDate={selectedDate}
+                onRefreshPrograms={handleRefreshPrograms}
               />
             )}
           </div>

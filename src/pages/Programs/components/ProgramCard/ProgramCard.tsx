@@ -1,11 +1,6 @@
 import { FC, useState } from "react";
 import { Program, ProgramCategory } from "../../types/Program";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -32,15 +27,28 @@ import ProgramsService from "../../services/ProgramsService";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
+import { toast } from "sonner";
 
 type Props = {
   program: Program;
   programCategories: ProgramCategory[];
   date: string;
+  onDeleteSuccess?: () => void; // Optional callback for successful deletion
 };
 
-const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
+const ProgramCard: FC<Props> = ({
+  program,
+  programCategories,
+  date,
+  onDeleteSuccess,
+}) => {
   const [expandedDetails, setExpandedDetails] = useState<number[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{
+    idProDetalle: number;
+    descripcionBody: string;
+  } | null>(null);
 
   function formatDate(dateString) {
     try {
@@ -66,20 +74,49 @@ const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
     return category ? category.descripcion : `ID-${id}`;
   }
 
-  async function deleteProgram(programId: number) {
-    const confirmed = window.confirm("¿Desea eliminar este programa?");
-    if (!confirmed) return;
+  const handleDeleteClick = (additional: any) => {
+    setItemToDelete({
+      idProDetalle: additional.idProDetalle,
+      descripcionBody: additional.descripcionBody,
+    });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
     try {
-      await ProgramsService.deleteProgram(programId);
-      window.location.reload();
-    } catch {
-      console.error("Error al eliminar programa");
+      // Use ProgramsService to delete the program detail
+      await ProgramsService.deleteProgramDetail(itemToDelete.idProDetalle);
+
+      // Optional callback for successful deletion
+      onDeleteSuccess && onDeleteSuccess();
+
+      // Additional feedback
+      toast.success("Detalle eliminado", {
+        description: `El detalle "${itemToDelete.descripcionBody}" ha sido eliminado exitosamente.`,
+      });
+    } catch (error) {
+      console.error("Error deleting program detail:", error);
+      toast.error("Error al eliminar", {
+        description:
+          "No se pudo eliminar el detalle del programa. Intente nuevamente.",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       {/* Action buttons outside the card */}
+      <ConfirmDeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemName={`el detalle "${itemToDelete?.descripcionBody}"`}
+      />
       <div className="flex flex-wrap gap-2 justify-start">
         {program.detalles[0] && (
           <EditProgramDialog
@@ -198,6 +235,7 @@ const ProgramCard: FC<Props> = ({ program, programCategories, date }) => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                onClick={() => handleDeleteClick(additional)}
                               >
                                 <Trash size={15} />
                               </Button>

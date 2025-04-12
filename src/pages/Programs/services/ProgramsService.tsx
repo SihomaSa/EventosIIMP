@@ -3,6 +3,7 @@ import { Program, ProgramCategory } from "../types/Program";
 
 const BASE_URL = "https://jd3gnip3o3.execute-api.us-east-1.amazonaws.com";
 const BASE_URL2 = "https://ktgbqfdb72.execute-api.us-east-1.amazonaws.com";
+const BASE_URL3 = "https://vo05im8kig.execute-api.us-east-1.amazonaws.com";
 
 const ProgramsService = {
   getPrograms: async () => {
@@ -36,6 +37,12 @@ const ProgramsService = {
       method: "DELETE",
     });
     if (!res.ok) throw new Error("Error deleting program");
+  },
+  deleteProgramDetail: async (idProDetalle: number) => {
+    const res = await fetch(`${BASE_URL3}/web/detailsprograms/${idProDetalle}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Error deleting program detail");
   },
 };
 
