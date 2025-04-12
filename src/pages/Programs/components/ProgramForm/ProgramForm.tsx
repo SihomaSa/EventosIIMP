@@ -20,6 +20,7 @@ import { ExpositorType } from "@/types/expositorTypes";
 import { MultiSelect } from "@/components/ui-custom/multi-select";
 import { getExpositors } from "@/components/services/expositorsService";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Trash } from "lucide-react";
 
 type Props = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,6 +174,20 @@ const ProgramForm: FC<Props> = ({
       <div ref={detailsRef} className="grid gap-4 max-h-[40vh] overflow-auto">
         {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
           <div className="flex gap-2" key={index}>
+            <Button
+              type="button"
+              title="Eliminar"
+              variant="ghost"
+              className="!px-2"
+              onClick={() => {
+                setValue(
+                  "detalles",
+                  details.filter((_, i) => i !== index)
+                );
+              }}
+            >
+              <Trash className="text-destructive" />
+            </Button>
             <Input
               className="flex min-w-max max-w-[100px]"
               value={horaIni.split("T")[1] ?? ""}
