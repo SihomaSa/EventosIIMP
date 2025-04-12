@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ProgramDatePicker from "./components/ProgramDatePicker";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ const ProgramForm: FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
   const [error, setError] = useState("");
+  const detailsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadExpositors() {
@@ -75,6 +76,10 @@ const ProgramForm: FC<Props> = ({
         horaIni: "",
       },
     ]);
+    detailsRef.current?.scroll({
+      top: detailsRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }
 
   function detailFormByProgramId(index: number) {
@@ -157,63 +162,65 @@ const ProgramForm: FC<Props> = ({
         </Label>
         <ProgramDatePicker
           id="fechaPrograma"
-          disabled={disabled}
-          date={dateStr ? new Date(dateStr) : undefined}
+          disabled={disabled || forEdit}
+          date={dateStr ? new Date(`${dateStr}T12:00:00`) : undefined}
           setDate={handleSetDate}
         />
       </div>
 
       <p className="text-sm">Hora de inicio / Hora de fin</p>
 
-      {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
-        <div className="flex gap-2" key={index}>
-          <Input
-            className="flex min-w-max max-w-[100px]"
-            value={horaIni.split("T")[1] ?? ""}
-            onChange={async (e) => {
-              const value = e.target.value;
-              setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
-            }}
-            type="time"
-            placeholder="Hora inicio"
-          />
-          <Input
-            className="flex min-w-max max-w-[100px]"
-            value={horaFin.split("T")[1] ?? ""}
-            onChange={async (e) => {
-              const value = e.target.value;
-              setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
-            }}
-            type="time"
-            placeholder="Hora fin"
-          />
-          <Select
-            value={tipoPrograma ? `${tipoPrograma}` : undefined}
-            onValueChange={(value) =>
-              setValue(`detalles.${index}.tipoPrograma`, Number(value))
-            }
-            disabled={forEdit}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo de programa" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Tipo de programa</SelectLabel>
-                {programCategories.map((category) => (
-                  <SelectItem
-                    value={String(category.idTipoPrograma)}
-                    key={category.idTipoPrograma}
-                  >
-                    {category.descripcion}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          {detailFormByProgramId(index)}
-        </div>
-      ))}
+      <div ref={detailsRef} className="grid gap-4 max-h-[40vh] overflow-auto">
+        {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
+          <div className="flex gap-2" key={index}>
+            <Input
+              className="flex min-w-max max-w-[100px]"
+              value={horaIni.split("T")[1] ?? ""}
+              onChange={async (e) => {
+                const value = e.target.value;
+                setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
+              }}
+              type="time"
+              placeholder="Hora inicio"
+            />
+            <Input
+              className="flex min-w-max max-w-[100px]"
+              value={horaFin.split("T")[1] ?? ""}
+              onChange={async (e) => {
+                const value = e.target.value;
+                setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
+              }}
+              type="time"
+              placeholder="Hora fin"
+            />
+            <Select
+              value={tipoPrograma ? `${tipoPrograma}` : undefined}
+              onValueChange={(value) =>
+                setValue(`detalles.${index}.tipoPrograma`, Number(value))
+              }
+              disabled={disabled || forEdit}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de programa" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Tipo de programa</SelectLabel>
+                  {programCategories.map((category) => (
+                    <SelectItem
+                      value={String(category.idTipoPrograma)}
+                      key={category.idTipoPrograma}
+                    >
+                      {category.descripcion}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {detailFormByProgramId(index)}
+          </div>
+        ))}
+      </div>
 
       <Button onClick={addSubProgram} disabled={disabled}>
         Añadir horario

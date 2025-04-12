@@ -43,6 +43,8 @@ const EditProgramDialog: FC<Props> = ({
         ...program,
         idEvento: selectedEvent.idEvent,
       });
+      alert("Programa editado correctamente");
+      window.location.reload();
     } catch {
       setError("Error al editar programa");
     } finally {

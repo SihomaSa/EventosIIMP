@@ -36,6 +36,8 @@ const NewProgramDialog: FC<Props> = ({ programCategories }) => {
         ...program,
         idEvento: selectedEvent.idEvent,
       });
+      alert("Programa creado correctamente");
+      window.location.reload();
     } catch {
       setError("Error al crear programa");
     } finally {
