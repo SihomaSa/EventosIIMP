@@ -59,8 +59,8 @@ const EditProgramDialog: FC<Props> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" className="text-xs">
-          <Edit />
+        <Button variant="outline">
+          <Edit/>
           Editar
         </Button>
       </DialogTrigger>
