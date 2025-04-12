@@ -14,7 +14,7 @@ export default function Home() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");//login
     resetTheme();
   };
 

@@ -33,7 +33,7 @@ const bulletinSchema = z.object({
 type BulletinFormValues = z.infer<typeof bulletinSchema>;
 
 interface UpdateBulletinModalProps {
-  onAdd: () => void;
+  onBulletin: () => void;
   onClose: () => void;
   bulletin: BulletinType;
   onUpdate: () => void;
@@ -70,6 +70,9 @@ export default function UpdateBulletinModal({
   useEffect(() => {
     if (bulletin) {
       console.log("Cargando datos en el formulario:", bulletin);
+      setValue("titulo", bulletin.titulo);
+      setValue("subtitulo", bulletin.subtitulo);
+      setValue("descripcion", bulletin.descripcion_prensa);
 		  setValue("url", bulletin.url);
 		  setValue("idioma", bulletin.prefijoIdioma === "EN" ? "1" : "2");
 		  setValue("estado", bulletin.estado);
@@ -197,7 +200,7 @@ export default function UpdateBulletinModal({
 								<p className="text-red-500 text-sm">{errors.idioma.message}</p>
 							)}
 						</div>
-
+            
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
