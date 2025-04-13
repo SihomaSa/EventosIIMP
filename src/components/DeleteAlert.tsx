@@ -16,17 +16,24 @@ interface DeleteAlertProps {
 	id: string;
 	name: string;
 	deleteMethod: (id: string) => void;
+	className?: string;
+  	size?: "sm" | "lg" | "default";
 }
 
 export default function DeleteAlert({
 	id,
 	name,
 	deleteMethod,
+	className, 
 }: DeleteAlertProps) {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"outline"}>
+				<Button 
+				variant={"outline"}
+				size={"sm"}
+      			className={`cursor-pointer text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 flex items-center gap-1 transition-colors duration-200 ${className}`}
+				>
 					<Trash2 /> Eliminar
 				</Button>
 			</AlertDialogTrigger>
