@@ -13,7 +13,6 @@ import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
 import {
   Trash,
-  Edit,
   ChevronDown,
   Clock,
   Users,
@@ -21,7 +20,7 @@ import {
   ChevronUp,
   Calendar,
 } from "lucide-react";
-import EditTitleProgramDialog from "../../../../components/programs/EditTitleProgramDialog";
+// import EditTitleProgramDialog from "../../../../components/programs/EditTitleProgramDialog";
 import ProgramsService from "../../services/ProgramsService";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -30,6 +29,21 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { toast } from "sonner";
 import AddProgramDialog from "../../../../components/programs/AddProgramDialog";
 import EditProgramDetailDialog from "../../../../components/programs/EditProgramDetailDialog";
+
+type AutorWithNumberId = {
+  idAutor: number;
+  nombres: string;
+  apellidos: string;
+  [key: string]: string | number;
+};
+
+// Define the Autor type with string id (for EditProgramDetailDialog)
+type AutorWithStringId = {
+  idAutor: string;
+  nombres: string;
+  apellidos: string;
+  [key: string]: string | number;
+};
 
 type Props = {
   program: Program;
@@ -52,11 +66,12 @@ const ProgramCard: FC<Props> = ({
     descripcionBody: string;
   } | null>(null);
 
-  function formatDate(dateString) {
+  function formatDate(dateString: string): string {
     try {
       const date = new Date(`${dateString}T12:00:00`);
       return format(date, "EEEE d 'de' MMMM, yyyy", { locale: es });
     } catch (e) {
+      console.warn("Error parsing date:", e);
       return dateString;
     }
   }
@@ -76,7 +91,10 @@ const ProgramCard: FC<Props> = ({
     return category ? category.descripcion : `ID-${id}`;
   }
 
-  const handleDeleteClick = (additional: any) => {
+  const handleDeleteClick = (additional: {
+    idProDetalle: number;
+    descripcionBody: string;
+  }) => {
     setItemToDelete({
       idProDetalle: additional.idProDetalle,
       descripcionBody: additional.descripcionBody,
@@ -92,7 +110,9 @@ const ProgramCard: FC<Props> = ({
       await ProgramsService.deleteProgramDetail(itemToDelete.idProDetalle);
 
       // Optional callback for successful deletion
-      onDeleteSuccess && onDeleteSuccess();
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
 
       // Additional feedback
       toast.success("Detalle eliminado", {
@@ -110,6 +130,17 @@ const ProgramCard: FC<Props> = ({
     }
   };
 
+  // Function to convert autor ids from number to string if needed
+  const convertAutorIds = (
+    autores: AutorWithNumberId[] | undefined | null
+  ): AutorWithStringId[] | undefined => {
+    if (!autores) return undefined;
+    return autores.map((autor) => ({
+      ...autor,
+      idAutor: autor.idAutor.toString(), // Convert number to string
+    }));
+  };
+
   return (
     <div className="space-y-4">
       {/* Action buttons outside the card */}
@@ -120,14 +151,14 @@ const ProgramCard: FC<Props> = ({
         itemName={`el programa: "${itemToDelete?.descripcionBody}"`}
       />
       <div className="flex flex-wrap gap-2 justify-start">
-        {program.detalles[0] && (
+        {/* {program.detalles[0] && (
           <EditTitleProgramDialog
             date={date}
             programDetail={program.detalles[0]}
             programCategories={programCategories}
             onDeleteSuccess={onDeleteSuccess}
           />
-        )}
+        )} */}
         <AddProgramDialog
           programCategories={programCategories}
           date={date}
@@ -230,7 +261,10 @@ const ProgramCard: FC<Props> = ({
                           <TableCell className="text-center whitespace-nowrap">
                             <div className="flex justify-center space-x-1">
                               <EditProgramDetailDialog
-                                programDetail={additional}
+                                programDetail={{
+                                  ...additional,
+                                  autores: convertAutorIds(additional.autores), // Convert IDs to string
+                                }}
                                 programCategories={programCategories}
                                 date={program.fechaPrograma}
                                 programDescription={detalle.descripcion}
@@ -253,8 +287,6 @@ const ProgramCard: FC<Props> = ({
                   </Table>
                 </div>
               </div>
-
-              {/* Mobile view - Card List */}
               <div className="block md:hidden">
                 {detalle.detalleAdicional.map((additional, index) => (
                   <div
@@ -278,13 +310,11 @@ const ProgramCard: FC<Props> = ({
                             )}
                           </span>
                         </div>
-
                         <div className="mt-3">
                           <h4 className="text-base font-semibold mb-2 text-gray-800">
                             {additional.descripcionBody}
                           </h4>
                         </div>
-
                         <div className="flex flex-wrap gap-2 mt-2">
                           <Badge
                             variant="outline"
@@ -299,27 +329,23 @@ const ProgramCard: FC<Props> = ({
                           )}
                         </div>
                       </div>
-
                       <div className="flex items-center gap-1">
+                        <EditProgramDetailDialog
+                          programDetail={{
+                            ...additional,
+                            autores: convertAutorIds(additional.autores), // Convert IDs to string
+                          }}
+                          programCategories={programCategories}
+                          date={program.fechaPrograma}
+                          programDescription={detalle.descripcion}
+                          programId={detalle.idPrograma}
+                          onUpdateSuccess={onDeleteSuccess}
+                        />
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-blue-600 rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Edit action logic would go here
-                          }}
-                        >
-                          <Edit size={15} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-500 rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Delete action logic would go here
-                          }}
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                          onClick={() => handleDeleteClick(additional)}
                         >
                           <Trash size={15} />
                         </Button>

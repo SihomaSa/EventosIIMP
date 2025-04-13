@@ -31,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  form: UseFormReturn<ProgramFormType, any, undefined>;
+  form: UseFormReturn<ProgramFormType, unknown, ProgramFormType>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
   programCategories: ProgramCategory[];
@@ -40,7 +40,7 @@ type Props = {
 };
 
 const ProgramForm: FC<Props> = ({
-  form: { handleSubmit, register, watch, setValue, formState, trigger },
+  form: { handleSubmit, register, watch, setValue, formState },
   onSubmit,
   disabled,
   programCategories,

@@ -86,6 +86,7 @@ const AddProgramDialog: FC<Props> = ({
       if (!isValid(date)) return dateStr;
       return format(date, "EEEE d 'de' MMMM, yyyy", { locale: es });
     } catch (e) {
+      console.warn("Invalid date format:", e);
       return dateStr;
     }
   }, []);

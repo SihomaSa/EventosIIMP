@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { format, isValid, isFuture } from "date-fns";
+import { format, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -62,13 +62,6 @@ const NewProgramDialog: FC<Props> = ({
       setSelectedLanguage("2"); // Reset to Spanish
     }
   }, [isOpen, form]);
-
-  // Format a date to YYYY-MM-DD string
-  const formatDateToString = useCallback((date: Date | undefined): string => {
-    if (!date) return "";
-    if (!isValid(date)) return "";
-    return format(date, "yyyy-MM-dd");
-  }, []);
 
   // Format a date for display
   const formatDateForDisplay = useCallback((date: Date | undefined): string => {

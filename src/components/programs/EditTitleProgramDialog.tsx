@@ -66,15 +66,14 @@ const EditTitleProgramDialog: FC<Props> = ({
     try {
       setLoading(true);
       setError(null);
-      const updatedProgramDetail = {
+
+      // Send the update request
+      await ProgramsService.updateProgram({
         fechaPrograma: date,
         idEvento: selectedEvent.idEvent,
         descripcionPro: description.trim(),
         idPrograma: programDetail.idPrograma,
-      };
-
-      // Send the update request
-      await ProgramsService.updateProgram(updatedProgramDetail);
+      });
 
       // Show success message
       toast.success("Programa actualizado", {

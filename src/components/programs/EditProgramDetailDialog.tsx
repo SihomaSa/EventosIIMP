@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from "react";
-import { Edit, Plus, Trash } from "lucide-react";
+import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,8 +32,6 @@ import { toast } from "sonner";
 import { ProgramCategory } from "../../pages/Programs/types/Program";
 import ProgramsService from "../../pages/Programs/services/ProgramsService";
 import { useEventStore } from "@/stores/eventStore";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { ProgramMultiSelect } from "../../pages/Programs/components/ProgramForm/components/ProgramMultiSelect";
 import { getExpositors } from "@/components/services/expositorsService";
 import { ExpositorType } from "@/types/expositorTypes";
@@ -86,12 +84,6 @@ const EditProgramDetailDialog: FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
-
-  // Find the current program category
-  const getCurrentCategory = (tipoPrograma: number) =>
-    programCategories.find(
-      (category) => category.idTipoPrograma === tipoPrograma
-    );
 
   const [formData, setFormData] = useState<ProgramDetailForEdit>({
     ...programDetail,
@@ -231,9 +223,6 @@ const EditProgramDetailDialog: FC<Props> = ({
       setLoading(false);
     }
   };
-
-  // Get current category
-  const currentCategory = getCurrentCategory(formData.tipoPrograma);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogChange}>
