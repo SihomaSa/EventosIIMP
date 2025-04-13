@@ -24,7 +24,7 @@ import {
   MessageSquare,
   MapPin,
   Users,
-  Settings
+  Settings,
 } from "lucide-react";
 import { ProgramMultiSelect } from "./components/ProgramMultiSelect";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +36,7 @@ type Props = {
   disabled: boolean;
   programCategories: ProgramCategory[];
   forEdit?: boolean;
+  hideDescriptionPro?: boolean;
 };
 
 const ProgramForm: FC<Props> = ({
@@ -44,6 +45,7 @@ const ProgramForm: FC<Props> = ({
   disabled,
   programCategories,
   forEdit,
+  hideDescriptionPro = false,
 }) => {
   const dateStr = watch("fechaPrograma");
   const details = watch("detalles") || [];
@@ -52,7 +54,9 @@ const ProgramForm: FC<Props> = ({
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
   const [error, setError] = useState("");
   const detailsRef = useRef<HTMLDivElement>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, Record<string, string>>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, Record<string, string>>
+  >({});
 
   // Use useMemo for form errors to avoid infinite loop
   const fieldErrors = useMemo(() => {
@@ -60,7 +64,8 @@ const ProgramForm: FC<Props> = ({
 
     // Add form errors
     if (formState.errors.descripcionPro) {
-      errors.descripcionPro = "La descripción es obligatoria y debe tener al menos 3 caracteres";
+      errors.descripcionPro =
+        "La descripción es obligatoria y debe tener al menos 3 caracteres";
     }
 
     return errors;
@@ -127,9 +132,9 @@ const ProgramForm: FC<Props> = ({
     }
 
     // Update errors for this detail
-    setValidationErrors(prev => ({
+    setValidationErrors((prev) => ({
       ...prev,
-      [index]: errors
+      [index]: errors,
     }));
 
     return Object.keys(errors).length === 0;
@@ -141,9 +146,11 @@ const ProgramForm: FC<Props> = ({
     if (!data.descripcionPro || data.descripcionPro.trim().length < 3) {
       setValue("descripcionPro", data.descripcionPro, {
         shouldValidate: true,
-        shouldDirty: true
+        shouldDirty: true,
       });
-      setError("La descripción del programa es obligatoria y debe tener al menos 3 caracteres");
+      setError(
+        "La descripción del programa es obligatoria y debe tener al menos 3 caracteres"
+      );
       return;
     }
 
@@ -156,7 +163,9 @@ const ProgramForm: FC<Props> = ({
     });
 
     if (!isValid) {
-      setError("Por favor complete todos los campos obligatorios en los detalles del programa");
+      setError(
+        "Por favor complete todos los campos obligatorios en los detalles del programa"
+      );
       return;
     }
 
@@ -213,42 +222,53 @@ const ProgramForm: FC<Props> = ({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6 py-4">
       {/* Description */}
-      <div className={cn(
-        "p-4 border rounded-md",
-        fieldErrors.descripcionPro ? "border-red-300 bg-red-50/50" : "hover:border-primary/50 transition-colors"
-      )}>
-        <Label htmlFor="description" className="block mb-2 font-medium flex items-center gap-2">
-          <MessageSquare size={16} className="text-primary" />
-          Descripción del programa <span className="text-red-500">*</span>
-        </Label>
-        <div className="space-y-2">
-          <Textarea
-            {...register(`descripcionPro`, {
-              required: true,
-              minLength: 3
-            })}
-            id="description"
-            placeholder="Descripción general del programa..."
-            disabled={disabled}
-            className={cn(
-              "min-h-[80px]",
-              fieldErrors.descripcionPro ? "border-red-500 focus-visible:ring-red-500" : ""
+      {!hideDescriptionPro && (
+        <div
+          className={cn(
+            "p-4 border rounded-md",
+            fieldErrors.descripcionPro
+              ? "border-red-300 bg-red-50/50"
+              : "hover:border-primary/50 transition-colors"
+          )}
+        >
+          <Label
+            htmlFor="description"
+            className="block mb-2 font-medium flex items-center gap-2"
+          >
+            <MessageSquare size={16} className="text-primary" />
+            Descripción del programa <span className="text-red-500">*</span>
+          </Label>
+          <div className="space-y-2">
+            <Textarea
+              {...register(`descripcionPro`, {
+                required: true,
+                minLength: 3,
+              })}
+              id="description"
+              placeholder="Descripción general del programa..."
+              disabled={disabled}
+              className={cn(
+                "min-h-[80px]",
+                fieldErrors.descripcionPro
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              )}
+            />
+            {fieldErrors.descripcionPro && (
+              <p className="text-red-500 text-xs flex items-center">
+                <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                {fieldErrors.descripcionPro}
+              </p>
             )}
-          />
-          {fieldErrors.descripcionPro && (
-            <p className="text-red-500 text-xs flex items-center">
-              <AlertCircle size={12} className="mr-1 flex-shrink-0" />
-              {fieldErrors.descripcionPro}
-            </p>
-          )}
-          {!descripcionPro && !fieldErrors.descripcionPro && (
-            <p className="text-amber-600 text-xs flex items-center">
-              <AlertCircle size={12} className="mr-1 flex-shrink-0" />
-              Ingrese una descripción de al menos 3 caracteres
-            </p>
-          )}
+            {!descripcionPro && !fieldErrors.descripcionPro && (
+              <p className="text-amber-600 text-xs flex items-center">
+                <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                Ingrese una descripción de al menos 3 caracteres
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Program Details */}
       <div className="border rounded-md p-4 space-y-5">
@@ -269,20 +289,32 @@ const ProgramForm: FC<Props> = ({
                 key={index}
                 className={cn(
                   "border rounded-md overflow-hidden",
-                  Object.keys(detailErrors).length > 0 ? "border-red-300" : "border-gray-200"
+                  Object.keys(detailErrors).length > 0
+                    ? "border-red-300"
+                    : "border-gray-200"
                 )}
               >
                 {/* Program Type Selection - Always Visible First */}
                 <div className="p-4 bg-gray-50 border-b">
-                  <Label htmlFor={`tipo-programa-${index}`} className="block mb-2 font-medium flex items-center gap-2">
+                  <Label
+                    htmlFor={`tipo-programa-${index}`}
+                    className="block mb-2 font-medium flex items-center gap-2"
+                  >
                     <BadgeCheck size={16} className="text-primary" />
                     Tipo de programa <span className="text-red-500">*</span>
                   </Label>
                   <div className="space-y-2">
                     <Select
-                      value={detail.tipoPrograma ? `${detail.tipoPrograma}` : undefined}
+                      value={
+                        detail.tipoPrograma
+                          ? `${detail.tipoPrograma}`
+                          : undefined
+                      }
                       onValueChange={(value) => {
-                        setValue(`detalles.${index}.tipoPrograma`, Number(value));
+                        setValue(
+                          `detalles.${index}.tipoPrograma`,
+                          Number(value)
+                        );
                         validateDetail(index);
                       }}
                       disabled={disabled || forEdit}
@@ -290,7 +322,9 @@ const ProgramForm: FC<Props> = ({
                       <SelectTrigger
                         id={`tipo-programa-${index}`}
                         className={cn(
-                          detailErrors.tipoPrograma ? "border-red-500 focus-visible:ring-red-500" : ""
+                          detailErrors.tipoPrograma
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : ""
                         )}
                       >
                         <SelectValue placeholder="Seleccionar tipo de programa" />
@@ -336,18 +370,26 @@ const ProgramForm: FC<Props> = ({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <Label htmlFor={`hora-ini-${index}`} className="text-xs text-gray-500">
+                          <Label
+                            htmlFor={`hora-ini-${index}`}
+                            className="text-xs text-gray-500"
+                          >
                             Hora inicio <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id={`hora-ini-${index}`}
                             className={cn(
-                              detailErrors.horaIni ? "border-red-500 focus-visible:ring-red-500" : ""
+                              detailErrors.horaIni
+                                ? "border-red-500 focus-visible:ring-red-500"
+                                : ""
                             )}
                             value={startTime}
                             onChange={(e) => {
                               const value = e.target.value;
-                              setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
+                              setValue(
+                                `detalles.${index}.horaIni`,
+                                `${dateStr}T${value}`
+                              );
                               validateDetail(index);
                             }}
                             type="time"
@@ -356,25 +398,36 @@ const ProgramForm: FC<Props> = ({
                           />
                           {detailErrors.horaIni && (
                             <p className="text-red-500 text-xs flex items-center mt-1">
-                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              <AlertCircle
+                                size={10}
+                                className="mr-1 flex-shrink-0"
+                              />
                               {detailErrors.horaIni}
                             </p>
                           )}
                         </div>
 
                         <div className="space-y-1">
-                          <Label htmlFor={`hora-fin-${index}`} className="text-xs text-gray-500">
+                          <Label
+                            htmlFor={`hora-fin-${index}`}
+                            className="text-xs text-gray-500"
+                          >
                             Hora fin <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id={`hora-fin-${index}`}
                             className={cn(
-                              detailErrors.horaFin ? "border-red-500 focus-visible:ring-red-500" : ""
+                              detailErrors.horaFin
+                                ? "border-red-500 focus-visible:ring-red-500"
+                                : ""
                             )}
                             value={endTime}
                             onChange={(e) => {
                               const value = e.target.value;
-                              setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
+                              setValue(
+                                `detalles.${index}.horaFin`,
+                                `${dateStr}T${value}`
+                              );
                               validateDetail(index);
                             }}
                             type="time"
@@ -383,7 +436,10 @@ const ProgramForm: FC<Props> = ({
                           />
                           {detailErrors.horaFin && (
                             <p className="text-red-500 text-xs flex items-center mt-1">
-                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              <AlertCircle
+                                size={10}
+                                className="mr-1 flex-shrink-0"
+                              />
                               {detailErrors.horaFin}
                             </p>
                           )}
@@ -401,16 +457,24 @@ const ProgramForm: FC<Props> = ({
                         {...register(`detalles.${index}.descripcionBody`)}
                         placeholder="Descripción del detalle"
                         className={cn(
-                          detailErrors.descripcionBody ? "border-red-500 focus-visible:ring-red-500" : ""
+                          detailErrors.descripcionBody
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : ""
                         )}
                         onChange={(e) => {
-                          setValue(`detalles.${index}.descripcionBody`, e.target.value);
+                          setValue(
+                            `detalles.${index}.descripcionBody`,
+                            e.target.value
+                          );
                           validateDetail(index);
                         }}
                       />
                       {detailErrors.descripcionBody && (
                         <p className="text-red-500 text-xs flex items-center mt-1">
-                          <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                          <AlertCircle
+                            size={10}
+                            className="mr-1 flex-shrink-0"
+                          />
                           {detailErrors.descripcionBody}
                         </p>
                       )}
@@ -421,7 +485,8 @@ const ProgramForm: FC<Props> = ({
                       <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200 space-y-4">
                         <h4 className="font-medium text-sm flex items-center gap-2">
                           <User size={16} className="text-primary" />
-                          Información adicional para Conferencia <span className="text-red-500">*</span>
+                          Información adicional para Conferencia{" "}
+                          <span className="text-red-500">*</span>
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -431,15 +496,26 @@ const ProgramForm: FC<Props> = ({
                               Idioma <span className="text-red-500">*</span>
                             </Label>
                             <Select
-                              value={detail.idIdioma ? `${detail.idIdioma}` : undefined}
+                              value={
+                                detail.idIdioma
+                                  ? `${detail.idIdioma}`
+                                  : undefined
+                              }
                               onValueChange={(value) => {
-                                setValue(`detalles.${index}.idIdioma`, Number(value));
+                                setValue(
+                                  `detalles.${index}.idIdioma`,
+                                  Number(value)
+                                );
                                 validateDetail(index);
                               }}
                             >
-                              <SelectTrigger className={cn(
-                                detailErrors.idIdioma ? "border-red-500 focus-visible:ring-red-500" : ""
-                              )}>
+                              <SelectTrigger
+                                className={cn(
+                                  detailErrors.idIdioma
+                                    ? "border-red-500 focus-visible:ring-red-500"
+                                    : ""
+                                )}
+                              >
                                 <SelectValue placeholder="Seleccionar idioma" />
                               </SelectTrigger>
                               <SelectContent>
@@ -452,7 +528,10 @@ const ProgramForm: FC<Props> = ({
                             </Select>
                             {detailErrors.idIdioma && (
                               <p className="text-red-500 text-xs flex items-center mt-1">
-                                <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                                <AlertCircle
+                                  size={10}
+                                  className="mr-1 flex-shrink-0"
+                                />
                                 {detailErrors.idIdioma}
                               </p>
                             )}
@@ -468,16 +547,24 @@ const ProgramForm: FC<Props> = ({
                               {...register(`detalles.${index}.sala`)}
                               placeholder="Sala / Ubicación"
                               className={cn(
-                                detailErrors.sala ? "border-red-500 focus-visible:ring-red-500" : ""
+                                detailErrors.sala
+                                  ? "border-red-500 focus-visible:ring-red-500"
+                                  : ""
                               )}
                               onChange={(e) => {
-                                setValue(`detalles.${index}.sala`, e.target.value);
+                                setValue(
+                                  `detalles.${index}.sala`,
+                                  e.target.value
+                                );
                                 validateDetail(index);
                               }}
                             />
                             {detailErrors.sala && (
                               <p className="text-red-500 text-xs flex items-center mt-1">
-                                <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                                <AlertCircle
+                                  size={10}
+                                  className="mr-1 flex-shrink-0"
+                                />
                                 {detailErrors.sala}
                               </p>
                             )}
@@ -496,9 +583,14 @@ const ProgramForm: FC<Props> = ({
                               detailErrors.idAutor ? "text-red-500" : ""
                             )}
                             placeholder="Seleccionar autores"
-                            selected={detail.idAutor ? detail.idAutor.split(",") : []}
+                            selected={
+                              detail.idAutor ? detail.idAutor.split(",") : []
+                            }
                             onChange={(selected) => {
-                              setValue(`detalles.${index}.idAutor`, selected.join(","));
+                              setValue(
+                                `detalles.${index}.idAutor`,
+                                selected.join(",")
+                              );
                               validateDetail(index);
                             }}
                             options={expositors.map((expositor) => ({
@@ -508,7 +600,10 @@ const ProgramForm: FC<Props> = ({
                           />
                           {detailErrors.idAutor && (
                             <p className="text-red-500 text-xs flex items-center mt-1">
-                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              <AlertCircle
+                                size={10}
+                                className="mr-1 flex-shrink-0"
+                              />
                               {detailErrors.idAutor}
                             </p>
                           )}

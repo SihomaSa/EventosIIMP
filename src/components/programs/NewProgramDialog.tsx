@@ -252,7 +252,7 @@ const NewProgramDialog: FC<Props> = ({
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-white">
           <Plus size={16} className="mr-1" />
-          Crear programa
+          Crear nueva fecha
         </Button>
       </DialogTrigger>
 

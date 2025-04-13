@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Program, ProgramCategory } from "../../types/Program";
+import { Program, ProgramCategory, ProgramDetail } from "../../types/Program";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -12,7 +12,6 @@ import {
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
 import {
-  Plus,
   Trash,
   Edit,
   ChevronDown,
@@ -22,19 +21,21 @@ import {
   ChevronUp,
   Calendar,
 } from "lucide-react";
-import EditProgramDialog from "../../../../components/programs/EditProgramDialog";
+import EditTitleProgramDialog from "../../../../components/programs/EditTitleProgramDialog";
 import ProgramsService from "../../services/ProgramsService";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { toast } from "sonner";
+import AddProgramDialog from "../../../../components/programs/AddProgramDialog"; // Import the AddProgramDialog
 
 type Props = {
   program: Program;
+    programDetail: ProgramDetail;
   programCategories: ProgramCategory[];
   date: string;
-  onDeleteSuccess?: () => void; // Optional callback for successful deletion
+  onDeleteSuccess?: () => void;
 };
 
 const ProgramCard: FC<Props> = ({
@@ -119,16 +120,19 @@ const ProgramCard: FC<Props> = ({
       />
       <div className="flex flex-wrap gap-2 justify-start">
         {program.detalles[0] && (
-          <EditProgramDialog
+          <EditTitleProgramDialog
             date={date}
             programDetail={program.detalles[0]}
             programCategories={programCategories}
+            onDeleteSuccess={onDeleteSuccess}
           />
         )}
-        <Button className="bg-primary hover:bg-primary/90 shadow-sm">
-          <Plus />
-          Añadir programa
-        </Button>
+        <AddProgramDialog
+          programCategories={programCategories}
+          date={date}
+          programDetail={program.detalles[0]}
+          onDeleteSuccess={onDeleteSuccess}
+        />
       </div>
 
       <Card className="overflow-hidden border-primary/20 shadow-sm py-0">
