@@ -64,7 +64,7 @@ const EditProgramDialog: FC<Props> = ({
           Editar
         </Button>
       </DialogTrigger>
-      <DialogContent className="!max-w-[1200px]">
+      <DialogContent className="max-w-md md:max-w-2xl w-full">
         <DialogHeader>
           <DialogTitle>Editar programa</DialogTitle>
         </DialogHeader>

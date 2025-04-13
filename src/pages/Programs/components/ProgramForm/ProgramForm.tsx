@@ -1,10 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import ProgramDatePicker from "./components/ProgramDatePicker";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { ProgramForm as ProgramFormType } from "./types/ProgramForm";
 import {
   Select,
@@ -19,11 +16,21 @@ import { ProgramCategory } from "../../types/Program";
 import { ExpositorType } from "@/types/expositorTypes";
 import { getExpositors } from "@/components/services/expositorsService";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash } from "lucide-react";
+import {
+  AlertCircle,
+  Clock,
+  BadgeCheck,
+  User,
+  MessageSquare,
+  MapPin,
+  Users,
+  Settings
+} from "lucide-react";
 import { ProgramMultiSelect } from "./components/ProgramMultiSelect";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 type Props = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: UseFormReturn<ProgramFormType, any, undefined>;
   onSubmit: (program: ProgramFormType) => void;
   disabled: boolean;
@@ -32,19 +39,34 @@ type Props = {
 };
 
 const ProgramForm: FC<Props> = ({
-  form: { handleSubmit, register, watch, setValue },
+  form: { handleSubmit, register, watch, setValue, formState, trigger },
   onSubmit,
   disabled,
   programCategories,
   forEdit,
 }) => {
   const dateStr = watch("fechaPrograma");
-  const details = watch("detalles");
+  const details = watch("detalles") || [];
+  const descripcionPro = watch("descripcionPro");
   const [loading, setLoading] = useState(false);
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
   const [error, setError] = useState("");
   const detailsRef = useRef<HTMLDivElement>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, Record<string, string>>>({});
 
+  // Use useMemo for form errors to avoid infinite loop
+  const fieldErrors = useMemo(() => {
+    const errors: Record<string, string> = {};
+
+    // Add form errors
+    if (formState.errors.descripcionPro) {
+      errors.descripcionPro = "La descripción es obligatoria y debe tener al menos 3 caracteres";
+    }
+
+    return errors;
+  }, [formState.errors]);
+
+  // Load expositors on component mount
   useEffect(() => {
     async function loadExpositors() {
       try {
@@ -60,192 +82,454 @@ const ProgramForm: FC<Props> = ({
     loadExpositors();
   }, []);
 
-  function handleSetDate(newDate?: Date) {
-    let parsedDate = "";
-    if (newDate) {
-      const date = new Date(newDate);
-      parsedDate = date.toISOString().split("T")[0];
+  // Validate detail fields
+  const validateDetail = (index: number) => {
+    const detail = details[index];
+    const errors: Record<string, string> = {};
+
+    // Validate time fields
+    const startTime = detail.horaIni?.split("T")[1] || "";
+    const endTime = detail.horaFin?.split("T")[1] || "";
+
+    if (!startTime) {
+      errors.horaIni = "Hora de inicio es obligatoria";
     }
-    setValue("fechaPrograma", parsedDate);
-  }
 
-  function addDetail() {
-    setValue("detalles", [
-      ...details,
-      {
-        horaFin: "",
-        horaIni: "",
-      },
-    ]);
-    detailsRef.current?.scroll({
-      top: detailsRef.current.scrollHeight,
-      behavior: "smooth",
+    if (!endTime) {
+      errors.horaFin = "Hora de fin es obligatoria";
+    } else if (startTime && endTime && endTime <= startTime) {
+      errors.horaFin = "Hora de fin debe ser posterior a hora de inicio";
+    }
+
+    // Validate type
+    if (!detail.tipoPrograma) {
+      errors.tipoPrograma = "Tipo de programa es obligatorio";
+    }
+
+    // Validate description
+    if (!detail.descripcionBody || detail.descripcionBody.trim().length < 3) {
+      errors.descripcionBody = "Descripción es obligatoria (mín. 3 caracteres)";
+    }
+
+    // Validate additional fields for type 3 (Conference)
+    if (detail.tipoPrograma === 3) {
+      if (!detail.idIdioma) {
+        errors.idIdioma = "Idioma es obligatorio";
+      }
+
+      if (!detail.sala || detail.sala.trim().length === 0) {
+        errors.sala = "Sala es obligatoria";
+      }
+
+      if (!detail.idAutor || detail.idAutor.trim().length === 0) {
+        errors.idAutor = "Debe seleccionar al menos un autor";
+      }
+    }
+
+    // Update errors for this detail
+    setValidationErrors(prev => ({
+      ...prev,
+      [index]: errors
+    }));
+
+    return Object.keys(errors).length === 0;
+  };
+
+  // Custom submit handler with validation
+  const handleFormSubmit = (data: ProgramFormType) => {
+    // Validate description length
+    if (!data.descripcionPro || data.descripcionPro.trim().length < 3) {
+      setValue("descripcionPro", data.descripcionPro, {
+        shouldValidate: true,
+        shouldDirty: true
+      });
+      setError("La descripción del programa es obligatoria y debe tener al menos 3 caracteres");
+      return;
+    }
+
+    // Validate details
+    let isValid = true;
+    details.forEach((_, index) => {
+      if (!validateDetail(index)) {
+        isValid = false;
+      }
     });
-  }
 
-  function detailFormByProgramId(index: number) {
-    const tipoPrograma = details[index]?.tipoPrograma;
-    if (!tipoPrograma) return;
-    const idIdioma = details[index]?.idIdioma;
-    const idAutor = details[index]?.idAutor;
-    return (
-      <>
-        <Input
-          {...register(`detalles.${index}.descripcionBody`)}
-          placeholder="Descripción"
-        />
-        {tipoPrograma === 3 && (
-          <>
-            <Select
-              value={idIdioma ? `${idIdioma}` : undefined}
-              onValueChange={(value) =>
-                setValue(`detalles.${index}.idIdioma`, Number(value))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Idioma" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Idioma</SelectLabel>
-                  <SelectItem value="2">Español</SelectItem>
-                  <SelectItem value="1">Inglés</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Input {...register(`detalles.${index}.sala`)} placeholder="Sala" />
-            <ProgramMultiSelect
-              className="w-fit max-w-3xs"
-              placeholder="Autores"
-              selected={idAutor ? idAutor.split(",") : []}
-              onChange={(selected) =>
-                setValue(`detalles.${index}.idAutor`, selected.join(","))
-              }
-              options={expositors.map((expositor) => ({
-                label: `${expositor.nombres}, ${expositor.apellidos}`,
-                value: `${expositor.idAutor}`,
-              }))}
-            />
-          </>
-        )}
-      </>
-    );
-  }
+    if (!isValid) {
+      setError("Por favor complete todos los campos obligatorios en los detalles del programa");
+      return;
+    }
 
-  if (loading)
+    // If all validations pass, submit the form
+    setError("");
+    onSubmit(data);
+  };
+
+  // Loading state - Enhanced skeleton that matches the form layout
+  if (loading) {
     return (
-      <div className="grid grid-cols-1 gap-4">
-        <Skeleton className="h-6 w-1/3 bg-primary/60" />
-        <Skeleton className="h-6 w-full bg-primary/60" />
-        <Skeleton className="h-6 w-full bg-primary/60" />
-        <Skeleton className="h-6 w-full bg-primary/60" />
+      <div className="grid gap-4 py-4">
+        {/* Description skeleton */}
+        <div className="p-3 border rounded-md">
+          <Skeleton className="h-6 w-36 bg-primary/30 mb-2" />
+          <Skeleton className="h-24 w-full bg-primary/30" />
+        </div>
+
+        {/* Program Details skeleton */}
+        <div className="p-4 border rounded-md">
+          <Skeleton className="h-6 w-48 bg-primary/30 mb-4" />
+
+          <div className="space-y-4">
+            {/* Program type skeleton */}
+            <div className="p-3 border rounded-md">
+              <Skeleton className="h-6 w-36 bg-primary/30 mb-2" />
+              <Skeleton className="h-10 w-full bg-primary/30" />
+            </div>
+
+            {/* Time fields skeleton */}
+            <div className="p-3 border rounded-md">
+              <Skeleton className="h-6 w-24 bg-primary/30 mb-2" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full bg-primary/30" />
+                <Skeleton className="h-10 w-full bg-primary/30" />
+              </div>
+            </div>
+
+            {/* Description skeleton */}
+            <div className="p-3 border rounded-md">
+              <Skeleton className="h-6 w-36 bg-primary/30 mb-2" />
+              <Skeleton className="h-10 w-full bg-primary/30" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-32 bg-primary/30" />
+        </div>
       </div>
     );
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="description" className="text-right">
-          Descripción
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="grid gap-6 py-4">
+      {/* Description */}
+      <div className={cn(
+        "p-4 border rounded-md",
+        fieldErrors.descripcionPro ? "border-red-300 bg-red-50/50" : "hover:border-primary/50 transition-colors"
+      )}>
+        <Label htmlFor="description" className="block mb-2 font-medium flex items-center gap-2">
+          <MessageSquare size={16} className="text-primary" />
+          Descripción del programa <span className="text-red-500">*</span>
         </Label>
-        <Input
-          {...register(`descripcionPro`, {
-            required: true,
-          })}
-          id="description"
-          placeholder="..."
-          disabled={disabled}
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="fechaPrograma" className="text-right">
-          Fecha
-        </Label>
-        <ProgramDatePicker
-          id="fechaPrograma"
-          disabled={disabled || forEdit}
-          date={dateStr ? new Date(`${dateStr}T12:00:00`) : undefined}
-          setDate={handleSetDate}
-        />
+        <div className="space-y-2">
+          <Textarea
+            {...register(`descripcionPro`, {
+              required: true,
+              minLength: 3
+            })}
+            id="description"
+            placeholder="Descripción general del programa..."
+            disabled={disabled}
+            className={cn(
+              "min-h-[80px]",
+              fieldErrors.descripcionPro ? "border-red-500 focus-visible:ring-red-500" : ""
+            )}
+          />
+          {fieldErrors.descripcionPro && (
+            <p className="text-red-500 text-xs flex items-center">
+              <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+              {fieldErrors.descripcionPro}
+            </p>
+          )}
+          {!descripcionPro && !fieldErrors.descripcionPro && (
+            <p className="text-amber-600 text-xs flex items-center">
+              <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+              Ingrese una descripción de al menos 3 caracteres
+            </p>
+          )}
+        </div>
       </div>
 
-      <p className="text-sm">Hora de inicio / Hora de fin</p>
+      {/* Program Details */}
+      <div className="border rounded-md p-4 space-y-5">
+        <h3 className="text-md font-medium flex items-center gap-2 border-b pb-2">
+          <Settings size={16} className="text-primary" />
+          Detalle del programa <span className="text-red-500">*</span>
+        </h3>
 
-      <div ref={detailsRef} className="grid gap-4 max-h-[40vh] overflow-auto">
-        {details.map(({ tipoPrograma, horaIni, horaFin }, index) => (
-          <div className="flex gap-2" key={index}>
-            <Button
-              type="button"
-              title="Eliminar"
-              variant="ghost"
-              className="!px-2"
-              onClick={() => {
-                setValue(
-                  "detalles",
-                  details.filter((_, i) => i !== index)
-                );
-              }}
-            >
-              <Trash className="text-destructive" />
-            </Button>
-            <Input
-              className="flex min-w-max max-w-[100px]"
-              value={horaIni.split("T")[1] ?? ""}
-              onChange={async (e) => {
-                const value = e.target.value;
-                setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
-              }}
-              type="time"
-              placeholder="Hora inicio"
-            />
-            <Input
-              className="flex min-w-max max-w-[100px]"
-              value={horaFin.split("T")[1] ?? ""}
-              onChange={async (e) => {
-                const value = e.target.value;
-                setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
-              }}
-              type="time"
-              placeholder="Hora fin"
-            />
-            <Select
-              value={tipoPrograma ? `${tipoPrograma}` : undefined}
-              onValueChange={(value) =>
-                setValue(`detalles.${index}.tipoPrograma`, Number(value))
-              }
-              disabled={disabled || forEdit}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo de programa" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Tipo de programa</SelectLabel>
-                  {programCategories.map((category) => (
-                    <SelectItem
-                      value={String(category.idTipoPrograma)}
-                      key={category.idTipoPrograma}
+        <div ref={detailsRef} className="space-y-5">
+          {details.map((detail, index) => {
+            const startTime = detail.horaIni?.split("T")[1] || "";
+            const endTime = detail.horaFin?.split("T")[1] || "";
+            const detailErrors = validationErrors[index] || {};
+            const hasTypeSelected = !!detail.tipoPrograma;
+
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "border rounded-md overflow-hidden",
+                  Object.keys(detailErrors).length > 0 ? "border-red-300" : "border-gray-200"
+                )}
+              >
+                {/* Program Type Selection - Always Visible First */}
+                <div className="p-4 bg-gray-50 border-b">
+                  <Label htmlFor={`tipo-programa-${index}`} className="block mb-2 font-medium flex items-center gap-2">
+                    <BadgeCheck size={16} className="text-primary" />
+                    Tipo de programa <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="space-y-2">
+                    <Select
+                      value={detail.tipoPrograma ? `${detail.tipoPrograma}` : undefined}
+                      onValueChange={(value) => {
+                        setValue(`detalles.${index}.tipoPrograma`, Number(value));
+                        validateDetail(index);
+                      }}
+                      disabled={disabled || forEdit}
                     >
-                      {category.descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            {detailFormByProgramId(index)}
-          </div>
-        ))}
+                      <SelectTrigger
+                        id={`tipo-programa-${index}`}
+                        className={cn(
+                          detailErrors.tipoPrograma ? "border-red-500 focus-visible:ring-red-500" : ""
+                        )}
+                      >
+                        <SelectValue placeholder="Seleccionar tipo de programa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Tipo de programa</SelectLabel>
+                          {programCategories.map((category) => (
+                            <SelectItem
+                              value={String(category.idTipoPrograma)}
+                              key={category.idTipoPrograma}
+                            >
+                              {category.descripcion}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {detailErrors.tipoPrograma && (
+                      <p className="text-red-500 text-xs flex items-center mt-1">
+                        <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                        {detailErrors.tipoPrograma}
+                      </p>
+                    )}
+                    {!detail.tipoPrograma && !detailErrors.tipoPrograma && (
+                      <p className="text-amber-600 text-xs flex items-center">
+                        <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                        Seleccione un tipo de programa para continuar
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Additional Fields - Only visible after program type is selected */}
+                {hasTypeSelected && (
+                  <div className="p-4 space-y-4">
+                    {/* Time fields */}
+                    <div className="space-y-2">
+                      <Label className="block mb-1 font-medium flex items-center gap-2">
+                        <Clock size={16} className="text-primary" />
+                        Horario <span className="text-red-500">*</span>
+                      </Label>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label htmlFor={`hora-ini-${index}`} className="text-xs text-gray-500">
+                            Hora inicio <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id={`hora-ini-${index}`}
+                            className={cn(
+                              detailErrors.horaIni ? "border-red-500 focus-visible:ring-red-500" : ""
+                            )}
+                            value={startTime}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setValue(`detalles.${index}.horaIni`, `${dateStr}T${value}`);
+                              validateDetail(index);
+                            }}
+                            type="time"
+                            placeholder="Hora inicio"
+                            disabled={disabled}
+                          />
+                          {detailErrors.horaIni && (
+                            <p className="text-red-500 text-xs flex items-center mt-1">
+                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              {detailErrors.horaIni}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <Label htmlFor={`hora-fin-${index}`} className="text-xs text-gray-500">
+                            Hora fin <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id={`hora-fin-${index}`}
+                            className={cn(
+                              detailErrors.horaFin ? "border-red-500 focus-visible:ring-red-500" : ""
+                            )}
+                            value={endTime}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setValue(`detalles.${index}.horaFin`, `${dateStr}T${value}`);
+                              validateDetail(index);
+                            }}
+                            type="time"
+                            placeholder="Hora fin"
+                            disabled={disabled}
+                          />
+                          {detailErrors.horaFin && (
+                            <p className="text-red-500 text-xs flex items-center mt-1">
+                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              {detailErrors.horaFin}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-2">
+                      <Label className="block mb-1 font-medium flex items-center gap-2">
+                        <MessageSquare size={16} className="text-primary" />
+                        Descripción <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        {...register(`detalles.${index}.descripcionBody`)}
+                        placeholder="Descripción del detalle"
+                        className={cn(
+                          detailErrors.descripcionBody ? "border-red-500 focus-visible:ring-red-500" : ""
+                        )}
+                        onChange={(e) => {
+                          setValue(`detalles.${index}.descripcionBody`, e.target.value);
+                          validateDetail(index);
+                        }}
+                      />
+                      {detailErrors.descripcionBody && (
+                        <p className="text-red-500 text-xs flex items-center mt-1">
+                          <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                          {detailErrors.descripcionBody}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Additional fields for Conference (type 3) */}
+                    {detail.tipoPrograma === 3 && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200 space-y-4">
+                        <h4 className="font-medium text-sm flex items-center gap-2">
+                          <User size={16} className="text-primary" />
+                          Información adicional para Conferencia <span className="text-red-500">*</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {/* Language Select */}
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500 flex items-center gap-1">
+                              Idioma <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                              value={detail.idIdioma ? `${detail.idIdioma}` : undefined}
+                              onValueChange={(value) => {
+                                setValue(`detalles.${index}.idIdioma`, Number(value));
+                                validateDetail(index);
+                              }}
+                            >
+                              <SelectTrigger className={cn(
+                                detailErrors.idIdioma ? "border-red-500 focus-visible:ring-red-500" : ""
+                              )}>
+                                <SelectValue placeholder="Seleccionar idioma" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Idioma</SelectLabel>
+                                  <SelectItem value="2">Español</SelectItem>
+                                  <SelectItem value="1">Inglés</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                            {detailErrors.idIdioma && (
+                              <p className="text-red-500 text-xs flex items-center mt-1">
+                                <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                                {detailErrors.idIdioma}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Room Input */}
+                          <div className="space-y-1">
+                            <Label className="text-xs text-gray-500 flex items-center gap-1">
+                              <MapPin size={10} className="text-primary" />
+                              Sala <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              {...register(`detalles.${index}.sala`)}
+                              placeholder="Sala / Ubicación"
+                              className={cn(
+                                detailErrors.sala ? "border-red-500 focus-visible:ring-red-500" : ""
+                              )}
+                              onChange={(e) => {
+                                setValue(`detalles.${index}.sala`, e.target.value);
+                                validateDetail(index);
+                              }}
+                            />
+                            {detailErrors.sala && (
+                              <p className="text-red-500 text-xs flex items-center mt-1">
+                                <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                                {detailErrors.sala}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Authors MultiSelect */}
+                        <div className="space-y-1">
+                          <Label className="text-xs text-gray-500 flex items-center gap-1">
+                            <Users size={10} className="text-primary" />
+                            Autores <span className="text-red-500">*</span>
+                          </Label>
+                          <ProgramMultiSelect
+                            className={cn(
+                              "w-full",
+                              detailErrors.idAutor ? "text-red-500" : ""
+                            )}
+                            placeholder="Seleccionar autores"
+                            selected={detail.idAutor ? detail.idAutor.split(",") : []}
+                            onChange={(selected) => {
+                              setValue(`detalles.${index}.idAutor`, selected.join(","));
+                              validateDetail(index);
+                            }}
+                            options={expositors.map((expositor) => ({
+                              label: `${expositor.nombres}, ${expositor.apellidos}`,
+                              value: `${expositor.idAutor}`,
+                            }))}
+                          />
+                          {detailErrors.idAutor && (
+                            <p className="text-red-500 text-xs flex items-center mt-1">
+                              <AlertCircle size={10} className="mr-1 flex-shrink-0" />
+                              {detailErrors.idAutor}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <Button onClick={addDetail} disabled={disabled}>
-        Añadir horario
-      </Button>
-
-      {error && <p className="text-destructive">{error}</p>}
-
-      <DialogFooter>
-        <Button type="submit">{forEdit ? "Editar" : "Crear"}</Button>
-      </DialogFooter>
+      {/* Error message */}
+      {error && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 flex items-start">
+          <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 text-red-500 mt-0.5" />
+          <p>{error}</p>
+        </div>
+      )}
     </form>
   );
 };

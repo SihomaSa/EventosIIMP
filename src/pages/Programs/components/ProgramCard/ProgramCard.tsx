@@ -115,7 +115,7 @@ const ProgramCard: FC<Props> = ({
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
-        itemName={`el detalle "${itemToDelete?.descripcionBody}"`}
+        itemName={`el programa: "${itemToDelete?.descripcionBody}"`}
       />
       <div className="flex flex-wrap gap-2 justify-start">
         {program.detalles[0] && (
@@ -159,7 +159,7 @@ const ProgramCard: FC<Props> = ({
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-gray-50 border-y border-gray-300">
-                        <TableHead className="text-center whitespace-nowrap font-semibold">
+                        <TableHead className="text-center whitespace-nowrap font-semibold truncate">
                           Horario
                         </TableHead>
                         <TableHead className="font-semibold">

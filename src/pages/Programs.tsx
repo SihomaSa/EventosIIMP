@@ -13,9 +13,7 @@ export default function Expositors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [programCategories, setProgramCategories] = useState<ProgramCategory[]>(
-    []
-  );
+  const [programCategories, setProgramCategories] = useState<ProgramCategory[]>([]);
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,26 +22,33 @@ export default function Expositors() {
     new Date().toLocaleTimeString()
   );
 
+  // Load all data (programs and categories)
   const loadData = useCallback(async () => {
     try {
       setIsRefreshing(true);
+
       // Load program categories
       const categories = await ProgramsService.getProgramCategories();
       setProgramCategories(categories);
+
       // Load programs
       const programs = await ProgramsService.getPrograms();
       setPrograms(programs);
+
       // Extract unique dates
       const uniqueDates = [
         ...new Set(programs.map((program) => program.fechaPrograma)),
       ].sort();
       setDates(uniqueDates);
+
       // Select first date if available and none selected
       if (uniqueDates.length > 0 && !selectedDate) {
         setSelectedDate(uniqueDates[0]);
       }
+
       // Clear any previous errors
       if (error) setError(null);
+
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       console.error("Error loading program data:", err);
@@ -59,14 +64,30 @@ export default function Expositors() {
     loadData();
   }, [loadData]);
 
+  // Function to refresh programs - used after adding a new program
   const handleRefreshPrograms = useCallback(async () => {
     try {
+      // Load programs
       const programs = await ProgramsService.getPrograms();
       setPrograms(programs);
+
+      // Extract and update dates
+      const uniqueDates = [
+        ...new Set(programs.map((program) => program.fechaPrograma)),
+      ].sort();
+      setDates(uniqueDates);
+
+      // If there was no selected date but now we have dates, select the first one
+      if (!selectedDate && uniqueDates.length > 0) {
+        setSelectedDate(uniqueDates[0]);
+      }
+
+      // Update last updated time
+      setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       console.error("Error refreshing programs:", err);
     }
-  }, []);
+  }, [selectedDate]);
 
   // Filter programs by selected date and search term
   const filteredPrograms = useMemo(() => {
@@ -82,14 +103,12 @@ export default function Expositors() {
         // Search in program title
         if (program.titulo && program.titulo.toLowerCase().includes(term))
           return true;
-
         // Search in program description
         if (
           program.descripcion &&
           program.descripcion.toLowerCase().includes(term)
         )
           return true;
-
         // Search in program details
         if (program.detalles && Array.isArray(program.detalles)) {
           return program.detalles.some(
@@ -101,7 +120,6 @@ export default function Expositors() {
                 detail.responsable.toLowerCase().includes(term))
           );
         }
-
         return false;
       });
     }
@@ -109,10 +127,12 @@ export default function Expositors() {
     return filtered;
   }, [programs, selectedDate, searchTerm]);
 
+  // Handle refresh button click
   const handleRefresh = () => {
     loadData();
   };
 
+  // Loading state UI
   if (loading) {
     return (
       <div className="p-0 xl:p-6 space-y-6">
@@ -123,7 +143,6 @@ export default function Expositors() {
             <Skeleton className="h-10 w-32 bg-primary/30" />
           </div>
         </div>
-
         <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200">
           <div className="mb-6">
             <Skeleton className="h-12 w-full bg-primary/30 mb-4" />
@@ -175,8 +194,11 @@ export default function Expositors() {
             />
             <span className="hidden md:inline">Actualizar</span>
           </Button>
-
-          <NewProgramDialog programCategories={programCategories} />
+          <NewProgramDialog
+            programCategories={programCategories}
+            existingDates={dates}
+            onProgramAdded={handleRefreshPrograms}
+          />
         </div>
       </div>
 
@@ -206,7 +228,6 @@ export default function Expositors() {
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
             />
-
             {selectedDate && (
               <ProgramContainer
                 programs={filteredPrograms}
