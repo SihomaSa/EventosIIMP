@@ -28,11 +28,12 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { toast } from "sonner";
-import AddProgramDialog from "../../../../components/programs/AddProgramDialog"; // Import the AddProgramDialog
+import AddProgramDialog from "../../../../components/programs/AddProgramDialog";
+import EditProgramDetailDialog from "../../../../components/programs/EditProgramDetailDialog";
 
 type Props = {
   program: Program;
-    programDetail: ProgramDetail;
+  programDetail: ProgramDetail;
   programCategories: ProgramCategory[];
   date: string;
   onDeleteSuccess?: () => void;
@@ -228,13 +229,14 @@ const ProgramCard: FC<Props> = ({
                           </TableCell>
                           <TableCell className="text-center whitespace-nowrap">
                             <div className="flex justify-center space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full"
-                              >
-                                <Edit size={15} />
-                              </Button>
+                              <EditProgramDetailDialog
+                                programDetail={additional}
+                                programCategories={programCategories}
+                                date={program.fechaPrograma}
+                                programDescription={detalle.descripcion}
+                                programId={detalle.idPrograma}
+                                onUpdateSuccess={onDeleteSuccess}
+                              />
                               <Button
                                 variant="ghost"
                                 size="icon"
