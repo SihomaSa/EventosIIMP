@@ -23,7 +23,7 @@ export const createSponsor = async (newSponsor:NewSponsorRequestType): Promise<S
   return response.json();
 };
 
-export const updateSponsors = async (updatedSponsor: UpdateSponsorRequestType): Promise<SponsorType> => {
+export const updateSponsor = async (updatedSponsor: UpdateSponsorRequestType): Promise<SponsorType> => {
   const response = await fetch(API_PUT_URL, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

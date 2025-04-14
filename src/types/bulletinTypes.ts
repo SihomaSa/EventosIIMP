@@ -1,4 +1,5 @@
-export interface BulletinType {
+import { LanguageType } from "./languageTypes";
+export interface BulletinType {//GET
     idTipPre: number;
     idPrensa: number;
     titulo: string;
@@ -10,17 +11,30 @@ export interface BulletinType {
     subtitulo: string;
     url: string;
     fecha: string;
-  }
-  export interface NewBulletinType {
+    estado: number;
+  }  
+ 
+  export interface NewBulletinType {//POST
     titulo: string;
     subtitulo: string;
     fecha: string;
     descripcion: string;
     url: string;
     foto: string;
-    idioma: string;
+    idioma: LanguageType;
   }
-  
+  export interface UpdateBulletinRequestType {//PUT
+    titulo: string;
+    subtitulo: string;
+    descripcion: string;
+    url: string;//*
+    evento: string;//*
+    tipoprensa: "2";
+    foto: string;//*
+    idioma: LanguageType;//*
+    idNews:string; //*
+    estado: string;
+  }
   export interface NewBulletinRequestType {
     titulo: string;
     subtitulo: string;
@@ -30,5 +44,5 @@ export interface BulletinType {
     evento: string;
     tipoprensa: "2";
     foto: string;
-    idioma: string;
+    idioma: LanguageType;
   }

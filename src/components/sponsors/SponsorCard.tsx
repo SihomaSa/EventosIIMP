@@ -1,74 +1,141 @@
-import { Pencil } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { SponsorType } from "@/types/sponsorTypes";
-import { deleteSponsor } from "../services/sponsorsService";
-import DeleteAlert from "../DeleteAlert";
 import { useState } from "react";
+import { Link as LinkIcon, Edit } from "lucide-react";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import DeleteAlert from "@/components/DeleteAlert";
+import { deleteSponsor } from "@/components/services/sponsorsService";
+import { SponsorType } from "@/types/sponsorTypes";
+import { toast } from "sonner";
 
 interface SponsorCardProps {
   sponsor: SponsorType;
-  openUpdateModal: () => void;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
-export default function SponsorCard({ sponsor, openUpdateModal, onDelete }: SponsorCardProps) {
-  
+export default function SponsorCard({
+  sponsor,
+  onEdit,
+  onDelete,
+}: SponsorCardProps) {
   const [error, setError] = useState<string | null>(null);
-	
-	const deleteSelectedSponsor = async (id: string) => {
-		try {
-			await deleteSponsor(id);
-			onDelete(); 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		} catch (err) {
-			setError("Error al borrar ");
-			console.error(error)
-		}
-	};
-  
+
+  const deleteSelectedSponsor = async (id: string) => {
+    try {
+      await deleteSponsor(id);
+      onDelete();
+      toast.success("Auspiciador eliminado correctamente");
+    } catch (err) {
+      setError("Error al borrar el auspiciador");
+      toast.error("No se pudo eliminar el auspiciador");
+      console.error(err);
+    }
+  };
+
   return (
-    <Card className="shadow-md overflow-hidden p-4 w-80 hover:shadow-2xl transition delay-150 duration-300 ease-in-out hover:scale-110">
-      <CardContent>
-        {sponsor.foto && (
+    <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
+      <CardHeader className="p-0">
+        <div className="relative w-full h-44 overflow-hidden rounded-t-lg">
           <img
             src={sponsor.foto}
-            alt={sponsor.nombre}
-            className="object-cover h-15 rounded-md"
+            alt={`auspiciador ${sponsor.idSponsor}`}
+            className="w-full h-full object-cover object-center"
           />
-        )}
-        <form className="p-2 space-y-2">
-          <div>
-            <Label htmlFor="nombre">Nombre</Label>
-            <Input id="nombre" value={sponsor.nombre} disabled className="bg-gray-100" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
+          <div className="absolute bottom-0 left-0 p-3 w-full">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
+                {sponsor.categoria}
+              </span>
+            </div>
           </div>
-          <div>
-            <Label htmlFor="descripcion">Descripción</Label>
-            <Input id="descripcion" value={sponsor.descripcionIdioma} disabled className="bg-gray-100" />
-          </div>
-          <div>
-            <Label htmlFor="categoria">Categoría</Label>
-            <Input id="categoria" value={sponsor.categoria} disabled className="bg-gray-100" />
-          </div>
-          <div>
-            <Label htmlFor="url">URL</Label>
-            <Input id="url" value={sponsor.url} disabled className="bg-gray-100" />
-          </div>
-          <div className="flex justify-between">
-          <DeleteAlert id={String(sponsor.idSponsor)} name="el auspiciador" deleteMethod={() => deleteSelectedSponsor(String(sponsor.idSponsor))} />
-            <Button
-              onClick={(event) => {
-                event.preventDefault();
-                openUpdateModal();
-              }}
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-3 bg-white flex-grow">
+        <div className="flex flex-col w-full gap-2">
+          {/* Nombre */}
+          <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
+            <Label
+              htmlFor="nombre"
+              className="text-xs font-medium flex items-center gap-1 text-primary truncate"
             >
-              <Pencil /> Editar
-            </Button>
+              <span className="truncate">Nombre</span>
+            </Label>
+            <Input
+              id="nombre"
+              value={sponsor.nombre}
+              disabled
+              className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
+            />
           </div>
-        </form>
+
+          {/* Descripción */}
+          <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
+            <Label
+              htmlFor="descripcion"
+              className="text-xs font-medium flex items-center gap-1 text-primary truncate"
+            >
+              <span className="truncate">Descripción</span>
+            </Label>
+            <Input
+              id="descripcion"
+              value={sponsor.descripcionIdioma}
+              disabled
+              className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
+            />
+          </div>
+
+          {/* URL */}
+          <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
+            <Label
+              htmlFor="url"
+              className="text-xs font-medium flex items-center gap-1 text-primary truncate"
+            >
+              <LinkIcon size={14} className="text-primary flex-shrink-0" />
+              <span className="truncate">URL</span>
+            </Label>
+            <div className="flex items-center">
+              <Input
+                id="url"
+                value={sponsor.url}
+                disabled
+                className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
+              />
+              <a
+                href={sponsor.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 text-primary hover:text-primary/80 transition-colors"
+              >
+                <LinkIcon size={14} />
+              </a>
+            </div>
+          </div>
+        </div>
       </CardContent>
+
+      <CardFooter className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between">
+        <DeleteAlert
+          id={String(sponsor.idSponsor)}
+          name="el auspiciador"
+          deleteMethod={() => deleteSelectedSponsor(String(sponsor.idSponsor))}
+        />
+        <Button
+          size="sm"
+          className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
+          onClick={(event) => {
+            event.preventDefault();
+            onEdit();
+          }}
+        >
+          <Edit size={14} />
+          <span className="truncate">Editar</span>
+        </Button>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+      </CardFooter>
     </Card>
   );
 }

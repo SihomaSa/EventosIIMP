@@ -13,23 +13,21 @@ export interface NewSponsorRequestType {//POST
     descripcion: string;
     foto: string;
 	url: string;
-	idEvento: string;
+	idEvento: 1;
 	categoria: string;
     idioma: LanguageType;
   }
-
   export interface UpdateSponsorRequestType {  //PUT
 	descripcion: string;
 	foto: string;
 	url: string;
-	idEvento:string ;
+	idEvento: number ;
 	categoria: string;
 	idioma: LanguageType;
 	estado: string;
 	idSponsor: number;
   }
-
-
+ 
   export interface NewSponsorType {
 	idEvento: number;
 	descripcion: string;

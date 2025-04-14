@@ -24,9 +24,7 @@ const adSchema = z.object({
 		.min(0)
 		.max(1, { message: "El estado debe ser inactivo o activo" }),
 });
-
 type AdFormValues = z.infer<typeof adSchema>;
-
 interface UpdateAdsModalProps {
 	onAdd: () => void;
 	onClose: () => void;
@@ -34,7 +32,6 @@ interface UpdateAdsModalProps {
 	onUpdate: () => void;
 	open: boolean;
 }
-
 export default function UpdateAdsModal({
 	onClose,
 	ad,
@@ -44,9 +41,7 @@ export default function UpdateAdsModal({
 	const [imagePreview, setImagePreview] = useState<string | null>(
 		typeof ad.foto === "string" ? ad.foto : null
 	);
-
 	const [fotoUpdated, setFotoUpdated] = useState(0);
-
 	const {
 		register,
 		handleSubmit,
@@ -74,12 +69,21 @@ export default function UpdateAdsModal({
 		}
 	  }, [ad, setValue]);
 	
+	  const [imageError, setImageError] = useState<string | null>(null); // ✅ Error del archivo
 
 	  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
+			if (file.size > 1024 * 1024) {
+				setImageError("La imagen excede el tamaño máximo permitido de 1MB.");
+				setValue("foto", undefined); // Limpia el valor del form
+				setImagePreview(null); // Limpia la vista previa
+				event.target.value = ""; // Resetea el input
+				return;
+			}
+			setImageError(null); // Limpia errores anteriores
 			setImagePreview(URL.createObjectURL(file));
-			setValue("foto", file, { shouldValidate: true }); // ✅ CAMBIO
+			setValue("foto", file, { shouldValidate: true });
 			setFotoUpdated((prev) => prev + 1);
 		}
 	};
@@ -98,14 +102,13 @@ export default function UpdateAdsModal({
 			  : ad.foto;
 	  
 		  const editAd: UpdateAdRequestType = {
-			idPublicidad: String(ad.idPublicidad), // 📌 Se asegura que `idPublicidad` está presente
 			foto: formFoto,
 			url: data.url,
 			idioma: data.idioma,
 			evento: String(ad.idEvento),
 			estado: String(data.estado),
+			idPublicidad: String(ad.idPublicidad), // 📌 Se asegura que `idPublicidad` está presente
 		  };
-	  
 		  console.log("Actualizando publicidad con:", editAd);
 		  await updateAd(editAd);
 	  
@@ -148,6 +151,9 @@ export default function UpdateAdsModal({
 								accept="image/*"
 								onChange={onFileChange}
 							/>
+							{imageError && (
+								<p className="text-red-500 text-sm mt-2">{imageError}</p> // ✅ Mensaje de error
+							)}
 							{imagePreview && (
 								<img
 									src={imagePreview}

@@ -78,31 +78,47 @@ export default function EventList() {
 			</div>
 		);
 	if (error) return <p className="text-red-500">{error}</p>;
-
+	let firstEnabledShown = false;
 	return (
 		<div className="h-screen w-screen py-9 px-9 max-w-md m-auto overflow-y-scroll overflow-x-hidden">
 			<h2 className="text-2xl font-bold mb-4">Selecciona el evento que desea ver</h2>
 
 			<div className="flex flex-wrap justify-center items-center gap-2 py-9">
 				{events.map((event, index) => {
+				// Si el evento está deshabilitado (estado === "0"), lo mostramos como inactivo
 					if (event.estado === "0") {
 						return (
-							<div key={index} className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center">
-								<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto grayscale" />
-							</div>
+						<div key={index} className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center">
+							<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto grayscale" />
+						</div>
 						);
 					}
-					return (
+
+					// Si es el primer evento habilitado, lo mostramos como clickeable
+					if (!firstEnabledShown) {
+						firstEnabledShown = true;
+						return (
 						<Link key={index} to={`/home/ads`} onClick={() => { selectEvent(event); setTheme(`event${event.idEvent}`); }}>
 							<div className="w-20 h-20 border-3 border-primary rounded-lg shadow-xl hover:shadow-2xl flex items-center transition delay-150 duration-300 ease-in-out hover:scale-110">
-								<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto" />
+							<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto" />
 							</div>
 						</Link>
+						);
+					}
+
+					// Si ya se mostró el primero habilitado, los siguientes se muestran desactivados (como si fueran estado "0")
+					return (
+						<div key={index} className="w-20 h-20 border-3 border-stone-400 rounded-lg shadow-xl flex items-center">
+						<img src={event.foto} alt="evento logo" className="object-cover p-2 w-full h-auto grayscale opacity-60" />
+						</div>
 					);
-				})}
+					})}
 			</div>
 
-			<div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" onClick={() => setShowForm(!showForm)}>
+			<div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" 
+			    //  onClick={() => setShowForm(!showForm)} 
+				style={{ color: "var(--color-stone-400)", borderColor: "var(--color-stone-400)" }}
+				>
 				<h3 className="text-lg font-semibold">Agregar Evento</h3>
 				<Plus size={50} />
 			</div>
