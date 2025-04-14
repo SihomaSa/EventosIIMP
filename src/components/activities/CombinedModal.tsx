@@ -1017,6 +1017,7 @@ export default memo(function CombinedModal({
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          className="pointer-events-auto"
                           mode="single"
                           selected={
                             controllerField.value
@@ -1082,6 +1083,7 @@ export default memo(function CombinedModal({
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          className="pointer-events-auto"
                           mode="single"
                           selected={
                             controllerField.value
