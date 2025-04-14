@@ -295,7 +295,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
                           size={14}
                           className="text-primary flex-shrink-0"
                         />
-                        <span className="truncate">Idioma</span>
+                        <span className="truncate">Traducción</span>
                       </Label>
                       <Input
                         id="idioma"

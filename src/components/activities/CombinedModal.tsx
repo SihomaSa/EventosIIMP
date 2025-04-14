@@ -74,6 +74,7 @@ const FIELD_NAMES = {
   horaFin: "Hora de finalización",
   lugar: "Lugar",
   duracion: "Duración del viaje",
+  traduccion: "Traducción",
 };
 
 const FIELD_ICONS = {
@@ -85,11 +86,12 @@ const FIELD_ICONS = {
   horaFin: <Clock size={16} className="text-primary" />,
   lugar: <MapPin size={16} className="text-primary" />,
   duracion: <Clock size={16} className="text-primary" />,
+  traduccion: <Languages size={16} className="text-primary" />,
 };
 
 const FIELDS_BY_ACTIVITY_TYPE: Record<ActivityTypeId, string[]> = {
   1: ["titulo", "responsable", "fechaIni", "fechaFin", "horaIni", "horaFin"],
-  2: ["titulo", "responsable", "horaIni", "horaFin", "lugar"],
+  2: ["titulo", "responsable", "horaIni", "horaFin", "lugar", "traduccion"],
   3: ["titulo", "horaIni", "horaFin"],
   4: ["titulo", "horaIni", "horaFin"],
   5: ["titulo", "horaIni", "horaFin", "lugar"],
@@ -524,7 +526,9 @@ export default memo(function CombinedModal({
       "responsable" in data &&
       typeof data.responsable === "string" &&
       "lugar" in data &&
-      typeof data.lugar === "string"
+      typeof data.lugar === "string" &&
+      "traduccion" in data &&
+      typeof data.traduccion === "string"
     );
   };
 
@@ -644,6 +648,7 @@ export default memo(function CombinedModal({
           fechaFin?: string;
           duracion?: string;
           lugar?: string;
+          traduccion?: string;
           idDetalleAct?: number;
         } = {
           titulo: (data as { titulo: string }).titulo,
@@ -674,6 +679,7 @@ export default memo(function CombinedModal({
             ...detalles,
             responsable: data.responsable,
             lugar: data.lugar,
+            traduccion: data.traduccion,
           };
         } else if (activityType === 3 && isCoffeeBreakRequest(data)) {
           // Base details are sufficient
