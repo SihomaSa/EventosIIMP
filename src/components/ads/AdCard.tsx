@@ -9,7 +9,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 
 interface AdCardProps {
-	
 	id: number;
 	foto: string;
 	url: string;
@@ -19,7 +18,6 @@ interface AdCardProps {
 }
 
 export default function AdCard({
-	
 	id,
 	foto,
 	url,

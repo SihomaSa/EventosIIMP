@@ -24,9 +24,7 @@ const adSchema = z.object({
 		.min(0)
 		.max(1, { message: "El estado debe ser inactivo o activo" }),
 });
-
 type AdFormValues = z.infer<typeof adSchema>;
-
 interface UpdateAdsModalProps {
 	onAdd: () => void;
 	onClose: () => void;
@@ -34,7 +32,6 @@ interface UpdateAdsModalProps {
 	onUpdate: () => void;
 	open: boolean;
 }
-
 export default function UpdateAdsModal({
 	onClose,
 	ad,
@@ -44,9 +41,7 @@ export default function UpdateAdsModal({
 	const [imagePreview, setImagePreview] = useState<string | null>(
 		typeof ad.foto === "string" ? ad.foto : null
 	);
-
 	const [fotoUpdated, setFotoUpdated] = useState(0);
-
 	const {
 		register,
 		handleSubmit,
@@ -107,14 +102,13 @@ export default function UpdateAdsModal({
 			  : ad.foto;
 	  
 		  const editAd: UpdateAdRequestType = {
-			idPublicidad: String(ad.idPublicidad), // 📌 Se asegura que `idPublicidad` está presente
 			foto: formFoto,
 			url: data.url,
 			idioma: data.idioma,
 			evento: String(ad.idEvento),
 			estado: String(data.estado),
+			idPublicidad: String(ad.idPublicidad), // 📌 Se asegura que `idPublicidad` está presente
 		  };
-	  
 		  console.log("Actualizando publicidad con:", editAd);
 		  await updateAd(editAd);
 	  
