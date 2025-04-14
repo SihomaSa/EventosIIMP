@@ -340,7 +340,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
                 className="cursor-pointer text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 flex items-center gap-1 transition-colors duration-200"
               >
                 <Trash2 size={14} />
-                <span className="truncate">Eliminar</span>
+                {/* <span className="truncate">Eliminar</span> */}
               </Button>
               <Button
                 size="sm"
@@ -348,7 +348,7 @@ const ActivityDetailForm: React.FC<ActivityDetailFormProps> = ({
                 className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
               >
                 <Edit size={14} />
-                <span className="truncate">Editar</span>
+                {/* <span className="truncate">Editar</span> */}
               </Button>
             </CardFooter>
           </CollapsibleContent>
