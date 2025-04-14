@@ -21,7 +21,7 @@ export interface NewSponsorRequestType {//POST
 	descripcion: string;
 	foto: string;
 	url: string;
-	idEvento:1 ;
+	idEvento: number ;
 	categoria: string;
 	idioma: LanguageType;
 	estado: string;

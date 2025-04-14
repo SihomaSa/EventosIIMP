@@ -59,7 +59,7 @@ export default function UpdateSponsorModal({
     formState: { errors, isSubmitting },
     reset,
     setValue,
-    watch,
+    // watch,
     control,
   } = useForm<SponsorFormValues>({
     resolver: zodResolver(sponsorSchema),
@@ -121,13 +121,13 @@ export default function UpdateSponsorModal({
         data.categoria === "2" ? "PLATA" : "BRONCE";
 
       const editSponsor: UpdateSponsorRequestType = {
-        nombre: data.nombre,
+        
         foto: formFoto,
         url: data.url,
         idEvento: sponsor.idEvento,
         categoria,
         descripcion: data.descripcion,
-        descripcionidioma: idioma,
+        idioma: idioma,
         estado: data.estado,
         idSponsor: sponsor.idSponsor,
       };
@@ -310,8 +310,8 @@ export default function UpdateSponsorModal({
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
+            <Button type="submit" disabled={loading || isSubmitting}>
+              {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Guardando...
