@@ -22,9 +22,7 @@ export interface NewPressNoteType {
 }
 export interface NewPressNoteRequestType {
   titulo: string;
-  subtitulo: string;
   fecha: string;
-  descripcion: string;
   url: string;
   evento: string;
   tipoprensa: "1";

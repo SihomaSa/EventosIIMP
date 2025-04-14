@@ -1266,7 +1266,7 @@ export default memo(function CombinedModal({
       <DialogContent className="max-w-md md:max-w-2xl w-full flex flex-col max-h-[90vh]">
         <DialogHeader className="flex-shrink-0 flex items-center justify-between">
           <div>
-            <DialogTitle>
+          <DialogTitle className="text-xl font-semibold flex items-center">
               {mode === MODAL_MODES.DATE_SELECT && "Agregar Nueva Fecha"}
               {mode === MODAL_MODES.ACTIVITY_ADD &&
                 step === 1 &&
@@ -1296,27 +1296,37 @@ export default memo(function CombinedModal({
             </DialogDescription>
           </div>
         </DialogHeader>
-
         {mode === MODAL_MODES.DATE_SELECT && (
           <div className="overflow-y-auto flex-grow pr-2 mb-4">
-            <div className="p-2 bg-gray-50 rounded-lg mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                Selecciona una fecha para agregar actividades:
-              </p>
-              <Calendar
-                mode="single"
-                selected={
-                  selectedDate
-                    ? new Date(`${selectedDate}T12:00:00`)
-                    : undefined
-                }
-                onSelect={handleDateSelect}
-                disabled={isDateDisabled}
-                initialFocus
-              />
-              <div className="mt-4 px-1 flex items-center gap-2 text-xs text-gray-500">
-                <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                <span>Fechas ya creadas (deshabilitadas)</span>
+            <div className="py-6">
+              <div className="mx-auto max-w-sm bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-center items-center">
+                <Calendar
+                  mode="single"
+                  selected={
+                    selectedDate
+                      ? new Date(`${selectedDate}T12:00:00`)
+                      : undefined
+                  }
+                  onSelect={handleDateSelect}
+                  disabled={isDateDisabled}
+                  initialFocus
+                  className="mx-auto"
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <div className="h-3 w-3 rounded-full bg-gray-300 mr-2"></div>
+                  <span>Fechas ya creadas (deshabilitadas)</span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-center">
+                <div className="text-sm text-gray-500 bg-yellow-50 p-3 rounded-md border border-yellow-200 max-w-md">
+                  <p className="text-center">
+                    Seleccione una fecha disponible en el calendario para crear
+                    una nueva actividad. Las fechas en gris ya tienen
+                    actividades existentes.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

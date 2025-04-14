@@ -9,6 +9,7 @@ import PressCard from "@/components/press/PressCard";
 import EditPressForm from "@/components/press/EditPressForm";
 import UpdatePressModal from "@/components/press/UpdatePressModal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type LanguageTab = "all" | "en" | "sp";
 
@@ -56,6 +57,7 @@ export default function PressNotes() {
   }, []);
 
   const handleUpdatePressNote = useCallback(() => {
+    console.log("Update press note called");
     setPressNotesUpdated((prev) => prev + 1);
     setSelectedPressNote(null);
     setIsUpdateModalOpen(false);
@@ -348,29 +350,41 @@ export default function PressNotes() {
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <EditPressForm
-              onClose={() => setIsAddModalOpen(false)}
-              onAdd={handleAddPressNote}
-            />
-          </div>
-        </div>
-      )}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <EditPressForm
+            onClose={() => setIsAddModalOpen(false)}
+            onAdd={handleAddPressNote}
+          />
+        </DialogContent>
+      </Dialog>
 
-      {isUpdateModalOpen && selectedPressNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <Dialog
+        open={isUpdateModalOpen && !!selectedPressNote}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsUpdateModalOpen(false);
+            setTimeout(() => {
+              setSelectedPressNote(null);
+            }, 100);
+          }
+        }}
+      >
+        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+          {selectedPressNote && (
             <UpdatePressModal
               pressNote={selectedPressNote}
               onUpdate={handleUpdatePressNote}
-              open={isUpdateModalOpen}
-              onClose={() => setIsUpdateModalOpen(false)}
+              onClose={() => {
+                setIsUpdateModalOpen(false);
+                setTimeout(() => {
+                  setSelectedPressNote(null);
+                }, 100);
+              }}
             />
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
