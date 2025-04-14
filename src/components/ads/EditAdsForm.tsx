@@ -108,7 +108,8 @@ export default function EditAdsModal({
 	return (
 		<Card>
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-				<h2 className="text-xl">Nueva publicidad</h2>
+				<h2 className="text-xl">Editar publicidad</h2>
+				{/* URL */}
 				<div>
 					<Label htmlFor="url" className="mb-2">
 						Enlace
@@ -118,7 +119,7 @@ export default function EditAdsModal({
 						<p className="text-red-500 text-sm">{errors.url.message}</p>
 					)}
 				</div>
-
+				{/* Imagen */}
 				<ImageInput
 					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
 					preview={preview}
@@ -126,7 +127,7 @@ export default function EditAdsModal({
 					setPreview={setPreview}
 					setFileName={setFileName}
 				/>
-
+				{/* Idioma */}
 				<div>
 					<Label htmlFor="idioma" className="mb-2">
 						Idioma

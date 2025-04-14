@@ -1,16 +1,23 @@
-export interface ExpositorType {
-	idAutor: number;
+export interface ExpositorType {//GET
+	idAuthor: number;
 	nombres: string;
 	apellidos: string;
-	especialidad: string;
-	hojavida: string;
+	hojaVida: string;
 	foto: string;
+	especialidad: string;
 }
-
-export interface NewExpositorType {
+export interface NewExpositorType {//POST
 	nombres: string;
 	apellidos: string;
 	especialidad: string;
 	hojaDeVida: string;
 	foto: string;
+}
+export interface UpdateExpositorRequestType {//PUT
+	nombres: string;
+	apellidos: string;
+	especialidad: string;
+	hojaDeVida: string;
+	foto: string;
+	idAuthor: number;
 }

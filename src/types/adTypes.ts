@@ -15,14 +15,7 @@ export interface AdType { //GET
     idioma: LanguageType;
     url: string;
   }
-  export interface NewAdType {
-    idEvento: number;
-    foto: File;
-    prefijoIdioma: string;
-    estado: number;
-    url: string;
-    descripcionIdioma: string;
-  }
+
   export interface UpdateAdRequestType {//PUT
     foto: string;
     url: string;
@@ -30,4 +23,12 @@ export interface AdType { //GET
     evento: string;
     estado: string;
     idPublicidad: string;
+  }
+  export interface NewAdType {
+    idEvento: number;
+    foto: File;
+    prefijoIdioma: string;
+    estado: number;
+    url: string;
+    descripcionIdioma: string;
   }

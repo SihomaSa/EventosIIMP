@@ -140,7 +140,7 @@ const filteredAdds = useMemo(() => {
 			  className="cursor-pointer bg-primary hover:bg-primary/90"
 			>
 			  <Plus size={16} className="mr-1" />
-			  Agregar nueva nota
+			  Agregar nueva publicidad
 			</Button>
 		  </div>
 		),
@@ -205,11 +205,11 @@ const filteredAdds = useMemo(() => {
               <Skeleton className="h-8 w-24 rounded bg-red-100" />
               <Skeleton className="h-8 w-24 rounded bg-primary/30" />
             </div>
-          </div>
-        ))}
-      </div>
-    ),
-    []
+			</div>
+			))}
+		</div>
+		),
+		[]
   );
   if (error) return <p className="text-red-500">{error}</p>;
 	return (
@@ -222,8 +222,8 @@ const filteredAdds = useMemo(() => {
 					Administre todas las publicidades del evento
 				</p>
 			</div>
-		
-			<div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+	
+	<div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div className="relative w-full md:w-72">
           		<Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           			<Input
@@ -233,14 +233,14 @@ const filteredAdds = useMemo(() => {
 						className="pl-8 bg-gray-50 border-gray-200 w-full"
 					/>
 				</div>
-				<div className="flex gap-2 w-full md:w-auto">
-					<Button
+			<div className="flex gap-2 w-full md:w-auto">
+				<Button
 						variant="outline"
 						size="sm"
 						onClick={handleRefresh}
 						disabled={isRefreshing}
 						className="cursor-pointer border-gray-200 text-gray-700 flex items-center gap-1"
-					>
+				>
 					<RefreshCw
 						size={16}
 						className={isRefreshing ? "animate-spin" : ""}
@@ -248,15 +248,16 @@ const filteredAdds = useMemo(() => {
 					<span className="hidden md:inline">Actualizar</span>
 				</Button>
 				<Button
-            size="sm"
-            onClick={() => setIsadsModalOpen(true)}
-            className="cursor-pointer bg-primary hover:bg-primary/90 text-white ml-auto flex items-center gap-1"
-          >
-            <Plus size={16} />
-            <span>Agregar nueva publicidad</span>
-          </Button>
-        </div>
+					size="sm"
+					onClick={() => setIsadsModalOpen(true)}
+					className="cursor-pointer bg-primary hover:bg-primary/90 text-white ml-auto flex items-center gap-1"
+				>
+					<Plus size={16} />
+					<span>Agregar nueva publicidad</span>
+          		</Button>
+        	</div>
       </div>
+	  {/* Mensaje error */}
 	  {error && (
         <div className="bg-red-50 text-red-500 p-4 mb-6 rounded-lg border border-red-200 flex items-center">
           <svg
@@ -274,15 +275,16 @@ const filteredAdds = useMemo(() => {
           {error}
         </div>
       )}
+
 	  <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
-		{!loading && (
+			{!loading && (
 			<div className="mb-6">
 				<Tabs
 					defaultValue="all"
 					value={activeLanguage}
 					onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
 					className="w-full"
-				  >
+				>
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
 					  <div className="flex items-center text-gray-800">
 						<Globe
@@ -313,14 +315,14 @@ const filteredAdds = useMemo(() => {
 					  </TabsList>
 					</div>
 					<TabsContent
-									value={activeLanguage}
-									className="mt-0 pt-4 pb-1 flex flex-col"
-								  >
-									{" "}
-									{filteredAdds.length === 0 && emptyState}
-									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-									  {filteredAdds.map((ad) => (
-										<AdCard
+						value={activeLanguage}
+						className="mt-0 pt-4 pb-1 flex flex-col"
+					>
+							{" "}
+							{filteredAdds.length === 0 && emptyState}
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+							{filteredAdds.map((ad) => (
+							    <AdCard
 										key={ad.idPublicidad}
 										id={ad.idPublicidad}
 										foto={ad.foto}
@@ -328,9 +330,9 @@ const filteredAdds = useMemo(() => {
 										idioma={ad.descripcionIdioma}
 										openUpdateModal={() => openUpdateModal(ad)}
 										onDelete={handleDeleteAd}
-									/>
-									  ))}
-									</div>
+							    />
+							 ))}
+						</div>
 					</TabsContent>
 				</Tabs>
 			</div>
@@ -345,7 +347,7 @@ const filteredAdds = useMemo(() => {
 							? `Mostrando ${filteredAdds.length} ${
 								filteredAdds.length === 1
 								? "Publicidad"
-								: "Publicidad"
+								: "Publicidades"
 							}${
 								activeLanguage !== "all"
 								? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
@@ -386,50 +388,3 @@ const filteredAdds = useMemo(() => {
 		</div>
 	);
 }
-
-
-{/* <div className="flex flex-col-reverse md:flex-row w-full h-full">
-				<div className="flex flex-wrap gap-4 justify-center  md:w-2/3">
-					{loading ? (
-						<div className="flex gap-4 space-y-3">
-							{[...Array(3)].map((_, index) => (
-								<div key={index} className="flex flex-col space-y-3">
-									<Skeleton className="h-[125px] w-[200px] rounded-xl bg-primary/60" />
-									<div className="space-y-2">
-										<Skeleton className="h-4 w-[200px] bg-primary/60" />
-										<Skeleton className="h-4 w-[200px] bg-primary/60" />
-										<Skeleton className="h-4 w-[200px] bg-primary/60" />
-									</div>
-									<div className="space-y-2">
-										<Skeleton className="h-7 w-[200px] bg-primary/60" />
-									</div>
-								</div>
-							))}
-						</div>
-
-					) : ads?.length > 0 ? (
-						ads.map((ad) => (
-							<AdCard
-								key={ad.idPublicidad}
-								id={ad.idPublicidad}
-								foto={ad.foto}
-								url={ad.url}
-								idioma={ad.descripcionIdioma}
-								openUpdateModal={() => openUpdateModal(ad)}
-								onDelete={handleDeleteAd}
-							/>
-						))
-					) : (
-						<p className="text-gray-500">No hay Publicidades disponibles</p>
-					)}
-				</div>
-
-				<div className="md:w-1/3 flex flex-col gap-y-4 mx-4 mb-4">
-					<div
-						className="text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:shadow-xl"
-						onClick={() => setIsadsModalOpen(!isadsModalOpen)}
-					>
-						<h3 className="text-lg font-semibold">Agregar Publicación</h3>
-						<Plus size={50} />
-					</div> */}
-{/* AQUI ME QUEDE */}
