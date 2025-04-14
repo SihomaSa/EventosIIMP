@@ -74,6 +74,7 @@ const FIELD_NAMES = {
   horaFin: "Hora de finalización",
   lugar: "Lugar",
   duracion: "Duración del viaje",
+  traduccion: "Traducción",
 };
 
 const FIELD_ICONS = {
@@ -85,18 +86,19 @@ const FIELD_ICONS = {
   horaFin: <Clock size={16} className="text-primary" />,
   lugar: <MapPin size={16} className="text-primary" />,
   duracion: <Clock size={16} className="text-primary" />,
+  traduccion: <Languages size={16} className="text-primary" />,
 };
 
 const FIELDS_BY_ACTIVITY_TYPE: Record<ActivityTypeId, string[]> = {
   1: ["titulo", "responsable", "fechaIni", "fechaFin", "horaIni", "horaFin"],
-  2: ["titulo", "responsable", "horaIni", "horaFin", "lugar"],
+  2: ["titulo", "responsable", "horaIni", "horaFin", "lugar", "traduccion"],
   3: ["titulo", "horaIni", "horaFin"],
   4: ["titulo", "horaIni", "horaFin"],
   5: ["titulo", "horaIni", "horaFin", "lugar"],
   6: ["titulo", "horaIni", "horaFin", "lugar"],
   7: ["titulo", "horaIni", "horaFin", "responsable"],
   8: ["titulo", "horaIni", "horaFin", "lugar"],
-  9: ["titulo", "horaIni", "horaFin"],
+  9: ["titulo", "horaIni", "horaFin", "lugar"],
   10: ["titulo", "horaIni", "horaFin"],
   11: ["titulo", "horaIni", "horaFin"],
 };
@@ -355,13 +357,11 @@ export default memo(function CombinedModal({
         const typeId = Number(editActivity.idTipoActividad);
 
         // Determine if it's an English activity (ID 12-22)
-        let languageToSet = "2"; // Default to Spanish
+        const languageToSet = editActivity.idIdioma === "1" ? "1" : "2";
         let baseTypeId = typeId;
 
         if (typeId >= 12 && typeId <= 22) {
           // This is an English activity
-          languageToSet = "1";
-          // Convert to base type (1-11)
           baseTypeId = typeId - 11;
         }
 
@@ -526,7 +526,9 @@ export default memo(function CombinedModal({
       "responsable" in data &&
       typeof data.responsable === "string" &&
       "lugar" in data &&
-      typeof data.lugar === "string"
+      typeof data.lugar === "string" &&
+      "traduccion" in data &&
+      typeof data.traduccion === "string"
     );
   };
 
@@ -597,7 +599,9 @@ export default memo(function CombinedModal({
       typeof data === "object" &&
       data !== null &&
       "titulo" in data &&
-      typeof data.titulo === "string"
+      typeof data.titulo === "string" &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
     );
   };
 
@@ -644,6 +648,7 @@ export default memo(function CombinedModal({
           fechaFin?: string;
           duracion?: string;
           lugar?: string;
+          traduccion?: string;
           idDetalleAct?: number;
         } = {
           titulo: (data as { titulo: string }).titulo,
@@ -674,6 +679,7 @@ export default memo(function CombinedModal({
             ...detalles,
             responsable: data.responsable,
             lugar: data.lugar,
+            traduccion: data.traduccion,
           };
         } else if (activityType === 3 && isCoffeeBreakRequest(data)) {
           // Base details are sufficient
@@ -691,7 +697,7 @@ export default memo(function CombinedModal({
         } else if (activityType === 8 && isCongressInaugurationRequest(data)) {
           detalles = { ...detalles, lugar: data.lugar };
         } else if (activityType === 9 && isGratitudDinnerRequest(data)) {
-          // Base details are sufficient
+          detalles = { ...detalles, lugar: data.lugar };
         } else if (
           activityType === 10 &&
           isMagisterialConferenceRequest(data)
@@ -1017,6 +1023,7 @@ export default memo(function CombinedModal({
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          className="pointer-events-auto"
                           mode="single"
                           selected={
                             controllerField.value
@@ -1082,6 +1089,7 @@ export default memo(function CombinedModal({
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
+                          className="pointer-events-auto"
                           mode="single"
                           selected={
                             controllerField.value
