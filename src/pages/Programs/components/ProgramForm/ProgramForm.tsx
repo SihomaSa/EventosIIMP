@@ -58,6 +58,13 @@ const ProgramForm: FC<Props> = ({
     Record<string, Record<string, string>>
   >({});
 
+  const HOURS = Array.from({ length: 24 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+  const MINUTES = Array.from({ length: 60 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
+
   // Use useMemo for form errors to avoid infinite loop
   const fieldErrors = useMemo(() => {
     const errors: Record<string, string> = {};
@@ -376,26 +383,69 @@ const ProgramForm: FC<Props> = ({
                           >
                             Hora inicio <span className="text-red-500">*</span>
                           </Label>
-                          <Input
-                            id={`hora-ini-${index}`}
-                            className={cn(
-                              detailErrors.horaIni
-                                ? "border-red-500 focus-visible:ring-red-500"
-                                : ""
-                            )}
-                            value={startTime}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setValue(
-                                `detalles.${index}.horaIni`,
-                                `${dateStr}T${value}`
-                              );
-                              validateDetail(index);
-                            }}
-                            type="time"
-                            placeholder="Hora inicio"
-                            disabled={disabled}
-                          />
+                          <div className="relative flex items-center">
+                            <Clock className="absolute left-2 h-4 w-4 text-gray-400 pointer-events-none" />
+                            <div className="flex w-full">
+                              <Select
+                                value={startTime.split(":")[0] || ""}
+                                onValueChange={(value) => {
+                                  const currentMinutes =
+                                    startTime.split(":")[1] || "00";
+                                  setValue(
+                                    `detalles.${index}.horaIni`,
+                                    `${dateStr}T${value}:${currentMinutes}`
+                                  );
+                                  validateDetail(index);
+                                }}
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    "pl-8 rounded-r-none border-r-0",
+                                    detailErrors.horaIni &&
+                                      "border-red-500 focus-visible:ring-red-500"
+                                  )}
+                                >
+                                  <SelectValue placeholder="HH" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {HOURS.map((h) => (
+                                    <SelectItem key={h} value={h}>
+                                      {h}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                value={startTime.split(":")[1] || ""}
+                                onValueChange={(value) => {
+                                  const currentHours =
+                                    startTime.split(":")[0] || "00";
+                                  setValue(
+                                    `detalles.${index}.horaIni`,
+                                    `${dateStr}T${currentHours}:${value}`
+                                  );
+                                  validateDetail(index);
+                                }}
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    "rounded-l-none pl-2",
+                                    detailErrors.horaIni &&
+                                      "border-red-500 focus-visible:ring-red-500"
+                                  )}
+                                >
+                                  <SelectValue placeholder="MM" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {MINUTES.map((m) => (
+                                    <SelectItem key={m} value={m}>
+                                      {m}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                           {detailErrors.horaIni && (
                             <p className="text-red-500 text-xs flex items-center mt-1">
                               <AlertCircle
@@ -406,7 +456,6 @@ const ProgramForm: FC<Props> = ({
                             </p>
                           )}
                         </div>
-
                         <div className="space-y-1">
                           <Label
                             htmlFor={`hora-fin-${index}`}
@@ -414,26 +463,69 @@ const ProgramForm: FC<Props> = ({
                           >
                             Hora fin <span className="text-red-500">*</span>
                           </Label>
-                          <Input
-                            id={`hora-fin-${index}`}
-                            className={cn(
-                              detailErrors.horaFin
-                                ? "border-red-500 focus-visible:ring-red-500"
-                                : ""
-                            )}
-                            value={endTime}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              setValue(
-                                `detalles.${index}.horaFin`,
-                                `${dateStr}T${value}`
-                              );
-                              validateDetail(index);
-                            }}
-                            type="time"
-                            placeholder="Hora fin"
-                            disabled={disabled}
-                          />
+                          <div className="relative flex items-center">
+                            <Clock className="absolute left-2 h-4 w-4 text-gray-400 pointer-events-none" />
+                            <div className="flex w-full">
+                              <Select
+                                value={endTime.split(":")[0] || ""}
+                                onValueChange={(value) => {
+                                  const currentMinutes =
+                                    endTime.split(":")[1] || "00";
+                                  setValue(
+                                    `detalles.${index}.horaFin`,
+                                    `${dateStr}T${value}:${currentMinutes}`
+                                  );
+                                  validateDetail(index);
+                                }}
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    "pl-8 rounded-r-none border-r-0",
+                                    detailErrors.horaFin &&
+                                      "border-red-500 focus-visible:ring-red-500"
+                                  )}
+                                >
+                                  <SelectValue placeholder="HH" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {HOURS.map((h) => (
+                                    <SelectItem key={h} value={h}>
+                                      {h}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                value={endTime.split(":")[1] || ""}
+                                onValueChange={(value) => {
+                                  const currentHours =
+                                    endTime.split(":")[0] || "00";
+                                  setValue(
+                                    `detalles.${index}.horaFin`,
+                                    `${dateStr}T${currentHours}:${value}`
+                                  );
+                                  validateDetail(index);
+                                }}
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    "rounded-l-none pl-2",
+                                    detailErrors.horaFin &&
+                                      "border-red-500 focus-visible:ring-red-500"
+                                  )}
+                                >
+                                  <SelectValue placeholder="MM" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {MINUTES.map((m) => (
+                                    <SelectItem key={m} value={m}>
+                                      {m}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                           {detailErrors.horaFin && (
                             <p className="text-red-500 text-xs flex items-center mt-1">
                               <AlertCircle
