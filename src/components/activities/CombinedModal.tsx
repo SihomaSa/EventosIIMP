@@ -355,13 +355,11 @@ export default memo(function CombinedModal({
         const typeId = Number(editActivity.idTipoActividad);
 
         // Determine if it's an English activity (ID 12-22)
-        let languageToSet = "2"; // Default to Spanish
+        const languageToSet = editActivity.idIdioma === "1" ? "1" : "2";
         let baseTypeId = typeId;
 
         if (typeId >= 12 && typeId <= 22) {
           // This is an English activity
-          languageToSet = "1";
-          // Convert to base type (1-11)
           baseTypeId = typeId - 11;
         }
 
