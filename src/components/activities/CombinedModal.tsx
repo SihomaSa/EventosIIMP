@@ -75,6 +75,7 @@ const FIELD_NAMES = {
   lugar: "Lugar",
   duracion: "Duración del viaje",
   traduccion: "Traducción",
+  idioma: "Traducción",
 };
 
 const FIELD_ICONS = {
@@ -87,6 +88,7 @@ const FIELD_ICONS = {
   lugar: <MapPin size={16} className="text-primary" />,
   duracion: <Clock size={16} className="text-primary" />,
   traduccion: <Languages size={16} className="text-primary" />,
+  idioma: <Languages size={16} className="text-primary" />,
 };
 
 const FIELDS_BY_ACTIVITY_TYPE: Record<ActivityTypeId, string[]> = {
@@ -384,24 +386,33 @@ export default memo(function CombinedModal({
               const fields =
                 FIELDS_BY_ACTIVITY_TYPE[baseTypeId as ActivityTypeId];
               fields.forEach((field) => {
-                const rawValue = editActivity[field as keyof ActivityDetail];
-
-                const valueToSet = (() => {
-                  if (rawValue !== undefined && rawValue !== null) {
-                    if (field === "horaIni" || field === "horaFin") {
-                      return formatTimeValue(String(rawValue)) || "";
-                    } else if (field === "fechaIni" || field === "fechaFin") {
-                      return formatDateValue(String(rawValue)) || "";
-                    } else {
-                      return String(rawValue);
+                if (
+                  field === "traduccion" &&
+                  !(field in editActivity) &&
+                  "idioma" in editActivity
+                ) {
+                  const value = editActivity["idioma"];
+                  setValue("traduccion", String(value || ""), {
+                    shouldValidate: true,
+                  });
+                } else {
+                  const rawValue = editActivity[field as keyof ActivityDetail];
+                  const valueToSet = (() => {
+                    if (rawValue !== undefined && rawValue !== null) {
+                      if (field === "horaIni" || field === "horaFin") {
+                        return formatTimeValue(String(rawValue)) || "";
+                      } else if (field === "fechaIni" || field === "fechaFin") {
+                        return formatDateValue(String(rawValue)) || "";
+                      } else {
+                        return String(rawValue);
+                      }
                     }
-                  }
-                  return "";
-                })();
-
-                setValue(field as keyof FormData, valueToSet, {
-                  shouldValidate: true,
-                });
+                    return "";
+                  })();
+                  setValue(field as keyof FormData, valueToSet, {
+                    shouldValidate: true,
+                  });
+                }
               });
 
               formPopulatedRef.current = true;
