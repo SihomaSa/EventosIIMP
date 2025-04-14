@@ -1,0 +1,247 @@
+import { FC, useMemo, useState } from "react";
+import { Program, ProgramCategory } from "../../pages/Programs/types/Program";
+import ProgramCard from "../../pages/Programs/components/ProgramCard/ProgramCard";
+import { Button } from "@/components/ui/button";
+import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
+import { Languages, Globe } from "lucide-react";
+
+type Props = {
+  programs: Program[];
+  programCategories: ProgramCategory[];
+  showNewProgramButton?: boolean;
+  selectedDate: string | null;
+  onRefreshPrograms?: () => Promise<void>; // Optional refresh function
+};
+
+type LanguageTab = "all" | "en" | "sp";
+
+const ProgramContainer: FC<Props> = ({
+  programs,
+  programCategories,
+  selectedDate,
+  onRefreshPrograms,
+}) => {
+  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
+
+  const programsByLanguage = useMemo(() => {
+    const programsForSelectedDate = programs.filter(
+      (program) => program.fechaPrograma === selectedDate
+    );
+
+    // Create a deep copy of programs to avoid mutating the original data
+    const programsWithFilteredDetails = programsForSelectedDate.map(
+      (program) => {
+        const filteredProgram = { ...program };
+
+        // Filter details for each language
+        filteredProgram.detalles = filteredProgram.detalles?.map((detail) => ({
+          ...detail,
+          detalleAdicional: detail.detalleAdicional?.filter(
+            (subDetail) => subDetail.idIdioma === 1 || subDetail.idIdioma === 2
+          ),
+        }));
+
+        return filteredProgram;
+      }
+    );
+
+    // Separate programs by language
+    const english = programsWithFilteredDetails
+      .map((program) => ({
+        ...program,
+        detalles: program.detalles
+          ?.map((detail) => ({
+            ...detail,
+            detalleAdicional: detail.detalleAdicional?.filter(
+              (subDetail) => subDetail.idIdioma === 1
+            ),
+          }))
+          .filter((detail) => detail.detalleAdicional?.length > 0),
+      }))
+      .filter(
+        (program) =>
+          program.detalles &&
+          program.detalles.some((detail) => detail.detalleAdicional?.length > 0)
+      );
+
+    const spanish = programsWithFilteredDetails
+      .map((program) => ({
+        ...program,
+        detalles: program.detalles
+          ?.map((detail) => ({
+            ...detail,
+            detalleAdicional: detail.detalleAdicional?.filter(
+              (subDetail) => subDetail.idIdioma === 2
+            ),
+          }))
+          .filter((detail) => detail.detalleAdicional?.length > 0),
+      }))
+      .filter(
+        (program) =>
+          program.detalles &&
+          program.detalles.some((detail) => detail.detalleAdicional?.length > 0)
+      );
+
+    return {
+      all: programsWithFilteredDetails,
+      en: english,
+      sp: spanish,
+    };
+  }, [programs, selectedDate]);
+
+  // Helper function to get the count of programs by language
+  const getLanguageCount = (language: LanguageTab) => {
+    if (language === "all")
+      return programsByLanguage.all.reduce(
+        (total, program) =>
+          total +
+          (program.detalles?.reduce(
+            (subtotal, detail) =>
+              subtotal + (detail.detalleAdicional?.length || 0),
+            0
+          ) || 0),
+        0
+      );
+
+    return programsByLanguage[language].reduce(
+      (total, program) =>
+        total +
+        (program.detalles?.reduce(
+          (subtotal, detail) =>
+            subtotal + (detail.detalleAdicional?.length || 0),
+          0
+        ) || 0),
+      0
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-4 mt-4 w-full">
+      <Tabs
+        defaultValue="all"
+        value={activeLanguage}
+        onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
+        className="w-full"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-0 w-full">
+          <div className="flex items-center text-gray-800">
+            <Globe size={18} className="text-primary mr-2 flex-shrink-0" />
+            <h2 className="text-lg font-medium">Filtrar por idioma</h2>
+          </div>
+
+          <div className="w-full sm:w-auto max-w-full overflow-x-auto pb-1">
+            <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3 min-w-[300px]">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm text-sm whitespace-nowrap"
+              >
+                Todos ({getLanguageCount("all")})
+              </TabsTrigger>
+              <TabsTrigger
+                value="en"
+                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm text-sm whitespace-nowrap"
+              >
+                English ({getLanguageCount("en")})
+              </TabsTrigger>
+              <TabsTrigger
+                value="sp"
+                className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm text-sm whitespace-nowrap"
+              >
+                Español ({getLanguageCount("sp")})
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        </div>
+
+        <TabsContent
+          value="all"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
+          {programsByLanguage.all.length === 0 ? (
+            <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+              <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                No hay programas disponibles
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto mb-4">
+                Aún no hay programas disponibles.
+              </p>
+            </div>
+          ) : (
+            programsByLanguage.all.map((program, index) => (
+              <ProgramCard
+                date={program.fechaPrograma}
+                program={program}
+                programCategories={programCategories}
+                key={`program-all-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
+              />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent
+          value="en"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
+          {programsByLanguage.en.length === 0 ? (
+            <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+              <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                No hay programas en inglés
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto mb-4">
+                Aún no hay programas disponibles para el idioma seleccionado.
+              </p>
+              <Button onClick={() => setActiveLanguage("all")}>
+                Ver todos los programas
+              </Button>
+            </div>
+          ) : (
+            programsByLanguage.en.map((program, index) => (
+              <ProgramCard
+                date={program.fechaPrograma}
+                program={program}
+                programCategories={programCategories}
+                key={`program-en-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
+              />
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent
+          value="sp"
+          className="mt-0 pt-2 flex flex-col space-y-4 w-full"
+        >
+          {programsByLanguage.sp.length === 0 ? (
+            <div className="p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+              <Languages className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                No hay programas en español
+              </h3>
+              <p className="text-gray-500 max-w-md mx-auto mb-4">
+                Aún no hay programas disponibles para el idioma seleccionado.
+              </p>
+              <Button onClick={() => setActiveLanguage("all")}>
+                Ver todos los programas
+              </Button>
+            </div>
+          ) : (
+            programsByLanguage.sp.map((program, index) => (
+              <ProgramCard
+                date={program.fechaPrograma}
+                program={program}
+                programCategories={programCategories}
+                key={`program-sp-${program.fechaPrograma}-${index}`}
+                onDeleteSuccess={onRefreshPrograms}
+              />
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default ProgramContainer;

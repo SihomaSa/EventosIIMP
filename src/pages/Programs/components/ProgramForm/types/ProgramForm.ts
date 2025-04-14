@@ -2,7 +2,8 @@ export type ProgramForm = {
   fechaPrograma: string;
   descripcionPro: string;
   idEvento: number;
-  detalles: {
+  idPrograma?: number;
+  detalles?: {
     descripcionBody?: string;
     idAutor?: string; // 1,2,3
     sala?: string;
