@@ -132,6 +132,7 @@ export interface NewGratitudDinnerRequest extends BaseActivityRequestType {
   titulo: string;
   horaFin: string;
   horaIni: string;
+  lugar: string;
 }
 export interface NewMagisterialConferenceRequest
   extends BaseActivityRequestType {

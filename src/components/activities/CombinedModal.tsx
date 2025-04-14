@@ -96,7 +96,7 @@ const FIELDS_BY_ACTIVITY_TYPE: Record<ActivityTypeId, string[]> = {
   6: ["titulo", "horaIni", "horaFin", "lugar"],
   7: ["titulo", "horaIni", "horaFin", "responsable"],
   8: ["titulo", "horaIni", "horaFin", "lugar"],
-  9: ["titulo", "horaIni", "horaFin"],
+  9: ["titulo", "horaIni", "horaFin", "lugar"],
   10: ["titulo", "horaIni", "horaFin"],
   11: ["titulo", "horaIni", "horaFin"],
 };
@@ -595,7 +595,9 @@ export default memo(function CombinedModal({
       typeof data === "object" &&
       data !== null &&
       "titulo" in data &&
-      typeof data.titulo === "string"
+      typeof data.titulo === "string" &&
+      "lugar" in data &&
+      typeof data.lugar === "string"
     );
   };
 
@@ -689,7 +691,7 @@ export default memo(function CombinedModal({
         } else if (activityType === 8 && isCongressInaugurationRequest(data)) {
           detalles = { ...detalles, lugar: data.lugar };
         } else if (activityType === 9 && isGratitudDinnerRequest(data)) {
-          // Base details are sufficient
+          detalles = { ...detalles, lugar: data.lugar };
         } else if (
           activityType === 10 &&
           isMagisterialConferenceRequest(data)
