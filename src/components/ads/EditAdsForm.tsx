@@ -66,44 +66,44 @@ export default function EditAdsModal({
 
 	const onSubmit = async (data: AdFormValues) => {
 		const toastId = toast.loading("Procesando publicidad...");
-		
+
 		try {
 		  if (!selectedEvent) {
 			throw new Error("No hay evento seleccionado");
 		  }
-	  
+
 		  // 🔥 Ahora usa `fileToBase64` que ya optimiza SVG antes de convertirlo
 		  const base64Image = await fileToBase64(data.foto);
-	  
+
 		  const adData = {
 			evento: String(selectedEvent.idEvent),
 			foto: base64Image,
 			url: data.url,
 			idioma: data.idioma,
 		  };
-	  
+
 		  await createAd(adData);
-		  
+
 		  toast.success("Publicidad creada exitosamente!", { id: toastId });
 		  onAdd();
 		  reset();
 		  onClose();
-		  
+
 		} catch (error) {
 		  console.error("Error en el proceso:", {
 			error,
 			inputData: { ...data, foto: "[BASE64_REDUCIDO]" }
 		  });
-	  
+
 		  toast.error(
-			error instanceof Error 
-			  ? error.message 
+			error instanceof Error
+			  ? error.message
 			  : "Error inesperado al procesar",
 			{ id: toastId }
 		  );
 		}
 	  };
-	  
+
 
 	return (
 		<Card>
@@ -159,4 +159,4 @@ export default function EditAdsModal({
 			</form>
 		</Card>
 	);
-} 
+}

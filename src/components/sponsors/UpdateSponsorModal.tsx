@@ -116,12 +116,12 @@ export default function UpdateSponsorModal({
           : sponsor.foto;
 
       const idioma = data.idioma === "1" ? "EN" : "ES";
-      const categoria = 
-        data.categoria === "1" ? "ORO" : 
+      const categoria =
+        data.categoria === "1" ? "ORO" :
         data.categoria === "2" ? "PLATA" : "BRONCE";
 
       const editSponsor: UpdateSponsorRequestType = {
-        
+
         foto: formFoto,
         url: data.url,
         idEvento: sponsor.idEvento,
@@ -133,7 +133,7 @@ export default function UpdateSponsorModal({
       };
 
       await updateSponsor(editSponsor);
-      
+
       toast.success("Auspiciador actualizado correctamente", { id: toastId });
       onUpdate();
       reset();

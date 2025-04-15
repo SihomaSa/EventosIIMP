@@ -30,10 +30,10 @@ interface UpdateExpositorModalProps {
   open: boolean;
 }
 
-export default function UpdateExpositorModal({ 
-  onClose, 
-  expositor, 
-  onUpdate, 
+export default function UpdateExpositorModal({
+  onClose,
+  expositor,
+  onUpdate,
   open,
  }: UpdateExpositorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
@@ -88,7 +88,7 @@ export default function UpdateExpositorModal({
   const onSubmit = async(data: ExpositorFormValues) => {
     try {
 		  console.log("Datos antes de enviar:", data);
-	  
+
 		  const formFoto =
 			fotoUpdated !== 0 && data.foto
 			  ? await fileToBase64(data.foto)
@@ -177,7 +177,7 @@ export default function UpdateExpositorModal({
 							</Button>
 							<Button type="submit">Guardar</Button>
 						</div>
-          </form>   
+          </form>
       </DialogContent>
     </Dialog>
   );
