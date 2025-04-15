@@ -146,9 +146,9 @@ export default function EditSponsorForm({
         {/* Nombre */}
         <div>
           <Label htmlFor="nombre">Nombre</Label>
-          <Input 
-            id="nombre" 
-            {...register("nombre")} 
+          <Input
+            id="nombre"
+            {...register("nombre")}
             disabled={isSubmitting}
           />
           {errors.nombre && (
@@ -172,9 +172,9 @@ export default function EditSponsorForm({
         {/* URL */}
         <div>
           <Label htmlFor="url">Enlace</Label>
-          <Input 
-            id="url" 
-            {...register("url")} 
+          <Input
+            id="url"
+            {...register("url")}
             disabled={isSubmitting}
           />
           {errors.url && (
@@ -267,9 +267,9 @@ export default function EditSponsorForm({
 
         {/* Botones */}
         <div className="flex justify-end gap-2 pt-2">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onClose}
             disabled={isSubmitting}
           >

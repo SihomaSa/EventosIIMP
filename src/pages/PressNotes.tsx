@@ -321,6 +321,7 @@ export default function PressNotes() {
                       pressNote={pressNote}
                       onEdit={() => openUpdateModal(pressNote)}
                       onDelete={handleDeletePressNote}
+                      tipoprensa={1}
                     />
                   ))}
                 </div>
@@ -352,6 +353,7 @@ export default function PressNotes() {
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
           <EditPressForm
+            tipoprensa={1}
             onClose={() => setIsAddModalOpen(false)}
             onAdd={handleAddPressNote}
           />

@@ -10,6 +10,7 @@ interface ImageInputProps {
   fileName: string | null;
   setPreview: (preview: string | null) => void;
   setFileName: (name: string | null) => void;
+  disabled?: boolean;
 }
 
 export function ImageInput({ onChange, preview, fileName, setPreview, setFileName }: ImageInputProps) {
