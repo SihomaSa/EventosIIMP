@@ -29,6 +29,7 @@ export default function EventList() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
   const {
@@ -147,22 +148,15 @@ export default function EventList() {
         })}
       </div>
 
-      <div
-        className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer"
-        //  onClick={() => setShowForm(!showForm)}
-        style={{
-          color: "var(--color-stone-400)",
-          borderColor: "var(--color-stone-400)",
-        }}
-      >
+      <div className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer" 
+			    //  onClick={() => setShowForm(!showForm)} 
+				style={{ color: "var(--color-stone-400)", borderColor: "var(--color-stone-400)" }}
+				>
         <h3 className="text-lg font-semibold">Agregar Evento</h3>
         <Plus size={50} />
       </div>
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="mt-4 p-6 border rounded-lg shadow-lg space-y-4"
-      >
+      {showForm && (
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 p-6 border rounded-lg shadow-lg space-y-4">
         <h3 className="text-lg font-semibold">Nuevo Evento</h3>
 
         <div className="w-full flex items-center justify-between">
@@ -224,6 +218,7 @@ export default function EventList() {
           Guardar Evento
         </Button>
       </form>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
-import { Megaphone, Newspaper, Users, Handshake, CalendarDays, Settings } from "lucide-react";
+import { Megaphone, Newspaper, Users, Handshake, CalendarDays } from "lucide-react";
 import NavItem from "@/components/NavItem"; // Importa el componente corregido
 
 const items = [
@@ -10,7 +10,7 @@ const items = [
   { label: "Auspiciadores", to: "/home/sponsors", icon: <Handshake strokeWidth={3} /> },
   { label: "Actividades", to: "/home/activities", icon: <CalendarDays strokeWidth={3} /> },
   { label: "Programas", to: "/home/programs", icon: <CalendarDays strokeWidth={3} /> },
-  { label: "Configuración", to: "/home/settings", icon: <Settings strokeWidth={3} /> },
+  // { label: "Configuración", to: "/home/settings", icon: <Settings strokeWidth={3} /> },
 ];
 
 export function AppSidebar() {
