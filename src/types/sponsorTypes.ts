@@ -13,7 +13,7 @@ export interface NewSponsorRequestType {//POST
     descripcion: string;
     foto: string;
 	url: string;
-	idEvento: 1;
+	idEvento: string | number;
 	categoria: string;
     idioma: LanguageType;
   }
@@ -27,7 +27,7 @@ export interface NewSponsorRequestType {//POST
 	estado: string; //Esto no
 	idSponsor: number;
   }
- 
+
   export interface NewSponsorType {
 	idEvento: number;
 	descripcion: string;
