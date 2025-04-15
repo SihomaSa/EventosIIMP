@@ -57,7 +57,6 @@ export default function PressNotes() {
   }, []);
 
   const handleUpdatePressNote = useCallback(() => {
-    console.log("Update press note called");
     setPressNotesUpdated((prev) => prev + 1);
     setSelectedPressNote(null);
     setIsUpdateModalOpen(false);

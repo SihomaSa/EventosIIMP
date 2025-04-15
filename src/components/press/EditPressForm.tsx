@@ -48,9 +48,11 @@ type PressNoteFormValues = z.infer<typeof PressNoteSchema>;
 export default function EditPressNoteForm({
   onAdd,
   onClose,
+  tipoprensa,
 }: {
   onAdd: () => void;
   onClose: () => void;
+  tipoprensa: number;
 }) {
   const { selectedEvent } = useEventStore();
   const [preview, setPreview] = useState<string | null>(null);
@@ -94,12 +96,12 @@ export default function EditPressNoteForm({
       const base64Image = await fileToBase64(data.foto);
       const newPressNote: NewPressNoteRequestType = {
         titulo: data.titulo,
-        fecha: format(data.fecha, "yyyy-MM-dd"),
         url: data.url,
         evento: String(selectedEvent.idEvent),
-        tipoprensa: "1",
+        tipoprensa: tipoprensa === 2 ? 2 : 1,
         foto: base64Image,
         idioma: data.idioma,
+        ...(tipoprensa !== 2 && { fecha: format(data.fecha, "yyyy-MM-dd") }),
       };
 
       await createPressNote(newPressNote);
@@ -119,7 +121,9 @@ export default function EditPressNoteForm({
     <div>
       <div className="flex items-center justify-between p-4 border-b mb-6">
         <DialogTitle className="text-xl font-semibold">
-          Editar Nota de Prensa
+        {tipoprensa === 2
+            ? "Agregar Boletin"
+            : "Agregar Nota de Prensa"}
         </DialogTitle>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -181,55 +185,56 @@ export default function EditPressNoteForm({
             )}
           </div>
         </div>
-
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-gray-700">
-            <CalendarIcon size={16} className="text-primary" />
-            Fecha <span className="text-red-500">*</span>
-          </Label>
-          <Controller
-            name="fecha"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !value && "text-muted-foreground",
-                      errors.fecha && "border-red-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {value ? (
-                      format(value, "PPP", { locale: es })
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={value}
-                    onSelect={(selectedDate) => {
-                      onChange(selectedDate);
-                      setDatePickerOpen(false);
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+        {tipoprensa === 2 ? null : (
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-gray-700">
+              <CalendarIcon size={16} className="text-primary" />
+              Fecha <span className="text-red-500">*</span>
+            </Label>
+            <Controller
+              name="fecha"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !value && "text-muted-foreground",
+                        errors.fecha && "border-red-500"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {value ? (
+                        format(value, "PPP", { locale: es })
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={value}
+                      onSelect={(selectedDate) => {
+                        onChange(selectedDate);
+                        setDatePickerOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            {errors.fecha && (
+              <p className="text-red-500 text-xs flex items-center mt-1">
+                <AlertCircle size={12} className="mr-1" />
+                {errors.fecha.message}
+              </p>
             )}
-          />
-          {errors.fecha && (
-            <p className="text-red-500 text-xs flex items-center mt-1">
-              <AlertCircle size={12} className="mr-1" />
-              {errors.fecha.message}
-            </p>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-4">
           <Label className="flex items-center gap-2 text-gray-700">

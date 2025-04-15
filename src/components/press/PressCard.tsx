@@ -7,16 +7,18 @@ import { deletePressNote } from "../services/pressNotesService";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface PressCardProps {
   pressNote: PressNoteType;
   onEdit: () => void;
   onDelete: () => void;
+  tipoprensa: number;
 }
 
 export default function PressCard({
+  tipoprensa,
   pressNote,
   onEdit,
   onDelete,
@@ -47,6 +49,11 @@ export default function PressCard({
       : prefijo === "SP"
       ? "Español"
       : prefijo;
+  };
+
+  const formatDateValue = (dateString: string): Date => {
+    // Use UTC time with a Z suffix to prevent timezone offset issues
+    return new Date(`${dateString}T12:00:00Z`);
   };
 
   return (
@@ -92,22 +99,29 @@ export default function PressCard({
               />
             </div>
 
-                {/* Date */}
-    <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
-      <Label
-        htmlFor={`fecha-${pressNote.idPrensa}`}
-        className="text-xs font-medium flex items-center gap-1 text-primary truncate"
-      >
-        <CalendarIcon size={14} className="text-primary flex-shrink-0" />
-        <span className="truncate">Fecha</span>
-      </Label>
-      <Input
-        id={`fecha-${pressNote.idPrensa}`}
-        value={format(new Date(pressNote.fecha), 'PPP', { locale: es })}
-        disabled
-        className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
-      />
-    </div>
+            {/* Date */}
+            {tipoprensa === 2 ? null : (
+              <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
+                <Label
+                  htmlFor={`fecha-${pressNote.idPrensa}`}
+                  className="text-xs font-medium flex items-center gap-1 text-primary truncate"
+                >
+                  <CalendarIcon
+                    size={14}
+                    className="text-primary flex-shrink-0"
+                  />
+                  <span className="truncate">Fecha</span>
+                </Label>
+                <Input
+                  id={`fecha-${pressNote.idPrensa}`}
+                  value={format(formatDateValue(pressNote.fecha), "PPP", {
+                    locale: es,
+                  })}
+                  disabled
+                  className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
+                />
+              </div>
+            )}
 
             {/* URL */}
             {pressNote.url && (

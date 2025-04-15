@@ -172,6 +172,7 @@ const ProgramContainer: FC<Props> = ({
               <ProgramCard
                 date={program.fechaPrograma}
                 program={program}
+                programDetail={program.detalles[0]}
                 programCategories={programCategories}
                 key={`program-all-${program.fechaPrograma}-${index}`}
                 onDeleteSuccess={onRefreshPrograms}
@@ -202,6 +203,7 @@ const ProgramContainer: FC<Props> = ({
               <ProgramCard
                 date={program.fechaPrograma}
                 program={program}
+                programDetail={program.detalles[0]}
                 programCategories={programCategories}
                 key={`program-en-${program.fechaPrograma}-${index}`}
                 onDeleteSuccess={onRefreshPrograms}
@@ -232,6 +234,7 @@ const ProgramContainer: FC<Props> = ({
               <ProgramCard
                 date={program.fechaPrograma}
                 program={program}
+                programDetail={program.detalles[0]}
                 programCategories={programCategories}
                 key={`program-sp-${program.fechaPrograma}-${index}`}
                 onDeleteSuccess={onRefreshPrograms}

@@ -12,22 +12,28 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { PressNoteType } from "@/types/pressNoteTypes";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Upload, Loader2, X, AlertCircle } from "lucide-react";
+import { CalendarIcon, Upload, Loader2, AlertCircle } from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { updatePressNote } from "../services/pressNotesService";
 
 // ✅ Esquema de validación con Zod
 const PressNoteSchema = z.object({
   idioma: z.enum(["1", "2"], {
     message: "Selecciona un idioma válido",
   }),
-  idTipPre: z.number().int().positive(),
   url: z.string().url("Debe ser una URL válida"),
   titulo: z.string().min(1, "El título es obligatorio"),
-  foto: z.instanceof(File).optional(),
-  fecha: z.date({
-    required_error: "La fecha es obligatoria",
-    invalid_type_error: "Seleccione una fecha válida",
-  }),
+  foto: z.string().optional(),
+  fecha: z
+    .date()
+    .or(z.string())
+    .transform((val) => {
+      if (val instanceof Date) {
+        return format(val, "yyyy-MM-dd");
+      }
+      return val;
+    })
+    .optional(),
 });
 
 // ✅ Tipo basado en Zod
@@ -38,7 +44,7 @@ export default function UpdatePressModal({
   onClose,
   pressNote,
 }: {
-  onUpdate: (updated: PressNoteType) => void;
+  onUpdate: () => void;
   onClose: () => void;
   pressNote: PressNoteType;
 }) {
@@ -52,7 +58,6 @@ export default function UpdatePressModal({
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     watch,
     setValue,
     control,
@@ -60,42 +65,72 @@ export default function UpdatePressModal({
     resolver: zodResolver(PressNoteSchema),
     mode: "onSubmit",
     defaultValues: {
-      idioma: pressNote.idioma as "1" | "2",
-      idTipPre: pressNote.idTipPre,
+      idioma: pressNote.prefijoIdioma === "EN" ? "1" : "2",
       url: pressNote.url,
       titulo: pressNote.titulo,
-      foto: undefined,
-      fecha: pressNote.fecha ? new Date(pressNote.fecha) : new Date(),
+      foto: pressNote.foto,
+      ...(pressNote.idTipPre !== 2 && { fecha: pressNote.fecha }),
     },
   });
 
   const selectedLanguage = watch("idioma");
 
+  const formatDateValue = (value: string | Date | undefined | null): string => {
+    if (!value) return "";
+    if (value instanceof Date) {
+      return format(value, "yyyy-MM-dd");
+    }
+    if (typeof value === "string") {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return value;
+      }
+      try {
+        // Use UTC to prevent timezone issues
+        const date = new Date(`${value}T12:00:00Z`);
+        if (!isNaN(date.getTime())) {
+          return format(date, "yyyy-MM-dd");
+        }
+      } catch (e) {
+        console.error("Failed to parse date value:", value, e);
+      }
+    }
+    return "";
+  };
+
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setValue("foto", file, { shouldValidate: true });
-      setImagePreview(URL.createObjectURL(file));
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        // Store the base64 string instead of the file
+        setValue("foto", base64String, { shouldValidate: true });
+        setImagePreview(URL.createObjectURL(file));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const onSubmit = async (data: PressNoteFormValues) => {
-    console.log("Form data:", data);
     try {
       setIsSubmitting(true);
+      const isPhotoChanged = data.foto !== pressNote.foto;
+      const tipoprensa = pressNote.idTipPre;
 
-      // Create a copy of the press note to avoid mutation issues
-      const updatedPressNote: PressNoteType = {
-        ...pressNote,
-        idioma: data.idioma,
+      await updatePressNote({
+        evento: 1,
+        idNews: pressNote.idPrensa,
+        tipoprensa: tipoprensa,
+        ididioma: data.idioma,
         url: data.url,
         titulo: data.titulo,
-        fecha: format(data.fecha, "yyyy-MM-dd"),
-        foto: data.foto ? URL.createObjectURL(data.foto) : pressNote.foto,
-      };
+        ...(tipoprensa !== 2 && { fecha: data.fecha }),
+        ...(isPhotoChanged && { foto: data.foto }),
+      });
 
-      onUpdate(updatedPressNote);
-      reset();
+      onUpdate();
+
       onClose();
     } catch (error) {
       console.error("Error updating press note", error);
@@ -107,13 +142,13 @@ export default function UpdatePressModal({
     <div className="bg-white rounded-lg">
       <div className="flex items-start justify-between p-4 border-b mb-6">
         <DialogTitle className="text-xl font-semibold">
-          Editar Nota de Prensa
+          {pressNote.idTipPre === 2
+            ? "Editar boletin"
+            : "Editar nota de prensa"}
         </DialogTitle>
       </div>
       <form
         onSubmit={(e) => {
-          console.log("Form submission event triggered");
-          console.log("Current form errors:", errors);
           handleSubmit(onSubmit)(e);
         }}
         className="flex flex-col gap-6"
@@ -140,51 +175,79 @@ export default function UpdatePressModal({
             <p className="text-red-500 text-sm">{errors.url.message}</p>
           )}
         </div>
-        <div className="space-y-2">
-          <Label>Fecha</Label>
-          <Controller
-            name="fecha"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !value && "text-muted-foreground",
-                      errors.fecha && "border-red-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {value ? (
-                      format(value, "PPP", { locale: es })
-                    ) : (
-                      <span>Seleccionar fecha</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={value}
-                    onSelect={(selectedDate) => {
-                      onChange(selectedDate);
-                      setDatePickerOpen(false);
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+        {pressNote.idTipPre === 2 ? null : (
+          <div className="space-y-2">
+            <Label>Fecha</Label>
+            <Controller
+              name="fecha"
+              control={control}
+              render={({ field: { value, onChange } }) => (
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !value && "text-muted-foreground",
+                        errors.fecha && "border-red-500"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {value ? (
+                        // Convert the string date value to a Date for display
+                        format(
+                          typeof value === "string"
+                            ? new Date(`${formatDateValue(value)}T12:00:00Z`)
+                            : value,
+                          "PPP",
+                          { locale: es }
+                        )
+                      ) : (
+                        <span>Seleccionar fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        typeof value === "string"
+                          ? new Date(`${formatDateValue(value)}T12:00:00Z`)
+                          : value
+                      }
+                      onSelect={(selectedDate) => {
+                        if (selectedDate) {
+                          const utcDate = new Date(
+                            Date.UTC(
+                              selectedDate.getFullYear(),
+                              selectedDate.getMonth(),
+                              selectedDate.getDate(),
+                              12,
+                              0,
+                              0
+                            )
+                          );
+                          onChange(formatDateValue(utcDate));
+                        } else {
+                          onChange(null);
+                        }
+                        setDatePickerOpen(false);
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            {errors.fecha && (
+              <p className="text-red-500 text-xs flex items-center mt-1">
+                <AlertCircle size={12} className="mr-1" />
+                {errors.fecha.message}
+              </p>
             )}
-          />
-          {errors.fecha && (
-            <p className="text-red-500 text-xs flex items-center mt-1">
-              <AlertCircle size={12} className="mr-1" />
-              {errors.fecha.message}
-            </p>
-          )}
-        </div>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="foto">Imagen</Label>
           <Input
