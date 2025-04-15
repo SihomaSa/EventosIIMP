@@ -1,6 +1,8 @@
 export type Program = {
   fechaPrograma: string;
   detalles: ProgramDetail[];
+  titulo?: string;
+  descripcion?: string;
 };
 
 export type ProgramDetail = {
@@ -8,6 +10,8 @@ export type ProgramDetail = {
   idPrograma: number;
   idEvento: number;
   detalleAdicional: DetalleAdicional[];
+  titulo?: string;
+  responsable?: string;
 };
 
 type DetalleAdicional = {

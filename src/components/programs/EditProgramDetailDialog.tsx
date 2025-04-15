@@ -284,36 +284,122 @@ const EditProgramDetailDialog: FC<Props> = ({
                 <Clock size={16} className="mr-2 text-primary" />
                 Hora de inicio <span className="text-red-500 ml-1">*</span>
               </Label>
-              <Input
-                id="horaIni"
-                type="time"
-                value={extractTime(formData.horaIni)}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    horaIni: `${date}T${e.target.value}`,
-                  }))
-                }
-                disabled={loading}
-              />
+              <div className="relative flex items-center">
+                <Clock className="absolute left-2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <div className="flex w-full">
+                  <Select
+                    value={extractTime(formData.horaIni).split(":")[0] || ""}
+                    onValueChange={(value) => {
+                      const currentMinutes =
+                        extractTime(formData.horaIni).split(":")[1] || "00";
+                      setFormData((prev) => ({
+                        ...prev,
+                        horaIni: `${date}T${value}:${currentMinutes}`,
+                      }));
+                    }}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="pl-8 rounded-r-none border-r-0">
+                      <SelectValue placeholder="HH" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) =>
+                        i.toString().padStart(2, "0")
+                      ).map((h) => (
+                        <SelectItem key={h} value={h}>
+                          {h}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={extractTime(formData.horaIni).split(":")[1] || ""}
+                    onValueChange={(value) => {
+                      const currentHours =
+                        extractTime(formData.horaIni).split(":")[0] || "00";
+                      setFormData((prev) => ({
+                        ...prev,
+                        horaIni: `${date}T${currentHours}:${value}`,
+                      }));
+                    }}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="rounded-l-none pl-2">
+                      <SelectValue placeholder="MM" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 60 }, (_, i) =>
+                        i.toString().padStart(2, "0")
+                      ).map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="horaFin" className="flex items-center">
                 <Clock size={16} className="mr-2 text-primary" />
                 Hora de fin <span className="text-red-500 ml-1">*</span>
               </Label>
-              <Input
-                id="horaFin"
-                type="time"
-                value={extractTime(formData.horaFin)}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    horaFin: `${date}T${e.target.value}`,
-                  }))
-                }
-                disabled={loading}
-              />
+              <div className="relative flex items-center">
+                <Clock className="absolute left-2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <div className="flex w-full">
+                  <Select
+                    value={extractTime(formData.horaFin).split(":")[0] || ""}
+                    onValueChange={(value) => {
+                      const currentMinutes =
+                        extractTime(formData.horaFin).split(":")[1] || "00";
+                      setFormData((prev) => ({
+                        ...prev,
+                        horaFin: `${date}T${value}:${currentMinutes}`,
+                      }));
+                    }}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="pl-8 rounded-r-none border-r-0">
+                      <SelectValue placeholder="HH" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) =>
+                        i.toString().padStart(2, "0")
+                      ).map((h) => (
+                        <SelectItem key={h} value={h}>
+                          {h}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={extractTime(formData.horaFin).split(":")[1] || ""}
+                    onValueChange={(value) => {
+                      const currentHours =
+                        extractTime(formData.horaFin).split(":")[0] || "00";
+                      setFormData((prev) => ({
+                        ...prev,
+                        horaFin: `${date}T${currentHours}:${value}`,
+                      }));
+                    }}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="rounded-l-none pl-2">
+                      <SelectValue placeholder="MM" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 60 }, (_, i) =>
+                        i.toString().padStart(2, "0")
+                      ).map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
           {/* Program Type */}
@@ -397,7 +483,7 @@ const EditProgramDetailDialog: FC<Props> = ({
               </Label>
               <Input
                 id="sala"
-                placeholder="Ingrese la sala si aplica..."
+                placeholder="Ingrese la sala"
                 value={formData.sala || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({

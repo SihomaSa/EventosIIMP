@@ -250,7 +250,7 @@ const NewProgramDialog: FC<Props> = ({
       </DialogTrigger>
 
       <DialogContent className="max-w-md md:max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex items-center">
           <DialogTitle className="text-xl font-semibold flex items-center">
             {step === ModalStep.DATE_SELECT
               ? "Seleccionar fecha para el programa"
@@ -272,7 +272,7 @@ const NewProgramDialog: FC<Props> = ({
 
         {step === ModalStep.DATE_SELECT ? (
           <div className="py-6">
-            <div className="mx-auto max-w-sm bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+            <div className="mx-auto max-w-sm bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-center items-center">
               <Calendar
                 mode="single"
                 selected={selectedDate}

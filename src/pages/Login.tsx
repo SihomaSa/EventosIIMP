@@ -39,6 +39,7 @@ export default function Login() {
       await login(formData.email, formData.password); // Inicia sesión con Firebase
       navigate("/events"); // Redirige después del login
     } catch (error) {
+      console.warn(error)
       setErrors({ general: "Credenciales incorrectas. Inténtalo de nuevo." });
       setLoading(false);
     }

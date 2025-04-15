@@ -21,6 +21,17 @@ export const createPressNote = async (newPressNote: NewPressNoteRequestType): Pr
   return response.json();
 };
 
+export const updatePressNote = async (newPressNote: NewPressNoteRequestType): Promise<PressNoteType> => {
+  const response = await fetch(API_POST_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newPressNote),
+  });
+
+  if (!response.ok) throw new Error("Error al crear la nota de prensa");
+  return response.json();
+};
+
 export const deletePressNote = async (pressNoteId: string): Promise<void> => {
   const response = await fetch(`${API_DELETE_URL}/${pressNoteId}`, {
     method: "DELETE",
