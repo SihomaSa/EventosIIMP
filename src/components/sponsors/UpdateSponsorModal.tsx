@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 import { useState, useEffect } from "react";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { updateSponsor } from "@/components/services/sponsorsService";
@@ -20,80 +14,71 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 const sponsorSchema = z.object({
-  nombre: z.string().min(1, "El nombre es obligatorio"),
+  descripcion: z.string().min(1, "La descripción es obligatoria"),
   foto: z.instanceof(File).optional(),
   url: z.string().url({ message: "Debe ser una URL válida" }),
+  categoria: z.string().min(1, "Selecciona una categoría válida"),
   idioma: z.enum(["1", "2"], {
     message: "Selecciona un idioma válido",
   }),
-  estado: z.enum(["0", "1"], {
-    message: "Selecciona un estado válido",
-  }),
-  descripcion: z.string().min(1, "La descripción es obligatoria"),
-  categoria: z.string().min(1, "Selecciona una categoría válida"),
 });
 
 type SponsorFormValues = z.infer<typeof sponsorSchema>;
 
 interface UpdateSponsorModalProps {
-  sponsor: SponsorType;
-  onUpdate: () => void;
   onClose: () => void;
+  sponsor: SponsorType;
+  idEvento?: string;
+  onUpdate: () => void;
 }
 
 export default function UpdateSponsorModal({
-  sponsor,
-  onUpdate,
   onClose,
+  sponsor,
+  idEvento = "1",
+  onUpdate,
 }: UpdateSponsorModalProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    typeof sponsor.foto === "string" ? sponsor.foto : null
-  );
+  const [imagePreview, setImagePreview] = useState<string | null>(sponsor.foto || null);
   const [fotoUpdated, setFotoUpdated] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
+    formState: { errors },
     setValue,
-    // watch,
+    watch,
     control,
   } = useForm<SponsorFormValues>({
     resolver: zodResolver(sponsorSchema),
     defaultValues: {
-      nombre: sponsor.nombre,
+      descripcion: sponsor.descripcionIdioma,
       foto: undefined,
       url: sponsor.url,
-      descripcion: sponsor.descripcionIdioma,
       idioma: sponsor.prefijoIdioma === "EN" ? "1" : "2",
-      estado: "1",
       categoria: sponsor.categoria === "ORO" ? "1" : sponsor.categoria === "PLATA" ? "2" : "3",
     },
   });
 
   useEffect(() => {
     if (sponsor) {
-      setValue("nombre", sponsor.nombre);
       setValue("url", sponsor.url);
-      setValue("descripcion", sponsor.descripcionIdioma);
       setValue("idioma", sponsor.prefijoIdioma === "EN" ? "1" : "2");
+      setValue("descripcion", sponsor.descripcionIdioma);
+      setImagePreview(sponsor.foto || null);
       setValue(
         "categoria",
         sponsor.categoria === "ORO" ? "1" : sponsor.categoria === "PLATA" ? "2" : "3"
       );
-      setValue("estado", "1");
-      setImagePreview(sponsor.foto || null);
     }
   }, [sponsor, setValue]);
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 1024 * 1024 * 2) { // 2MB max
-        setImageError("La imagen excede el tamaño máximo permitido de 2MB.");
+      if (file.size > 1024 * 1024) {
+        setImageError("La imagen excede el tamaño máximo permitido de 1MB.");
         setValue("foto", undefined);
         setImagePreview(null);
         event.target.value = "";
@@ -106,50 +91,48 @@ export default function UpdateSponsorModal({
     }
   };
 
+  const handleLanguageChange = (value: "1" | "2") => {
+    setValue("idioma", value, { shouldValidate: true });
+  };
+
   const onSubmit = async (data: SponsorFormValues) => {
-    setLoading(true);
-    const toastId = toast.loading("Actualizando auspiciador...");
+    setIsSubmitting(true);
     try {
-      const formFoto =
-        fotoUpdated !== 0 && data.foto
-          ? await fileToBase64(data.foto)
-          : sponsor.foto;
-
-      const idioma = data.idioma === "1" ? "EN" : "ES";
-      const categoria =
-        data.categoria === "1" ? "ORO" :
-        data.categoria === "2" ? "PLATA" : "BRONCE";
-
+      let fotoBase64 = sponsor.foto;
+      if (fotoUpdated > 0 && data.foto) {
+        fotoBase64 = await fileToBase64(data.foto);
+      }
+  
       const editSponsor: UpdateSponsorRequestType = {
-
-        foto: formFoto,
+        foto: fotoBase64 as string,
         url: data.url,
-        idEvento: sponsor.idEvento,
-        categoria,
+        categoria: data.categoria,
         descripcion: data.descripcion,
-        idioma: idioma,
-        estado: data.estado,
-        idSponsor: sponsor.idSponsor,
+        idioma: data.idioma,
+        estado: "1",
+        idEvento: String(idEvento), // Asegurar que sea string
+        idSponsor: Number(sponsor.idSponsor), // Asegurar que sea number si el backend lo espera así
       };
-
-      await updateSponsor(editSponsor);
-
-      toast.success("Auspiciador actualizado correctamente", { id: toastId });
+  
+      console.log("Datos a enviar:", editSponsor);
+      
+      const response = await updateSponsor(editSponsor);
+      console.log("Respuesta del servidor:", response);
+  
+      toast.success("Auspiciador actualizado correctamente");
       onUpdate();
-      reset();
       onClose();
-      setImagePreview(null);
     } catch (error) {
       console.error("Error al actualizar auspiciador:", error);
-      toast.error("Error al actualizar auspiciador", { id: toastId });
+      toast.error("Error al actualizar el auspiciador");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar Auspiciador</DialogTitle>
           <DialogDescription>
@@ -157,19 +140,6 @@ export default function UpdateSponsorModal({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Nombre */}
-          <div>
-            <Label htmlFor="nombre">Nombre</Label>
-            <Input
-              id="nombre"
-              {...register("nombre")}
-              disabled={isSubmitting}
-            />
-            {errors.nombre && (
-              <p className="text-red-500 text-sm">{errors.nombre.message}</p>
-            )}
-          </div>
-
           {/* Descripción */}
           <div>
             <Label htmlFor="descripcion">Descripción</Label>
@@ -198,28 +168,21 @@ export default function UpdateSponsorModal({
 
           {/* Idioma */}
           <div>
-            <Label>Idioma</Label>
-            <Controller
-              name="idioma"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isSubmitting}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="EN" />
-                    <Label htmlFor="EN">Inglés</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="2" id="ES" />
-                    <Label htmlFor="ES">Español</Label>
-                  </div>
-                </RadioGroup>
-              )}
-            />
+            <Label className="mb-2 font-bold">Idioma</Label>
+            <RadioGroup
+              onValueChange={handleLanguageChange}
+              value={watch("idioma")}
+              disabled={isSubmitting}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="1" id="EN" />
+                <Label htmlFor="EN">Inglés</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="2" id="SP" />
+                <Label htmlFor="SP">Español</Label>
+              </div>
+            </RadioGroup>
             {errors.idioma && (
               <p className="text-red-500 text-sm">{errors.idioma.message}</p>
             )}
@@ -239,51 +202,22 @@ export default function UpdateSponsorModal({
                   className="grid grid-cols-3 gap-2"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="ORO" />
-                    <Label htmlFor="ORO">Oro</Label>
+                    <RadioGroupItem value="1" id="oro" />
+                    <Label htmlFor="oro">ORO</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="2" id="PLATA" />
-                    <Label htmlFor="PLATA">Plata</Label>
+                    <RadioGroupItem value="2" id="plata" />
+                    <Label htmlFor="plata">PLATA</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="3" id="BRONCE" />
-                    <Label htmlFor="BRONCE">Bronce</Label>
+                    <RadioGroupItem value="3" id="cobre" />
+                    <Label htmlFor="cobre">COBRE</Label>
                   </div>
                 </RadioGroup>
               )}
             />
             {errors.categoria && (
               <p className="text-red-500 text-sm">{errors.categoria.message}</p>
-            )}
-          </div>
-
-          {/* Estado */}
-          <div>
-            <Label>Estado</Label>
-            <Controller
-              name="estado"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isSubmitting}
-                  className="flex space-x-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="activo" />
-                    <Label htmlFor="activo">Activo</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="0" id="inactivo" />
-                    <Label htmlFor="inactivo">Inactivo</Label>
-                  </div>
-                </RadioGroup>
-              )}
-            />
-            {errors.estado && (
-              <p className="text-red-500 text-sm">{errors.estado.message}</p>
             )}
           </div>
 
@@ -309,16 +243,13 @@ export default function UpdateSponsorModal({
             )}
           </div>
 
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={loading || isSubmitting}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Guardar Cambios"
-              )}
+          <div className="flex justify-between">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Guardar
             </Button>
           </div>
         </form>

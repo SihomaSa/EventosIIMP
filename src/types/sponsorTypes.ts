@@ -1,8 +1,7 @@
-// import { LanguageType } from "./languageTypes";
+import { LanguageType } from "./languageTypes";
 
 export interface SponsorType { //GET
 	idSponsor: number;
-	idEvento: number;
 	prefijoIdioma: string;
 	foto: string;
 	categoria: string;
@@ -14,26 +13,26 @@ export interface NewSponsorRequestType {//POST
     descripcion: string;
     foto: string;
 	url: string;
-	idEvento: string | number;
+	idEvento: 1;
 	categoria: string;
-    idioma: string | number;
+    idioma: LanguageType;
   }
   export interface UpdateSponsorRequestType {  //PUT
 	descripcion: string;
 	foto: string;
 	url: string;
-	idEvento: number;
+	idEvento:string;//Esto no
 	categoria: string;
-	idioma: string | number;
-	estado: string;
+	idioma: LanguageType;
+	estado: string; //Esto no
 	idSponsor: number;
   }
-
+ 
   export interface NewSponsorType {
 	idEvento: number;
 	descripcion: string;
 	foto: string;
 	url: string;
 	categoria: string;
-	idioma: string | number;
+	idioma: LanguageType;
 }

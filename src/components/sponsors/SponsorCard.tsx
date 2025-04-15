@@ -9,6 +9,7 @@ import { deleteSponsor } from "@/components/services/sponsorsService";
 import { SponsorType } from "@/types/sponsorTypes";
 import { toast } from "sonner";
 
+
 interface SponsorCardProps {
   sponsor: SponsorType;
   onEdit: () => void;
