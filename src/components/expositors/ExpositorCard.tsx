@@ -52,13 +52,13 @@ export default function ExpositorCard({
     <>
       <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
         <CardHeader className="p-0">
-          <div className="relative w-full h-44 overflow-hidden rounded-t-lg">
-            <img
-              src={foto}
+        <div className="relative w-full min-h-[280px] overflow-hidden rounded-t-lg bg-white"> 
+             <img 
+             src={foto}
               alt={`expositor ${idAuthor}`}
-              className="w-full h-full object-cover object-center"
+              className="absolute inset-0 w-full h-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
             <div className="absolute bottom-0 left-0 p-3 w-full">
               <h3 className="text-white font-semibold mt-1 line-clamp-2">
                 {nombres} {apellidos}

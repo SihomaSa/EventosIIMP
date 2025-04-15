@@ -9,7 +9,7 @@ import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
 import { toast } from "sonner";
-
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 export default function Sponsors() {
   const [sponsors, setSponsors] = useState<SponsorType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,27 +200,43 @@ export default function Sponsors() {
       </div>
 
       {isSponsorModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <Dialog open={isSponsorModalOpen} onOpenChange={setIsSponsorModalOpen}>
+        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <EditSponsorForm
+              open={isSponsorModalOpen}
               onAdd={handleAddSponsor}
               onClose={() => setIsSponsorModalOpen(false)}
             />
-          </div>
-        </div>
+           </DialogContent>
+      </Dialog>
+
       )}
 
-      {isUpdateModalOpen && selectedSponsor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <Dialog
+              
+              open={isUpdateModalOpen && !!selectedSponsor}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setIsUpdateModalOpen(false);
+                  setTimeout(() => {
+                  setSelectedSponsor(null);
+                  }, 100);
+                }
+              }}
+            >
+
+      
+       
+       <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+       {selectedSponsor && (
             <UpdateSponsorModal
               sponsor={selectedSponsor}
               onUpdate={handleUpdateSponsor}
               onClose={() => setIsUpdateModalOpen(false)}
             />
-          </div>
-        </div>
-      )}
+            )}
+          </DialogContent> 
+      </Dialog>
     </div>
   );
 }

@@ -37,23 +37,24 @@ export default function SponsorCard({
 
   return (
     <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
-      <CardHeader className="p-0">
-        <div className="relative w-full h-44 overflow-hidden rounded-t-lg">
-          <img
-            src={sponsor.foto}
-            alt={`auspiciador ${sponsor.idSponsor}`}
-            className="w-full h-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
-          <div className="absolute bottom-0 left-0 p-3 w-full">
-            <div className="flex items-center justify-between">
-              <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
-                {sponsor.categoria}
-              </span>
-            </div>
-          </div>
+     <CardHeader className="p-0">
+      <div className="relative w-full min-h-[180px] overflow-hidden rounded-t-lg bg-white flex items-center justify-center">
+        <img
+          src={sponsor.foto}
+          alt={`auspiciador ${sponsor.idSponsor}`}
+          className="max-h-[200%] max-w-[200%] object-contain scale-110 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+        <div className="absolute bottom-0 left-0 p-3 w-full">
+          <h3 className="text-white font-semibold mt-1 line-clamp-2">
+            <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
+              {sponsor.categoria}
+            </span>
+          </h3>
         </div>
-      </CardHeader>
+      </div>
+    </CardHeader>
+
 
       <CardContent className="p-3 bg-white flex-grow">
         <div className="flex flex-col w-full gap-2">
