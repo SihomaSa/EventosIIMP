@@ -25,7 +25,7 @@ import ProgramsService from "../../services/ProgramsService";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "sonner";
 import AddProgramDialog from "../../../../components/programs/AddProgramDialog";
 import EditProgramDetailDialog from "../../../../components/programs/EditProgramDetailDialog";

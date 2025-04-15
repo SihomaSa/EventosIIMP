@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
 import { PressNoteType } from "@/types/pressNoteTypes";
 import { deletePressNote } from "../services/pressNotesService";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { format } from "date-fns";

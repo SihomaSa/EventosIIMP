@@ -4,6 +4,7 @@ import { Plus, RefreshCw, Search, Newspaper } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ExpositorCard from "@/components/expositors/ExpositorCard";
 import UpdateExpositorModal from "@/components/expositors/UpdateExpositorModal";
 import EditExpositorForm from "@/components/expositors/EditExpositorForm";
@@ -39,55 +40,43 @@ export default function Expositors() {
   }, [error]);
 
   useEffect(() => {
-    const fetchExpositors = async () => {
-          try {
-            const data = await getExpositors();
-            setExpositors(data);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (err) {
-            setError("Error al obtener los conferencistas");
-          } finally {
-            setLoading(false);
-          }
-        };
     fetchExpositors();
-  }, [expositorsUpdated]);
+  }, [expositorsUpdated, fetchExpositors]);
 
-  const handleAddExpositor = () => {
+  const handleAddExpositor = useCallback(() => {
     setExpositorsUpdated((prev) => prev + 1);
     setIsExpositorModalOpen(false);
-  };
+  }, []);
 
-  const handleUpdateExpositor = () => {
+  const handleUpdateExpositor = useCallback(() => {
     setExpositorsUpdated((prev) => prev + 1);
     setSelectedExpositor(null);
     setIsUpdateModalOpen(false);
-  };
+  }, []);
 
-  const handleDelete = () => {
+  const handleDeleteExpositor = useCallback(() => {
     setExpositorsUpdated((prev) => prev + 1);
-  };
+  }, []);
 
-  const openUpdateModal = (expositor: ExpositorType) => {
+  const openUpdateModal = useCallback((expositor: ExpositorType) => {
     setSelectedExpositor(expositor);
     setIsUpdateModalOpen(true);
-  };
+  }, []);
 
   const handleRefresh = useCallback(() => {
     fetchExpositors();
   }, [fetchExpositors]);
 
   const filteredExpositors = useMemo(() => {
-	if (!searchTerm) return expositors;
-  
-	const term = searchTerm.toLowerCase();
-  
-	return expositors.filter((expositor) =>
-	  `${expositor.nombres} ${expositor.apellidos} ${expositor.especialidad}`
-		.toLowerCase()
-		.includes(term)
-	);
-	
+    if (!searchTerm) return expositors;
+
+    const term = searchTerm.toLowerCase();
+
+    return expositors.filter((expositor) =>
+      `${expositor.nombres} ${expositor.apellidos} ${expositor.especialidad}`
+        .toLowerCase()
+        .includes(term)
+    );
   }, [expositors, searchTerm]);
 
   const emptyState = useMemo(() => {
@@ -113,13 +102,10 @@ export default function Expositors() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {Array.from({ length: 8 }, (_, i) => (
           <div key={`skeleton-${i}`} className="border shadow-sm rounded-lg overflow-hidden h-full flex flex-col">
-
             {/* Image header with gradient overlay */}
             <div className="relative w-full h-44">
               <Skeleton className="absolute inset-0 rounded-t-lg bg-primary/30" />
-              
             </div>
-
             {/* Card content area */}
             <div className="p-3 bg-white flex-grow flex flex-col gap-2">
               {/* Title field */}
@@ -127,7 +113,6 @@ export default function Expositors() {
                 <Skeleton className="h-3 w-16 mb-1 rounded bg-primary/30" />
                 <Skeleton className="h-5 w-full rounded bg-primary/30" />
               </div>
-
               {/* Description field */}
               <div className="w-full bg-gray-50 p-2 rounded-md border border-gray-200">
                 <Skeleton className="h-3 w-24 mb-1 rounded bg-primary/30" />
@@ -137,7 +122,6 @@ export default function Expositors() {
                   <Skeleton className="h-4 w-5/6 rounded bg-primary/30" />
                 </div>
               </div>
-
               {/* URL field */}
               <div className="w-full bg-gray-50 p-2 rounded-md border border-gray-200">
                 <Skeleton className="h-3 w-12 mb-1 rounded bg-primary/30" />
@@ -146,14 +130,12 @@ export default function Expositors() {
                   <div className="ml-2 h-4 w-4 rounded-full bg-primary/30"></div>
                 </div>
               </div>
-
               {/* Language field */}
               <div className="w-full bg-gray-50 p-2 rounded-md border border-gray-200">
                 <Skeleton className="h-3 w-14 mb-1 rounded bg-primary/30" />
                 <Skeleton className="h-5 w-20 rounded bg-primary/30" />
               </div>
             </div>
-
             {/* Card footer with buttons */}
             <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 flex justify-between">
               <Skeleton className="h-8 w-24 rounded bg-red-100" />
@@ -166,15 +148,12 @@ export default function Expositors() {
     []
   );
 
-  if (error) return <p className="text-red-500">{error}</p>;
-
   return (
     <div className="p-0 xl:p-6 flex flex-col">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Conferencistas</h1>
         <p className="text-gray-500 mt-1">Administre todas los conferencistas del evento</p>
       </div>
-
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div className="relative w-full md:w-72">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
@@ -193,9 +172,10 @@ export default function Expositors() {
             disabled={isRefreshing}
             className="cursor-pointer border-gray-200 text-gray-700 flex items-center gap-1"
           >
-            <RefreshCw 
-              size={16} 
-              className={isRefreshing ? "animate-spin" : ""} />
+            <RefreshCw
+              size={16}
+              className={isRefreshing ? "animate-spin" : ""}
+            />
             <span className="hidden md:inline">Actualizar</span>
           </Button>
           <Button
@@ -227,71 +207,79 @@ export default function Expositors() {
       )}
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
         {!loading && (
-        <div className="mb-6">
-          <Tabs defaultValue="all" className="w-full">
-            <TabsContent value="all" className="mt-0 pt-4 pb-1 flex flex-col">
-              {" "}
-              {filteredExpositors.length === 0 && emptyState}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredExpositors.map((expositor) => (
-                  <ExpositorCard
-                    key={expositor.idAuthor}
-                    idAuthor={expositor.idAuthor}
-                    nombres={expositor.nombres}
-                    apellidos={expositor.apellidos}
-                    especialidad={expositor.especialidad}
-                    hojaDeVida={expositor.hojaVida}
-                    foto={expositor.foto}
-                    openUpdateModal={() => openUpdateModal(expositor)}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="mb-6">
+            <Tabs defaultValue="all" className="w-full">
+              <TabsContent value="all" className="mt-0 pt-4 pb-1 flex flex-col">
+                {filteredExpositors.length === 0 && emptyState}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredExpositors.map((expositor) => (
+                    <ExpositorCard
+                      key={expositor.idAutor}
+                      idAuthor={expositor.idAutor ?? 0}
+                      nombres={expositor.nombres}
+                      apellidos={expositor.apellidos}
+                      especialidad={expositor.especialidad}
+                      hojaDeVida={expositor.hojaVida}
+                      foto={expositor.foto}
+                      openUpdateModal={() => openUpdateModal(expositor)}
+                      onDelete={handleDeleteExpositor}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
-          {loading && loadingSkeletons}
+        {loading && loadingSkeletons}
       </div>
-
       <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
-      <span>
-						{!loading && filteredExpositors.length > 0
-							? `Mostrando ${filteredExpositors.length} ${
-								filteredExpositors.length === 1
-								? "Conferencista"
-								: "Conferencistas"
-							}`
-							: ""}
-						</span>
+        <span>
+          {!loading && filteredExpositors.length > 0
+            ? `Mostrando ${filteredExpositors.length} ${
+                filteredExpositors.length === 1
+                  ? "Conferencista"
+                  : "Conferencistas"
+              }`
+            : ""}
+        </span>
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
-      {isExpositorModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <EditExpositorForm
-			        open={isExpositorModalOpen}
-              onClose={() => setIsExpositorModalOpen(false)}
-              onAdd={handleAddExpositor}
-            />
-          </div>
-        </div>
-      )}
+      <Dialog open={isExpositorModalOpen} onOpenChange={setIsExpositorModalOpen}>
+        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <EditExpositorForm
+            onClose={() => setIsExpositorModalOpen(false)}
+            onAdd={handleAddExpositor}
+          />
+        </DialogContent>
+      </Dialog>
 
-      {isUpdateModalOpen && selectedExpositor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <Dialog
+        open={isUpdateModalOpen && !!selectedExpositor}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsUpdateModalOpen(false);
+            setTimeout(() => {
+              setSelectedExpositor(null);
+            }, 100);
+          }
+        }}
+      >
+        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+          {selectedExpositor && (
             <UpdateExpositorModal
               expositor={selectedExpositor}
               onUpdate={handleUpdateExpositor}
-              onAdd={handleAddExpositor}
-              open={isUpdateModalOpen}
-              onClose={() => setIsUpdateModalOpen(false)}
+              onClose={() => {
+                setIsUpdateModalOpen(false);
+                setTimeout(() => {
+                  setSelectedExpositor(null);
+                }, 100);
+              }}
             />
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

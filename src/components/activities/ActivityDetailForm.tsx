@@ -20,7 +20,7 @@ import {
   Calendar,
   BookOpen,
 } from "lucide-react";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog ";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { deleteActivity } from "@/components/services/activitiesServicec";
 
 interface ActivityDetailFormProps {

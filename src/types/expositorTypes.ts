@@ -22,7 +22,7 @@ export interface UpdateExpositorRequestType {//PUT
 	apellidos: string;
 	especialidad: string;
 	hojaDeVida: string;
-	foto: string;
-	idAuthor: number;
+	foto?: string ;
+	idAuthor: string | number;
 
 }
