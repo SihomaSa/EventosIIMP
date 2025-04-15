@@ -361,6 +361,7 @@ export default function Bulletins() {
       </Dialog>
 
       <Dialog
+        
         open={isUpdateModalOpen && !!selectedPressNote}
         onOpenChange={(open) => {
           if (!open) {

@@ -66,16 +66,16 @@ export default function PressCard({
               alt={pressNote.titulo}
               className="object-cover w-full h-full rounded-t-lg"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 rounded-t-lg"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 rounded-t-lg"></div>
             <div className="absolute bottom-0 left-0 p-3 w-full">
               <div className="flex items-center justify-between">
                 <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
                   {getLanguageDisplay(pressNote.prefijoIdioma)}
                 </span>
               </div>
-              <h3 className="text-white font-semibold mt-1 line-clamp-2">
+              {/* <h3 className="text-white font-semibold mt-1 line-clamp-2">
                 {pressNote.titulo}
-              </h3>
+              </h3> */}
             </div>
           </div>
         </CardHeader>

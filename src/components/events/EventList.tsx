@@ -29,7 +29,7 @@ export default function EventList() {
   const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
   const {
