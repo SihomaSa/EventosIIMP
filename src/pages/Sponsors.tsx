@@ -71,9 +71,9 @@ export default function Sponsors() {
 
   const filteredSponsors = useMemo(() => {
     if (!searchTerm) return sponsors;
-    
+
     const term = searchTerm.toLowerCase();
-    return sponsors.filter((sponsor) => 
+    return sponsors.filter((sponsor) =>
       `${sponsor.nombre} ${sponsor.descripcionIdioma} ${sponsor.categoria}`
         .toLowerCase()
         .includes(term)
@@ -89,8 +89,8 @@ export default function Sponsors() {
       <p className="text-sm mb-4">
         {searchTerm.trim() ? "Intenta con otro término de búsqueda" : "Agrega un nuevo auspiciador para comenzar."}
       </p>
-      <Button 
-        onClick={() => setIsSponsorModalOpen(true)} 
+      <Button
+        onClick={() => setIsSponsorModalOpen(true)}
         className="cursor-pointer bg-primary hover:bg-primary/90"
       >
         <Plus size={16} className="mr-1" /> Agregar auspiciador

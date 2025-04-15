@@ -44,7 +44,6 @@ export default function EditSponsorModal({
   onClose,
 }:  {
 	onAdd: () => void;
-	open: boolean;
 	onClose: () => void;
 }) {
   const { selectedEvent } = useEventStore();
@@ -89,13 +88,13 @@ export default function EditSponsorModal({
 
   const onSubmit = async (data: SponsorFormValues) => {
       const toastId = toast.loading("Procesando auspiciador...");
-      
+
       try {
         if (!selectedEvent) throw new Error("No hay evento seleccionado");
-      
+
         // 🔥 Ahora usa `fileToBase64` que ya optimiza SVG antes de convertirlo
         const base64Image = await fileToBase64(data.foto);
-      
+
         const sponsorData = {
 
             descripcion: data.descripcion,
@@ -105,23 +104,23 @@ export default function EditSponsorModal({
             categoria: data.categoria,
             idioma: data.idioma,
         };
-      
+
         await createSponsor(sponsorData);
-        
+
         toast.success("Publicidad creada exitosamente!", { id: toastId });
         onAdd();
         reset();
         onClose();
-        
+
       } catch (error) {
         console.error("Error en el proceso:", {
         error,
         inputData: { ...data, foto: "[BASE64_REDUCIDO]" }
         });
-      
+
         toast.error(
-        error instanceof Error 
-          ? error.message 
+        error instanceof Error
+          ? error.message
           : "Error inesperado al procesar",
         { id: toastId }
         );
@@ -131,7 +130,7 @@ export default function EditSponsorModal({
         <Card>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
             <h2 className="text-xl">Editar Auspiciador</h2>
-    
+
             {/* Nombre */}
             <div>
               <Label htmlFor="descripcion">Nombre</Label>
@@ -140,7 +139,7 @@ export default function EditSponsorModal({
                 <p className="text-red-500 text-sm">{errors.descripcion.message}</p>
               )}
             </div>
-    
+
             {/* URL */}
             <div>
               <Label htmlFor="url">Enlace</Label>
@@ -149,7 +148,7 @@ export default function EditSponsorModal({
                 <p className="text-red-500 text-sm">{errors.url.message}</p>
               )}
             </div>
-    
+
             {/* Idioma */}
             <div>
               <Label>Idioma</Label>
@@ -170,7 +169,7 @@ export default function EditSponsorModal({
                 <p className="text-red-500 text-sm">{errors.idioma.message}</p>
               )}
             </div>
-    
+
             {/* Categoría */}
             <div>
               <Label>Categoría</Label>
@@ -212,7 +211,7 @@ export default function EditSponsorModal({
                 <p className="text-red-500 text-sm">{errors.categoria.message}</p>
               )}
             </div>
-    
+
             {/* Imagen */}
             <ImageInput
               onChange={(file) => setValue("foto", file, { shouldValidate: true })}
@@ -224,7 +223,7 @@ export default function EditSponsorModal({
             {errors.foto && (
               <p className="text-red-500 text-sm">{errors.foto.message}</p>
             )}
-    
+
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
@@ -235,4 +234,3 @@ export default function EditSponsorModal({
         </Card>
       );
     }
-    
