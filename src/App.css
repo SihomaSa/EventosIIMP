@@ -217,20 +217,17 @@ blockquote::after {
 }
 
 .grid-auto-fit {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
 }
-@media (min-width: 1500px) {
+
+@media (max-width: 1400px) {
   .grid-auto-fit {
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   }
 }
-@media (min-width: 1200px) {
+
+@media (max-width: 900px) {
   .grid-auto-fit {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  }
-}
-@media (min-width: 900px) {
-  .grid-auto-fit {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }
