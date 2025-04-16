@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { SponsorType } from "@/types/sponsorTypes";
-import { Plus, RefreshCw, Search, Newspaper } from "lucide-react";
+import { Plus, RefreshCw, Search, Newspaper, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,10 @@ import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
 import { toast } from "sonner";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+
+type LanguageTab = "all" | "en" | "sp";
 export default function Sponsors() {
   const [sponsors, setSponsors] = useState<SponsorType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,9 @@ export default function Sponsors() {
   const [sponsorsUpdated, setSponsorsUpdated] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
+  const [activeCategory] = useState("all");
 
   const fetchSponsors = useCallback(async () => {
     try {
@@ -69,16 +74,41 @@ export default function Sponsors() {
     fetchSponsors();
   }, [fetchSponsors]);
 
+  //Language filter
+  const getLanguageCount = useCallback(
+    (language: string) => {
+      return sponsors.filter((sponsor) => sponsor.prefijoIdioma === language).length;
+    },
+    [sponsors]
+  );
   const filteredSponsors = useMemo(() => {
-    if (!searchTerm) return sponsors;
-
-    const term = searchTerm.toLowerCase();
-    return sponsors.filter((sponsor) =>
-      `${sponsor.nombre} ${sponsor.descripcionIdioma} ${sponsor.categoria}`
-        .toLowerCase()
-        .includes(term)
-    );
-  }, [sponsors, searchTerm]);
+    return sponsors.filter((sponsor) => {
+      if (
+        activeLanguage !== "all" &&
+        sponsor.prefijoIdioma.toLowerCase() !== activeLanguage
+      ) {
+        return false;
+      }
+  
+      if (
+        activeCategory !== "all" &&
+        sponsor.categoria?.toLowerCase() !== activeCategory
+      ) {
+        return false;
+      }
+  
+      if (!searchTerm) return true;
+  
+      const term = searchTerm.toLowerCase();
+  
+      return (
+        sponsor.nombre?.toLowerCase().includes(term) ||
+        sponsor.descripcionIdioma?.toLowerCase().includes(term) ||
+        sponsor.categoria?.toLowerCase().includes(term) ||
+        sponsor.prefijoIdioma?.toLowerCase().includes(term)
+      );
+    });
+  }, [sponsors, searchTerm, activeLanguage, activeCategory]);
 
   const emptyState = useMemo(() => (
     <div className="flex flex-col items-center justify-center py-12 text-center text-gray-600">
@@ -177,7 +207,7 @@ export default function Sponsors() {
           </Button>
         </div>
       </div>
-
+{/* 
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
         {loading && loadingSkeletons}
         {!loading && filteredSponsors.length === 0 && emptyState}
@@ -193,7 +223,68 @@ export default function Sponsors() {
             ))}
           </div>
         )}
+      </div> */}
+      <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
+        {!loading && (
+          <div className="mb-6">
+            <Tabs
+              defaultValue="all"
+              value={activeLanguage}
+              onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
+              className="w-full"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div className="flex items-center text-gray-800">
+                  <Globe
+                    size={18}
+                    className="text-primary mr-2 flex-shrink-0"
+                  />
+                  <h2 className="text-lg font-medium">Filtrar por idioma</h2>
+                </div>
+                <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
+                  <TabsTrigger
+                    value="all"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Todos ({sponsors.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="en"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Inglés ({getLanguageCount("EN")})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="sp"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Español ({getLanguageCount("SP")})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent
+                value={activeLanguage}
+                className="mt-0 pt-4 pb-1 flex flex-col"
+              >
+                {" "}
+                {filteredSponsors.length === 0 && emptyState}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredSponsors.map((sponsor) => (
+                    <SponsorCard
+                    key={sponsor.idSponsor}
+                    sponsor={sponsor}
+                    onEdit={() => openUpdateModal(sponsor)}
+                    onDelete={handleDeleteSponsor}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        {loading && loadingSkeletons}
       </div>
+
 
       <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
         <span className="text-xs">Última actualización: {lastUpdated}</span>
