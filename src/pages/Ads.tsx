@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { AdType } from "../types/adTypes";
-import { Plus, RefreshCw,  Newspaper, Globe  } from "lucide-react";
+import { Plus, RefreshCw, Newspaper, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
@@ -14,89 +14,72 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 type LanguageTab = "all" | "en" | "sp";
 
 export default function Ads() {
-	const [ads, setAds] = useState<AdType[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [selectedAd, setSelectedAd] = useState<AdType | null>(null);
-	const [isadsModalOpen, setIsadsModalOpen] = useState(false);
-	const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-	const [adsUpdated, setAdsUpdated] = useState(0);
-	const [searchTerm] = useState("");
-	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
-	const [lastUpdated, setLastUpdated] = useState(
-		new Date().toLocaleTimeString()
-	);
+  const [ads, setAds] = useState<AdType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedAd, setSelectedAd] = useState<AdType | null>(null);
+  const [isadsModalOpen, setIsadsModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [adsUpdated, setAdsUpdated] = useState(0);
+  const [searchTerm] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
+  const [lastUpdated, setLastUpdated] = useState(
+    new Date().toLocaleTimeString()
+  );
 
-	const fetchAds = useCallback(async () => {
-		try {
-		  setIsRefreshing(true);
-		  const data = await getAds();
-		  setAds(
-			data?.filter((ads) => ads.idPublicidad === 1) || []
-		  );
-		  if (error) setError(null);
-		  setLastUpdated(new Date().toLocaleTimeString());
-		} catch (err) {
-		  setError("Error al obtener las publicidades");
-		  console.error(err);
-		} finally {
-		  setLoading(false);
-		  setIsRefreshing(false);
-		}
-	  }, [error]);
+  const fetchAds = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      const data = await getAds();
+      setAds(data || []);
+      if (error) setError(null);
+      setLastUpdated(new Date().toLocaleTimeString());
+    } catch (err) {
+      setError("Error al obtener las publicidades");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [error]);
 
 	useEffect(() => {
-		const fetchAds = async () => {
-			try {
-				const data = await getAds();
-				setAds(data);
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			} catch (err) {
-				setError("Error al obtener los publicidades");
-			} finally {
-				setLoading(false);
-			}
-		};
+    fetchAds();
+  }, [adsUpdated, fetchAds]);
 
-		fetchAds();
-	}, [adsUpdated]);
+  const handleadsAd = () => {
+    setAdsUpdated((prev) => prev + 1);
+    setIsadsModalOpen(false);
+  };
 
-	const handleadsAd = () => {
-		setAdsUpdated((prev) => prev + 1);
-		setIsadsModalOpen(false);
-	};
+  const handleUpdateAd = () => {
+    setAdsUpdated((prev) => prev + 1);
+    setSelectedAd(null);
+    setIsUpdateModalOpen(false);
+  };
 
-	const handleUpdateAd = () => {
-		setAdsUpdated((prev) => prev + 1);
-		setSelectedAd(null);
-		setIsUpdateModalOpen(false);
-	};
+  const handleDeleteAd = () => {
+    setAdsUpdated((prev) => prev + 1);
+  };
 
-	const handleDeleteAd = () => {
-		setAdsUpdated((prev) => prev + 1);
-	};
+  const openUpdateModal = (ad: AdType) => {
+    setSelectedAd(ad);
+    setIsUpdateModalOpen(true);
+  };
+  const handleRefresh = useCallback(() => {
+    fetchAds();
+  }, [fetchAds]);
 
-	const openUpdateModal = (ad: AdType) => {
-		setSelectedAd(ad);
-		setIsUpdateModalOpen(true);
-	};
-	const handleRefresh = useCallback(() => {
-		fetchAds();
-	  }, [fetchAds]);
-
-
-	
   // Helper function to get the count of notes by language
   const getLanguageCount = useCallback(
     (language: string) => {
-      return ads.filter((note) => note.prefijoIdioma === language)
-        .length;
+      return ads.filter((note) => note.prefijoIdioma === language).length;
     },
     [ads]
   );
-// Filtered press notes based on search term and selected language tab
-const filteredAdds = useMemo(() => {
+  // Filtered press notes based on search term and selected language tab
+  const filteredAdds = useMemo(() => {
     if (!ads) return [];
 
     return ads.filter((note) => {
@@ -113,41 +96,40 @@ const filteredAdds = useMemo(() => {
       const lowerSearchTerm = searchTerm.toLowerCase();
 
       return (
-        (note.prefijoIdioma &&
-          note.prefijoIdioma.toLowerCase().includes(lowerSearchTerm))
+        note.prefijoIdioma &&
+        note.prefijoIdioma.toLowerCase().includes(lowerSearchTerm)
       );
     });
   }, [ads, searchTerm, activeLanguage]);
 
-	
-	const emptyState = useMemo(
-		() => (
-		  <div className="flex flex-col items-center justify-center py-12 text-center">
-			<Newspaper size={48} className="text-gray-300 mb-4" />
-			<h3 className="text-lg font-medium text-gray-700 mb-2">
-			  No hay publicidad
-			</h3>
-			<p className="text-gray-500 max-w-md mb-6">
-			  {searchTerm
-				? "No se encontraron notas de prensa con ese término de búsqueda"
-				: activeLanguage !== "all"
-				? `No hay notas de prensa en ${
-					activeLanguage === "en" ? "inglés" : "español"
-				  }`
-				: "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
-			</p>
-			<Button
-			  onClick={() => setIsadsModalOpen(true)}
-			  className="cursor-pointer bg-primary hover:bg-primary/90"
-			>
-			  <Plus size={16} className="mr-1" />
-			  Agregar nueva publicidad
-			</Button>
-		  </div>
-		),
-		[searchTerm, activeLanguage]
-	  );
-  	// Updated loadingSkeletons to match PressCard design
+  const emptyState = useMemo(
+    () => (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Newspaper size={48} className="text-gray-300 mb-4" />
+        <h3 className="text-lg font-medium text-gray-700 mb-2">
+          No hay publicidad
+        </h3>
+        <p className="text-gray-500 max-w-md mb-6">
+          {searchTerm
+            ? "No se encontraron notas de prensa con ese término de búsqueda"
+            : activeLanguage !== "all"
+            ? `No hay notas de prensa en ${
+                activeLanguage === "en" ? "inglés" : "español"
+              }`
+            : "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
+        </p>
+        <Button
+          onClick={() => setIsadsModalOpen(true)}
+          className="cursor-pointer bg-primary hover:bg-primary/90"
+        >
+          <Plus size={16} className="mr-1" />
+          Agregar nueva publicidad
+        </Button>
+      </div>
+    ),
+    [searchTerm, activeLanguage]
+  );
+  // Updated loadingSkeletons to match PressCard design
   const loadingSkeletons = useMemo(
     () => (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -206,60 +188,60 @@ const filteredAdds = useMemo(() => {
               <Skeleton className="h-8 w-24 rounded bg-red-100" />
               <Skeleton className="h-8 w-24 rounded bg-primary/30" />
             </div>
-			</div>
-			))}
-		</div>
-		),
-		[]
+          </div>
+        ))}
+      </div>
+    ),
+    []
   );
   if (error) return <p className="text-red-500">{error}</p>;
-	return (
-		<div className="p-0 xl:p-6 flex flex-col">
-			<div className="mb-6">
-				<h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-					Gestión de Publicidades
-				</h1>
-				<p className="text-gray-500 mt-1">
-					Administre todas las publicidades del evento
-				</p>
-			</div>
-	
-	<div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+  return (
+    <div className="p-0 xl:p-6 flex flex-col">
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Gestión de Publicidades
+        </h1>
+        <p className="text-gray-500 mt-1">
+          Administre todas las publicidades del evento
+        </p>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div className="relative w-full md:w-72">
-          		{/* <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+          {/* <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           			<Input
 						placeholder="Buscar publicidad..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="pl-8 bg-gray-50 border-gray-200 w-full"
 					/> */}
-				</div>
-			<div className="flex gap-2 w-full md:w-auto">
-				<Button
-						variant="outline"
-						size="sm"
-						onClick={handleRefresh}
-						disabled={isRefreshing}
-						className="cursor-pointer border-gray-200 text-gray-700 flex items-center gap-1"
-				>
-					<RefreshCw
-						size={16}
-						className={isRefreshing ? "animate-spin" : ""}
-					/>
-					<span className="hidden md:inline">Actualizar</span>
-				</Button>
-				<Button
-					size="sm"
-					onClick={() => setIsadsModalOpen(true)}
-					className="cursor-pointer bg-primary hover:bg-primary/90 text-white ml-auto flex items-center gap-1"
-				>
-					<Plus size={16} />
-					<span>Agregar nueva publicidad</span>
-          		</Button>
-        	</div>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="cursor-pointer border-gray-200 text-gray-700 flex items-center gap-1"
+          >
+            <RefreshCw
+              size={16}
+              className={isRefreshing ? "animate-spin" : ""}
+            />
+            <span className="hidden md:inline">Actualizar</span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setIsadsModalOpen(true)}
+            className="cursor-pointer bg-primary hover:bg-primary/90 text-white ml-auto flex items-center gap-1"
+          >
+            <Plus size={16} />
+            <span>Agregar nueva publicidad</span>
+          </Button>
+        </div>
       </div>
-	  {/* Mensaje error */}
-	  {error && (
+      {/* Mensaje error */}
+      {error && (
         <div className="bg-red-50 text-red-500 p-4 mb-6 rounded-lg border border-red-200 flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -277,115 +259,110 @@ const filteredAdds = useMemo(() => {
         </div>
       )}
 
-	  <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
-			{!loading && (
-			<div className="mb-6">
-				<Tabs
-					defaultValue="all"
-					value={activeLanguage}
-					onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
-					className="w-full"
-				>
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-					  <div className="flex items-center text-gray-800">
-						<Globe
-						  size={18}
-						  className="text-primary mr-2 flex-shrink-0"
-						/>
-						<h2 className="text-lg font-medium">Filtrar por idioma</h2>
-					  </div>
-					  <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
-						<TabsTrigger
-						  value="all"
-						  className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-						>
-						  Todos ({ads.length})
-						</TabsTrigger>
-						<TabsTrigger
-						  value="en"
-						  className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-						>
-						  English ({getLanguageCount("EN")})
-						</TabsTrigger>
-						<TabsTrigger
-						  value="sp"
-						  className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-						>
-						  Español ({getLanguageCount("SP")})
-						</TabsTrigger>
-					  </TabsList>
-					</div>
-					<TabsContent
-						value={activeLanguage}
-						className="mt-0 pt-4 pb-1 flex flex-col"
-					>
-							{" "}
-							{filteredAdds.length === 0 && emptyState}
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-							{filteredAdds.map((ad) => (
-							    <AdCard
-										key={ad.idPublicidad}
-										id={ad.idPublicidad}
-										foto={ad.foto}
-										url={ad.url}
-										idioma={ad.descripcionIdioma}
-										openUpdateModal={() => openUpdateModal(ad)}
-										onDelete={handleDeleteAd}
-							    />
-							 ))}
-						</div>
-					</TabsContent>
-				</Tabs>
-			</div>
-		)}
-			{loading && loadingSkeletons}
+      <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
+        {!loading && (
+          <div className="mb-6">
+            <Tabs
+              defaultValue="all"
+              value={activeLanguage}
+              onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
+              className="w-full"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div className="flex items-center text-gray-800">
+                  <Globe
+                    size={18}
+                    className="text-primary mr-2 flex-shrink-0"
+                  />
+                  <h2 className="text-lg font-medium">Filtrar por idioma</h2>
+                </div>
+                <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
+                  <TabsTrigger
+                    value="all"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Todos ({ads.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="en"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    English ({getLanguageCount("EN")})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="sp"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Español ({getLanguageCount("SP")})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent
+                value={activeLanguage}
+                className="mt-0 pt-4 pb-1 flex flex-col"
+              >
+                {" "}
+                {filteredAdds.length === 0 && emptyState}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredAdds.map((ad) => (
+                    <AdCard
+                      key={ad.idPublicidad}
+                      id={ad.idPublicidad}
+                      foto={ad.foto}
+                      url={ad.url}
+                      idioma={ad.descripcionIdioma}
+                      openUpdateModal={() => openUpdateModal(ad)}
+                      onDelete={handleDeleteAd}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        {loading && loadingSkeletons}
       </div>
 
-			
-					<div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
-						<span>
-						{!loading && filteredAdds.length > 0
-							? `Mostrando ${filteredAdds.length} ${
-								filteredAdds.length === 1
-								? "Publicidad"
-								: "Publicidades"
-							}${
-								activeLanguage !== "all"
-								? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
-								: ""
-							}`
-							: ""}
-						</span>
-						<span className="text-xs">Última actualización: {lastUpdated}</span>
-					</div>
+      <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
+        <span>
+          {!loading && filteredAdds.length > 0
+            ? `Mostrando ${filteredAdds.length} ${
+                filteredAdds.length === 1 ? "Publicidad" : "Publicidades"
+              }${
+                activeLanguage !== "all"
+                  ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : ""
+              }`
+            : ""}
+        </span>
+        <span className="text-xs">Última actualización: {lastUpdated}</span>
+      </div>
 
+      {isadsModalOpen && (
+        <Dialog open={isadsModalOpen} onOpenChange={setIsadsModalOpen}>
+          <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <EditAdsForm
+              open={isadsModalOpen}
+              onClose={() => setIsadsModalOpen(false)}
+              onAdd={handleadsAd}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
-					{isadsModalOpen && (
-					   <Dialog open={isadsModalOpen} onOpenChange={setIsadsModalOpen}>
-							  <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-								<EditAdsForm
-									open={isadsModalOpen}
-									onClose={() => setIsadsModalOpen(false)}
-									onAdd={handleadsAd}
-								/>
-							</DialogContent>
-							</Dialog>
-					)}
-				
-			{isUpdateModalOpen && selectedAd && (
-				
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-					<div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-					<UpdateAdsModal
-								ad={selectedAd}
-								onUpdate={handleUpdateAd}
-								onAdd={handleadsAd} // <- Añadido si realmente se usa en el modal
-								open={isUpdateModalOpen}
-								onClose={() => setIsUpdateModalOpen(false)}
-					/>
-				</div>
-			</div>
-			)}
-		</div>
-	);
+      {isUpdateModalOpen && selectedAd && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <UpdateAdsModal
+              ad={selectedAd}
+              onUpdate={handleUpdateAd}
+              onAdd={handleadsAd} // <- Añadido si realmente se usa en el modal
+              open={isUpdateModalOpen}
+              onClose={() => setIsUpdateModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
