@@ -204,8 +204,8 @@ export default function Sponsors() {
         <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <EditSponsorForm
               open={isSponsorModalOpen}
-              onAdd={handleAddSponsor}
               onClose={() => setIsSponsorModalOpen(false)}
+              onAdd={handleAddSponsor}
             />
            </DialogContent>
       </Dialog>
@@ -232,7 +232,9 @@ export default function Sponsors() {
             <UpdateSponsorModal
               sponsor={selectedSponsor}
               onUpdate={handleUpdateSponsor}
+              open={isUpdateModalOpen}
               onClose={() => setIsUpdateModalOpen(false)}
+              
             />
             )}
           </DialogContent> 

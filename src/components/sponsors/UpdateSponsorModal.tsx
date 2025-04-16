@@ -30,13 +30,16 @@ interface UpdateSponsorModalProps {
   sponsor: SponsorType;
   idEvento?: string;
   onUpdate: () => void;
+  open:boolean;
 }
 
 export default function UpdateSponsorModal({
+ 
   onClose,
   sponsor,
   idEvento = "1",
   onUpdate,
+  open,
 }: UpdateSponsorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(sponsor.foto || null);
   const [fotoUpdated, setFotoUpdated] = useState(0);
@@ -131,7 +134,7 @@ export default function UpdateSponsorModal({
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar Auspiciador</DialogTitle>

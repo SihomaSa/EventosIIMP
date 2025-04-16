@@ -41,9 +41,11 @@ const sponsorSchema = z.object({
 type SponsorFormValues = z.infer<typeof sponsorSchema>;
 export default function EditSponsorModal({
   onAdd,
+ 
   onClose,
 }:  {
 	onAdd: () => void;
+  open: boolean,
 	onClose: () => void;
 }) {
   const { selectedEvent } = useEventStore();
