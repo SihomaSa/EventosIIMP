@@ -49,7 +49,7 @@ export default function Home() {
             </div>
           </header>
 
-          <main className="p-3 md:p-6">
+          <main className="p-3 md:p-6 bg-secondary">
             <div className="mx-auto">
               <Outlet />
             </div>
