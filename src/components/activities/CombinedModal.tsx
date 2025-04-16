@@ -857,7 +857,7 @@ export default memo(function CombinedModal({
                 mode === MODAL_MODES.ACTIVITY_EDIT && "text-muted-foreground"
               )}
             >
-              English
+              Inglés
             </Label>
           </div>
           <div className="flex items-center space-x-2">

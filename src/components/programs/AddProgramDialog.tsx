@@ -293,7 +293,7 @@ const AddProgramDialog: FC<Props> = ({
                   }}
                 />
                 <Label htmlFor="language-en" className="cursor-pointer">
-                  English
+                  Inglés
                 </Label>
               </div>
               <div className="flex items-center space-x-2">

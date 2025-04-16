@@ -1,5 +1,12 @@
 import { FC, useState, useCallback, useEffect } from "react";
-import { Plus, AlertTriangle, Loader2, CalendarIcon, Languages, Info } from "lucide-react";
+import {
+  Plus,
+  AlertTriangle,
+  Loader2,
+  CalendarIcon,
+  Languages,
+  Info,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,13 +38,13 @@ type Props = {
 
 enum ModalStep {
   DATE_SELECT = "DATE_SELECT",
-  PROGRAM_FORM = "PROGRAM_FORM"
+  PROGRAM_FORM = "PROGRAM_FORM",
 }
 
 const NewProgramDialog: FC<Props> = ({
   programCategories,
   existingDates = [],
-  onProgramAdded
+  onProgramAdded,
 }) => {
   const form = useProgramForm();
   const [loading, setLoading] = useState(false);
@@ -71,38 +78,46 @@ const NewProgramDialog: FC<Props> = ({
   }, []);
 
   // Check if a date already has a program
-  const isDateDisabled = useCallback((date: Date) => {
-    const dateStr = format(date, "yyyy-MM-dd");
-    return existingDates.includes(dateStr);
-  }, [existingDates]);
+  const isDateDisabled = useCallback(
+    (date: Date) => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      return existingDates.includes(dateStr);
+    },
+    [existingDates]
+  );
 
   // Handle date selection
-  const handleDateSelect = useCallback((date: Date | undefined) => {
-    if (!date) return;
+  const handleDateSelect = useCallback(
+    (date: Date | undefined) => {
+      if (!date) return;
 
-    // Validate the date before proceeding
-    if (existingDates.includes(format(date, "yyyy-MM-dd"))) {
-      setError("Esta fecha ya tiene un programa creado.");
-      return;
-    }
+      // Validate the date before proceeding
+      if (existingDates.includes(format(date, "yyyy-MM-dd"))) {
+        setError("Esta fecha ya tiene un programa creado.");
+        return;
+      }
 
-    setSelectedDate(date);
+      setSelectedDate(date);
 
-    // Set the date in the form
-    const dateStr = format(date, "yyyy-MM-dd");
-    form.setValue("fechaPrograma", dateStr);
+      // Set the date in the form
+      const dateStr = format(date, "yyyy-MM-dd");
+      form.setValue("fechaPrograma", dateStr);
 
-    // Initialize one detail with empty times
-    form.setValue("detalles", [{
-      horaIni: `${dateStr}T00:00`,
-      horaFin: `${dateStr}T00:00`,
-      descripcionBody: "",
-      idIdioma: selectedLanguage === "1" ? 1 : 2
-    }]);
+      // Initialize one detail with empty times
+      form.setValue("detalles", [
+        {
+          horaIni: `${dateStr}T00:00`,
+          horaFin: `${dateStr}T00:00`,
+          descripcionBody: "",
+          idIdioma: selectedLanguage === "1" ? 1 : 2,
+        },
+      ]);
 
-    setError(null);
-    setStep(ModalStep.PROGRAM_FORM);
-  }, [existingDates, form, selectedLanguage]);
+      setError(null);
+      setStep(ModalStep.PROGRAM_FORM);
+    },
+    [existingDates, form, selectedLanguage]
+  );
 
   // Handle going back to date selection
   const handleBackToDateSelect = useCallback(() => {
@@ -110,57 +125,69 @@ const NewProgramDialog: FC<Props> = ({
   }, []);
 
   // Validate the form before submission
-  const validateForm = useCallback((program: ProgramFormType): string | null => {
-    if (!program.descripcionPro || program.descripcionPro.trim().length < 3) {
-      return "La descripción del programa es obligatoria y debe tener al menos 3 caracteres";
-    }
-
-    if (!program.fechaPrograma) {
-      return "Debe seleccionar una fecha para el programa";
-    }
-
-    if (!program.detalles || program.detalles.length === 0) {
-      return "Debe añadir al menos un detalle de horario";
-    }
-
-    // Validate each detail
-    for (let i = 0; i < program.detalles.length; i++) {
-      const detail = program.detalles[i];
-
-      if (!detail.horaIni) {
-        return `El detalle #${i + 1} debe tener una hora de inicio`;
+  const validateForm = useCallback(
+    (program: ProgramFormType): string | null => {
+      if (!program.descripcionPro || program.descripcionPro.trim().length < 3) {
+        return "La descripción del programa es obligatoria y debe tener al menos 3 caracteres";
       }
 
-      if (!detail.horaFin) {
-        return `El detalle #${i + 1} debe tener una hora de fin`;
+      if (!program.fechaPrograma) {
+        return "Debe seleccionar una fecha para el programa";
       }
 
-      if (!detail.tipoPrograma) {
-        return `El detalle #${i + 1} debe tener un tipo de programa seleccionado`;
+      if (!program.detalles || program.detalles.length === 0) {
+        return "Debe añadir al menos un detalle de horario";
       }
 
-      if (!detail.descripcionBody || detail.descripcionBody.trim().length < 3) {
-        return `El detalle #${i + 1} debe tener una descripción de al menos 3 caracteres`;
-      }
+      // Validate each detail
+      for (let i = 0; i < program.detalles.length; i++) {
+        const detail = program.detalles[i];
 
-      // If program type is 3 (which requires additional fields according to your form)
-      if (detail.tipoPrograma === 3) {
-        if (!detail.idIdioma) {
-          return `El detalle #${i + 1} debe tener un idioma seleccionado`;
+        if (!detail.horaIni) {
+          return `El detalle #${i + 1} debe tener una hora de inicio`;
         }
 
-        if (!detail.sala || detail.sala.trim().length === 0) {
-          return `El detalle #${i + 1} debe tener una sala especificada`;
+        if (!detail.horaFin) {
+          return `El detalle #${i + 1} debe tener una hora de fin`;
         }
 
-        if (!detail.idAutor || detail.idAutor.trim().length === 0) {
-          return `El detalle #${i + 1} debe tener al menos un autor seleccionado`;
+        if (!detail.tipoPrograma) {
+          return `El detalle #${
+            i + 1
+          } debe tener un tipo de programa seleccionado`;
+        }
+
+        if (
+          !detail.descripcionBody ||
+          detail.descripcionBody.trim().length < 3
+        ) {
+          return `El detalle #${
+            i + 1
+          } debe tener una descripción de al menos 3 caracteres`;
+        }
+
+        // If program type is 3 (which requires additional fields according to your form)
+        if (detail.tipoPrograma === 3) {
+          if (!detail.idIdioma) {
+            return `El detalle #${i + 1} debe tener un idioma seleccionado`;
+          }
+
+          if (!detail.sala || detail.sala.trim().length === 0) {
+            return `El detalle #${i + 1} debe tener una sala especificada`;
+          }
+
+          if (!detail.idAutor || detail.idAutor.trim().length === 0) {
+            return `El detalle #${
+              i + 1
+            } debe tener al menos un autor seleccionado`;
+          }
         }
       }
-    }
 
-    return null;
-  }, []);
+      return null;
+    },
+    []
+  );
 
   // Handle form submission
   const onSubmit = async (program: ProgramFormType) => {
@@ -189,11 +216,13 @@ const NewProgramDialog: FC<Props> = ({
       // The date is already set in the form when selecting a date
       await ProgramsService.addProgram({
         ...program,
-        idEvento: selectedEvent.idEvent
+        idEvento: selectedEvent.idEvent,
       });
 
       toast.success("Programa creado correctamente", {
-        description: `Se ha creado un nuevo programa para el ${formatDateForDisplay(selectedDate)}`,
+        description: `Se ha creado un nuevo programa para el ${formatDateForDisplay(
+          selectedDate
+        )}`,
       });
 
       setIsOpen(false);
@@ -219,29 +248,35 @@ const NewProgramDialog: FC<Props> = ({
   }
 
   // Language selector change handler
-  const handleLanguageChange = useCallback((language: "1" | "2") => {
-    setSelectedLanguage(language);
+  const handleLanguageChange = useCallback(
+    (language: "1" | "2") => {
+      setSelectedLanguage(language);
 
-    // Update language for all details without creating an infinite loop
-    const details = form.getValues("detalles") || [];
-    if (details.length > 0) {
-      const updatedDetails = details.map(detail => ({
-        ...detail,
-        idIdioma: language === "1" ? 1 : 2
-      }));
-      form.setValue("detalles", updatedDetails);
-    }
-  }, [form]);
+      // Update language for all details without creating an infinite loop
+      const details = form.getValues("detalles") || [];
+      if (details.length > 0) {
+        const updatedDetails = details.map((detail) => ({
+          ...detail,
+          idIdioma: language === "1" ? 1 : 2,
+        }));
+        form.setValue("detalles", updatedDetails);
+      }
+    },
+    [form]
+  );
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      // If we're closing the dialog and not in loading state
-      if (!open && !loading) {
-        handleClose();
-      } else if (open) {
-        setIsOpen(true);
-      }
-    }}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        // If we're closing the dialog and not in loading state
+        if (!open && !loading) {
+          handleClose();
+        } else if (open) {
+          setIsOpen(true);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-white">
           <Plus size={16} className="mr-1" />
@@ -293,8 +328,9 @@ const NewProgramDialog: FC<Props> = ({
             <div className="mt-4 flex justify-center">
               <div className="text-sm text-gray-500 bg-yellow-50 p-3 rounded-md border border-yellow-200 max-w-md">
                 <p className="text-center">
-                  Seleccione una fecha disponible en el calendario para crear un nuevo programa.
-                  Las fechas en gris ya tienen programas existentes.
+                  Seleccione una fecha disponible en el calendario para crear un
+                  nuevo programa. Las fechas en gris ya tienen programas
+                  existentes.
                 </p>
               </div>
             </div>
@@ -305,7 +341,9 @@ const NewProgramDialog: FC<Props> = ({
               <div className="mb-6 p-3 bg-primary/10 rounded-md flex items-center justify-between">
                 <div className="flex items-center">
                   <CalendarIcon className="h-5 w-5 mr-2 text-primary" />
-                  <span className="font-medium">{formatDateForDisplay(selectedDate)}</span>
+                  <span className="font-medium">
+                    {formatDateForDisplay(selectedDate)}
+                  </span>
                 </div>
                 <Button
                   variant="ghost"
@@ -338,7 +376,7 @@ const NewProgramDialog: FC<Props> = ({
                     }}
                   />
                   <Label htmlFor="language-en" className="cursor-pointer">
-                    English
+                    Inglés
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -368,9 +406,17 @@ const NewProgramDialog: FC<Props> = ({
               <div>
                 <p className="font-medium mb-1">Instrucciones:</p>
                 <ul className="list-disc pl-5 space-y-1 text-xs">
-                  <li>Complete la descripción del programa (mínimo 3 caracteres)</li>
-                  <li>Complete los campos de horario, tipo y descripción del detalle</li>
-                  <li>Para programas de tipo "Conferencia" complete todos los campos adicionales</li>
+                  <li>
+                    Complete la descripción del programa (mínimo 3 caracteres)
+                  </li>
+                  <li>
+                    Complete los campos de horario, tipo y descripción del
+                    detalle
+                  </li>
+                  <li>
+                    Para programas de tipo "Conferencia" complete todos los
+                    campos adicionales
+                  </li>
                   <li>Todos los campos marcados con * son obligatorios</li>
                 </ul>
               </div>
@@ -409,7 +455,7 @@ const NewProgramDialog: FC<Props> = ({
                   Creando...
                 </>
               ) : (
-                'Crear programa'
+                "Crear programa"
               )}
             </Button>
           )}
