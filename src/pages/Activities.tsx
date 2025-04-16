@@ -12,7 +12,8 @@ export default function Expositors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedActivityToEdit, setSelectedActivityToEdit] = useState<ActivityDetail | null>(null);
+  const [selectedActivityToEdit, setSelectedActivityToEdit] =
+    useState<ActivityDetail | null>(null);
   const [initialDate, setInitialDate] = useState<string | null>(null);
   const [expositorsUpdated, setExpositorsUpdated] = useState(0);
   const [activities, setActivities] = useState<ActivityDay[] | null>(null);
@@ -69,7 +70,7 @@ export default function Expositors() {
   // Extract existing dates from activities for calendar disabling
   const existingDates = useMemo(() => {
     if (!activities) return [];
-    return activities.map(activity => activity.fechaActividad);
+    return activities.map((activity) => activity.fechaActividad);
   }, [activities]);
 
   // Optimize filtering with useMemo to avoid recomputing on every render
@@ -117,11 +118,14 @@ export default function Expositors() {
   }, []);
 
   // Open modal for editing an activity
-  const handleEditActivity = useCallback((activity: ActivityDetail, activityDate: string) => {
-    setSelectedActivityToEdit(activity);
-    setInitialDate(activityDate);
-    setIsModalOpen(true);
-  }, []);
+  const handleEditActivity = useCallback(
+    (activity: ActivityDetail, activityDate: string) => {
+      setSelectedActivityToEdit(activity);
+      setInitialDate(activityDate);
+      setIsModalOpen(true);
+    },
+    []
+  );
 
   // Close the modal
   const handleCloseModal = useCallback(() => {
@@ -245,7 +249,7 @@ export default function Expositors() {
         {!loading && filteredActivities.length === 0 && emptyState}
         {loading && loadingSkeletons}
         {!loading && filteredActivities.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 grid-auto-fit">
             {filteredActivities.map((activity, index) => (
               <ActivityDayCard
                 key={`activity-${index}-${activity.fechaActividad}`}
@@ -277,7 +281,7 @@ export default function Expositors() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onAdd={() => {
-          setExpositorsUpdated(prev => prev + 1);
+          setExpositorsUpdated((prev) => prev + 1);
           handleCloseModal();
         }}
         existingDates={existingDates}
