@@ -73,7 +73,7 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-y-3">
                 <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
-                  English
+                  Inglés
                 </h3>
                 {englishActivities.map((det: ActivityDetail, index: number) => (
                   <ActivityDetailForm
@@ -108,7 +108,7 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
               {englishActivities.length > 0 && (
                 <div className="flex flex-col gap-y-3">
                   <h3 className="text-sm font-semibold text-gray-500 border-b pb-1">
-                    English
+                    Inglés
                   </h3>
                   {englishActivities.map(
                     (det: ActivityDetail, index: number) => (

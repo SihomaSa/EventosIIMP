@@ -287,7 +287,7 @@ export default function Ads() {
                     value="en"
                     className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
                   >
-                    English ({getLanguageCount("EN")})
+                    Inglés ({getLanguageCount("EN")})
                   </TabsTrigger>
                   <TabsTrigger
                     value="sp"
