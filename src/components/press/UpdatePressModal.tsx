@@ -12,7 +12,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { PressNoteType } from "@/types/pressNoteTypes";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Upload, Loader2, AlertCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  Upload,
+  Loader2,
+  AlertCircle,
+  ImageIcon,
+} from "lucide-react";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { updatePressNote } from "../services/pressNotesService";
 
@@ -255,18 +261,30 @@ export default function UpdatePressModal({
             type="file"
             accept="image/*"
             onChange={onFileChange}
+            className="hidden"
           />
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Vista previa"
-              className="mt-2 max-w-xs rounded"
-            />
-          )}
+          <div
+            onClick={() => document.getElementById("foto")?.click()}
+            className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+          >
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Vista previa"
+                className="w-full h-auto rounded-lg max-h-[200px] object-contain"
+              />
+            ) : (
+              <div className="flex items-center justify-center text-gray-500 p-6">
+                <ImageIcon className="mr-2" />
+                Seleccionar imagen
+              </div>
+            )}
+          </div>
           {errors.foto && (
             <p className="text-red-500 text-sm">{errors.foto.message}</p>
           )}
         </div>
+
         <div className="flex flex-col gap-4">
           <Label>Idioma</Label>
           <RadioGroup

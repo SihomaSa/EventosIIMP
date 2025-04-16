@@ -6,12 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
 import { useState, useEffect } from "react";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { updateSponsor } from "@/components/services/sponsorsService";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { ImageIcon, Loader2 } from "lucide-react";
 
 const sponsorSchema = z.object({
   descripcion: z.string().min(1, "La descripción es obligatoria"),
@@ -41,7 +47,9 @@ export default function UpdateSponsorModal({
   onUpdate,
   open,
 }: UpdateSponsorModalProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(sponsor.foto || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    sponsor.foto || null
+  );
   const [fotoUpdated, setFotoUpdated] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,11 +64,16 @@ export default function UpdateSponsorModal({
   } = useForm<SponsorFormValues>({
     resolver: zodResolver(sponsorSchema),
     defaultValues: {
-      descripcion: sponsor.descripcionIdioma,
+      descripcion: sponsor.nombre,
       foto: undefined,
       url: sponsor.url,
       idioma: sponsor.prefijoIdioma === "EN" ? "1" : "2",
-      categoria: sponsor.categoria === "ORO" ? "1" : sponsor.categoria === "PLATA" ? "2" : "3",
+      categoria:
+        sponsor.categoria === "ORO"
+          ? "1"
+          : sponsor.categoria === "PLATA"
+          ? "2"
+          : "3",
     },
   });
 
@@ -68,11 +81,15 @@ export default function UpdateSponsorModal({
     if (sponsor) {
       setValue("url", sponsor.url);
       setValue("idioma", sponsor.prefijoIdioma === "EN" ? "1" : "2");
-      setValue("descripcion", sponsor.descripcionIdioma);
+      setValue("descripcion", sponsor.nombre);
       setImagePreview(sponsor.foto || null);
       setValue(
         "categoria",
-        sponsor.categoria === "ORO" ? "1" : sponsor.categoria === "PLATA" ? "2" : "3"
+        sponsor.categoria === "ORO"
+          ? "1"
+          : sponsor.categoria === "PLATA"
+          ? "2"
+          : "3"
       );
     }
   }, [sponsor, setValue]);
@@ -105,7 +122,7 @@ export default function UpdateSponsorModal({
       if (fotoUpdated > 0 && data.foto) {
         fotoBase64 = await fileToBase64(data.foto);
       }
-  
+
       const editSponsor: UpdateSponsorRequestType = {
         foto: fotoBase64 as string,
         url: data.url,
@@ -116,12 +133,12 @@ export default function UpdateSponsorModal({
         idEvento: String(idEvento), // Asegurar que sea string
         idSponsor: Number(sponsor.idSponsor), // Asegurar que sea number si el backend lo espera así
       };
-  
+
       console.log("Datos a enviar:", editSponsor);
-      
+
       const response = await updateSponsor(editSponsor);
       console.log("Respuesta del servidor:", response);
-  
+
       toast.success("Auspiciador actualizado correctamente");
       onUpdate();
       onClose();
@@ -152,18 +169,16 @@ export default function UpdateSponsorModal({
               disabled={isSubmitting}
             />
             {errors.descripcion && (
-              <p className="text-red-500 text-sm">{errors.descripcion.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.descripcion.message}
+              </p>
             )}
           </div>
 
           {/* URL */}
           <div>
             <Label htmlFor="url">Enlace</Label>
-            <Input
-              id="url"
-              {...register("url")}
-              disabled={isSubmitting}
-            />
+            <Input id="url" {...register("url")} disabled={isSubmitting} />
             {errors.url && (
               <p className="text-red-500 text-sm">{errors.url.message}</p>
             )}
@@ -233,16 +248,33 @@ export default function UpdateSponsorModal({
               accept="image/*"
               onChange={onFileChange}
               disabled={isSubmitting}
+              className="hidden"
             />
+            <div
+              onClick={() =>
+                !isSubmitting && document.getElementById("foto")?.click()
+              }
+              className={`bg-gray-50 border border-gray-200 rounded-lg p-4 ${
+                !isSubmitting
+                  ? "cursor-pointer hover:bg-gray-100"
+                  : "opacity-70"
+              } transition-colors`}
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Vista previa"
+                  className="w-full h-auto rounded-lg max-h-[200px] object-contain"
+                />
+              ) : (
+                <div className="flex items-center justify-center text-gray-500 p-6">
+                  <ImageIcon className="mr-2" />
+                  Seleccionar imagen
+                </div>
+              )}
+            </div>
             {imageError && (
               <p className="text-red-500 text-sm mt-2">{imageError}</p>
-            )}
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Vista previa"
-                className="mt-2 max-w-xs rounded"
-              />
             )}
           </div>
 
@@ -251,7 +283,9 @@ export default function UpdateSponsorModal({
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Guardar
             </Button>
           </div>
