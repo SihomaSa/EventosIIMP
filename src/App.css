@@ -170,13 +170,11 @@ blockquote::after {
   font: 1.8rem/1.4 Georgia, serif;
 }
 @media screen {
-
 }
 @media screen and (min-width: 480px) {
   blockquote {
     quotes: "“" "”" "‘" "’";
   }
-
 }
 
 @keyframes collapsibleDown {
@@ -212,7 +210,24 @@ blockquote::after {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+}
+
+@media (max-width: 1400px) {
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
 }
