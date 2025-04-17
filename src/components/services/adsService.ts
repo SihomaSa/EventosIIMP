@@ -1,42 +1,55 @@
-import { AdType, NewAdRequestType, UpdateAdRequestType } from "@/types/adTypes";
+import { AdType, NewAdRequestType, UpdateAdRequestType } from '@/types/adTypes';
 
-const API_GET_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event/1";
-const API_POST_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event";
-const API_PUT_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising/event";
-const API_DELETE_URL = "https://ugv0ydrd77.execute-api.us-east-1.amazonaws.com/web/advertising";
+// Importa las variables de entorno de Vite
+const {
+  VITE_ADS_GET,
+  VITE_ADS_POST,
+  VITE_ADS_PUT,
+  VITE_ADS_DELETE
+} = import.meta.env;
 
-export const getAds = async (): Promise<AdType[]> => {
-  const response = await fetch(API_GET_URL);
-  if (!response.ok) throw new Error("Error al obtener los publicidades");
+const getApiUrl = (endpoint: string, id?: string): string => {
+  const baseUrl = {
+    GET: VITE_ADS_GET,
+    POST: VITE_ADS_POST,
+    PUT: VITE_ADS_PUT,
+    DELETE: VITE_ADS_DELETE
+  }[endpoint];
+
+  if (!baseUrl) throw new Error(`URL no configurada para ADS_${endpoint}`);
+  return id ? `${baseUrl}/${id}` : baseUrl;
+};
+
+export const getAds = async (eventId: string = "1"): Promise<AdType[]> => {
+  const url = getApiUrl("GET", eventId);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Error al obtener anuncios (${response.status})`);
   return response.json();
 };
 
 export const createAd = async (newAd: NewAdRequestType): Promise<AdType> => {
-  const response = await fetch(API_POST_URL, {
+  const response = await fetch(getApiUrl("POST"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newAd),
   });
-
-  if (!response.ok) throw new Error("Error al crear el publicidad");
+  if (!response.ok) throw new Error(`Error al crear anuncio (${response.status})`);
   return response.json();
 };
 
-export const updateAd = async (updatedAd: UpdateAdRequestType): Promise<AdType> => {
-  const response = await fetch(API_PUT_URL, {
+export const updateAd = async (editAd: UpdateAdRequestType): Promise<AdType> => {
+  const response = await fetch(getApiUrl("PUT"), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedAd),
+    body: JSON.stringify(editAd),
   });
-
-  if (!response.ok) throw new Error("Error al actualizar el publicidad");
+  if (!response.ok) throw new Error(`Error al actualizar anuncio (${response.status})`);
   return response.json();
 };
 
 export const deleteAd = async (adId: string): Promise<void> => {
-  const response = await fetch(`${API_DELETE_URL}/${adId}`, {
+  const response = await fetch(getApiUrl("DELETE", adId), {
     method: "DELETE",
   });
-
-  if (!response.ok) throw new Error("Error al eliminar la publicidad");
+  if (!response.ok) throw new Error(`Error al eliminar anuncio (${response.status})`);
 };

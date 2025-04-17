@@ -137,14 +137,16 @@ export default function UpdateAdsModal({
             Actualiza los detalles de la publicidad y guarda los cambios.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+        <form onSubmit={handleSubmit(onSubmit)} 
+        className="space-y-4 p-4">
           <div>
             <Label htmlFor="url" className="mb-2 font-bold">
               Enlace
             </Label>
             <Input id="url" {...register("url")} />
             {errors.url && (
-              <p className="text-red-500 text-sm">{errors.url.message}</p>
+              <p className="text-red-500 text-sm">
+                {errors.url.message}</p>
             )}
           </div>
           <div>

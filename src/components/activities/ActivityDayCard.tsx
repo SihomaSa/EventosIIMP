@@ -175,7 +175,7 @@ const ActivityDayCard: React.FC<ActivityDayCardProps> = ({
             onClick={onAddActivity}
           >
             <Plus size={24} className="mb-1" />
-            <h3 className="text-sm font-medium">Agregar Actividad</h3>
+            <h3 className="text-sm font-medium">Agregar Nueva Actividad</h3>
           </div>
         </CardContent>
       </Card>

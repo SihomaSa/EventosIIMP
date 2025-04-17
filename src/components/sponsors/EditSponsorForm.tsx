@@ -131,11 +131,14 @@ export default function EditSponsorModal({
       return (
         <Card>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
-            <h2 className="text-xl">Editar Auspiciador</h2>
+            <h2 className="text-xl">Agregar Nuevo Auspiciador</h2>
 
             {/* Nombre */}
             <div>
-              <Label htmlFor="descripcion">Nombre</Label>
+              <Label 
+              htmlFor="descripcion"
+              className="mb-2"
+              >Nombre</Label>
               <Input id="descripcion" {...register("descripcion")} />
               {errors.descripcion && (
                 <p className="text-red-500 text-sm">{errors.descripcion.message}</p>
@@ -144,7 +147,7 @@ export default function EditSponsorModal({
 
             {/* URL */}
             <div>
-              <Label htmlFor="url">Enlace</Label>
+              <Label htmlFor="url" className="mb-2">Enlace</Label>
               <Input id="url" {...register("url")} />
               {errors.url && (
                 <p className="text-red-500 text-sm">{errors.url.message}</p>
@@ -153,7 +156,7 @@ export default function EditSponsorModal({
 
             {/* Idioma */}
             <div>
-              <Label>Idioma</Label>
+              <Label htmlFor="idioma" className="mb-2">Idioma</Label>
               <RadioGroup
                 value={idiomaSeleccionado}
                 onValueChange={(value: LanguageType) => setValue("idioma", value)}
@@ -174,7 +177,7 @@ export default function EditSponsorModal({
 
             {/* Categoría */}
             <div>
-              <Label>Categoría</Label>
+              <Label htmlFor="categoria" className="mb-2">Categoría</Label>
               <Controller
                 name="categoria"
                 control={control}

@@ -154,15 +154,20 @@ export default function UpdateSponsorModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar Auspiciador</DialogTitle>
+        <DialogTitle className="text-xl font-semibold">Editar Auspiciador</DialogTitle>
           <DialogDescription>
             Actualiza los detalles del auspiciador y guarda los cambios.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} 
+        className="space-y-7 p-4">
           {/* Descripción */}
           <div>
-            <Label htmlFor="descripcion">Descripción</Label>
+            <Label 
+              htmlFor="descripcion"
+              className="mb-2 font-bold"
+            >
+              Descripción</Label>
             <Input
               id="descripcion"
               {...register("descripcion")}
@@ -177,7 +182,9 @@ export default function UpdateSponsorModal({
 
           {/* URL */}
           <div>
-            <Label htmlFor="url">Enlace</Label>
+            <Label htmlFor="url"
+             className="mb-2 font-bold"
+            >Enlace</Label>
             <Input id="url" {...register("url")} disabled={isSubmitting} />
             {errors.url && (
               <p className="text-red-500 text-sm">{errors.url.message}</p>
@@ -186,7 +193,9 @@ export default function UpdateSponsorModal({
 
           {/* Idioma */}
           <div>
-            <Label className="mb-2 font-bold">Idioma</Label>
+            <Label className="mb-2 font-bold"
+            
+            >Idioma</Label>
             <RadioGroup
               onValueChange={handleLanguageChange}
               value={watch("idioma")}
@@ -208,7 +217,10 @@ export default function UpdateSponsorModal({
 
           {/* Categoría */}
           <div>
-            <Label>Categoría</Label>
+            <Label htmlFor="categoria"
+             className="mb-2 font-bold"
+            
+            >Categoría</Label>
             <Controller
               name="categoria"
               control={control}
@@ -241,7 +253,9 @@ export default function UpdateSponsorModal({
 
           {/* Imagen */}
           <div>
-            <Label htmlFor="foto">Imagen</Label>
+            <Label htmlFor="foto"
+            className="mb-2 font-bold"
+            >Imagen</Label>
             <Input
               id="foto"
               type="file"

@@ -1,9 +1,20 @@
 import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
 
-const API_GET_URL = "https://d47n68si9j.execute-api.us-east-1.amazonaws.com/web/category/sponsors";
+// Importa la variable de entorno para la categoría de auspiciadores
+const { VITE_CATEGORY_SPONSORS_GET } = import.meta.env;
+
+const getApiUrl = (endpoint: string): string => {
+  const baseUrl = {
+    GET: VITE_CATEGORY_SPONSORS_GET,
+  }[endpoint];
+
+  if (!baseUrl) throw new Error(`URL no configurada para CATEGORY_SPONSORS_${endpoint}`);
+  return baseUrl;
+};
 
 export const getSponsorCategories = async (): Promise<SponsorCategoryType[]> => {
-  const response = await fetch(API_GET_URL);
-  if (!response.ok) throw new Error("Error al obtener los auspiciadores");
+  const url = getApiUrl("GET");
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Error al obtener categorías de auspiciadores (${response.status})`);
   return response.json();
 };
