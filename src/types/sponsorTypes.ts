@@ -8,6 +8,7 @@ export interface SponsorType { //GET
 	nombre: string;
 	url: string;
 	descripcionIdioma: string;
+	idCategoria?: number;
 }
 export interface NewSponsorRequestType {//POST
     descripcion: string;
