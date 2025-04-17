@@ -132,7 +132,9 @@ export default function UpdateAdsModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar Publicidad</DialogTitle>
+          <div className="flex items-center justify-between p-4 border-b">
+            <DialogTitle className="text-xl font-semibold">Editar</DialogTitle>
+          </div>
           <DialogDescription>
             Actualiza los detalles de la publicidad y guarda los cambios.
           </DialogDescription>

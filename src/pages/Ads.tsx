@@ -44,7 +44,7 @@ export default function Ads() {
     }
   }, [error]);
 
-	useEffect(() => {
+  useEffect(() => {
     fetchAds();
   }, [adsUpdated, fetchAds]);
 
@@ -207,15 +207,15 @@ export default function Ads() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="relative w-full md:w-72">
-          {/* <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+        {/* <div className="relative w-full md:w-72">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           			<Input
 						placeholder="Buscar publicidad..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="pl-8 bg-gray-50 border-gray-200 w-full"
-					/> */}
-        </div>
+					/>
+        </div> */}
         <div className="flex gap-2 w-full md:w-auto">
           <Button
             variant="outline"
@@ -230,6 +230,8 @@ export default function Ads() {
             />
             <span className="hidden md:inline">Actualizar</span>
           </Button>
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
           <Button
             size="sm"
             onClick={() => setIsadsModalOpen(true)}
@@ -342,7 +344,6 @@ export default function Ads() {
         <Dialog open={isadsModalOpen} onOpenChange={setIsadsModalOpen}>
           <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <EditAdsForm
-              open={isadsModalOpen}
               onClose={() => setIsadsModalOpen(false)}
               onAdd={handleadsAd}
             />
@@ -351,17 +352,17 @@ export default function Ads() {
       )}
 
       {isUpdateModalOpen && selectedAd && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+          <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <UpdateAdsModal
               ad={selectedAd}
               onUpdate={handleUpdateAd}
-              onAdd={handleadsAd} // <- Añadido si realmente se usa en el modal
+              onAdd={handleadsAd}
               open={isUpdateModalOpen}
               onClose={() => setIsUpdateModalOpen(false)}
             />
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

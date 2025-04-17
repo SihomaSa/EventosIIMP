@@ -14,7 +14,7 @@ export default function Home() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");//login
+    navigate("/"); //login
     resetTheme();
   };
 
@@ -49,14 +49,24 @@ export default function Home() {
             </div>
           </header>
 
-          <main className="p-3 md:p-6">
+          <main className="p-3 md:p-6 bg-secondary">
             <div className="mx-auto">
               <Outlet />
             </div>
           </main>
         </div>
 
-        <Toaster position="top-right" closeButton />
+        <Toaster
+          position="top-right"
+          closeButton
+          richColors
+          expand={true}
+          duration={4000}
+          className="toast-container"
+          toastOptions={{
+            className: "toast-item"
+          }}
+        />
       </SidebarProvider>
     </div>
   );

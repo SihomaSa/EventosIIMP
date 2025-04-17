@@ -7,17 +7,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../ui/dialog";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { updateSponsor } from "@/components/services/sponsorsService";
 import { toast } from "sonner";
 import { ImageIcon, Loader2 } from "lucide-react";
+import { getSponsorCategories } from "../services/sponsorCategoriesService";
+import { SponsorCategoryType } from "@/types/sponsorCategoryTypes";
 
 const sponsorSchema = z.object({
   descripcion: z.string().min(1, "La descripción es obligatoria"),
@@ -28,7 +32,6 @@ const sponsorSchema = z.object({
     message: "Selecciona un idioma válido",
   }),
 });
-
 type SponsorFormValues = z.infer<typeof sponsorSchema>;
 
 interface UpdateSponsorModalProps {
@@ -36,16 +39,13 @@ interface UpdateSponsorModalProps {
   sponsor: SponsorType;
   idEvento?: string;
   onUpdate: () => void;
-  open:boolean;
 }
 
 export default function UpdateSponsorModal({
- 
   onClose,
   sponsor,
   idEvento = "1",
   onUpdate,
-  open,
 }: UpdateSponsorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
     sponsor.foto || null
@@ -53,6 +53,8 @@ export default function UpdateSponsorModal({
   const [fotoUpdated, setFotoUpdated] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sponsorCategories, setSponsorCategories] = useState<SponsorCategoryType[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const {
     register,
@@ -68,14 +70,31 @@ export default function UpdateSponsorModal({
       foto: undefined,
       url: sponsor.url,
       idioma: sponsor.prefijoIdioma === "EN" ? "1" : "2",
-      categoria:
-        sponsor.categoria === "ORO"
-          ? "1"
-          : sponsor.categoria === "PLATA"
-          ? "2"
-          : "3",
+      categoria: String(sponsor.idCategoria || ""),
     },
   });
+
+  // Obtener el valor del idioma seleccionado
+  const idiomaSeleccionado = watch("idioma");
+
+  // Cargar las categorías de auspiciadores
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getSponsorCategories();
+        setSponsorCategories(data || []);
+      } catch (error) {
+        console.error("Error al cargar categorías:", error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  // Filtrar categorías según el idioma seleccionado
+  const filteredCategories = sponsorCategories.filter(
+    (cat) => cat.idIdioma === idiomaSeleccionado
+  );
 
   useEffect(() => {
     if (sponsor) {
@@ -83,14 +102,7 @@ export default function UpdateSponsorModal({
       setValue("idioma", sponsor.prefijoIdioma === "EN" ? "1" : "2");
       setValue("descripcion", sponsor.nombre);
       setImagePreview(sponsor.foto || null);
-      setValue(
-        "categoria",
-        sponsor.categoria === "ORO"
-          ? "1"
-          : sponsor.categoria === "PLATA"
-          ? "2"
-          : "3"
-      );
+      setValue("categoria", String(sponsor.idCategoria || ""));
     }
   }, [sponsor, setValue]);
 
@@ -122,7 +134,6 @@ export default function UpdateSponsorModal({
       if (fotoUpdated > 0 && data.foto) {
         fotoBase64 = await fileToBase64(data.foto);
       }
-
       const editSponsor: UpdateSponsorRequestType = {
         foto: fotoBase64 as string,
         url: data.url,
@@ -130,15 +141,12 @@ export default function UpdateSponsorModal({
         descripcion: data.descripcion,
         idioma: data.idioma,
         estado: "1",
-        idEvento: String(idEvento), // Asegurar que sea string
-        idSponsor: Number(sponsor.idSponsor), // Asegurar que sea number si el backend lo espera así
+        idEvento: String(idEvento),
+        idSponsor: Number(sponsor.idSponsor),
       };
-
       console.log("Datos a enviar:", editSponsor);
-
       const response = await updateSponsor(editSponsor);
       console.log("Respuesta del servidor:", response);
-
       toast.success("Auspiciador actualizado correctamente");
       onUpdate();
       onClose();
@@ -151,6 +159,7 @@ export default function UpdateSponsorModal({
   };
 
   return (
+
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
@@ -213,7 +222,14 @@ export default function UpdateSponsorModal({
             {errors.idioma && (
               <p className="text-red-500 text-sm">{errors.idioma.message}</p>
             )}
+
           </div>
+        </RadioGroup>
+        {errors.idioma && (
+          <p className="text-red-500 text-sm">{errors.idioma.message}</p>
+        )}
+      </div>
+
 
           {/* Categoría */}
           <div>
@@ -249,7 +265,13 @@ export default function UpdateSponsorModal({
             {errors.categoria && (
               <p className="text-red-500 text-sm">{errors.categoria.message}</p>
             )}
+        
           </div>
+        )}
+        {errors.categoria && (
+          <p className="text-red-500 text-sm">{errors.categoria.message}</p>
+        )}
+      </div>
 
           {/* Imagen */}
           <div>
@@ -263,48 +285,31 @@ export default function UpdateSponsorModal({
               onChange={onFileChange}
               disabled={isSubmitting}
               className="hidden"
-            />
-            <div
-              onClick={() =>
-                !isSubmitting && document.getElementById("foto")?.click()
-              }
-              className={`bg-gray-50 border border-gray-200 rounded-lg p-4 ${
-                !isSubmitting
-                  ? "cursor-pointer hover:bg-gray-100"
-                  : "opacity-70"
-              } transition-colors`}
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Vista previa"
-                  className="w-full h-auto rounded-lg max-h-[200px] object-contain"
-                />
-              ) : (
-                <div className="flex items-center justify-center text-gray-500 p-6">
-                  <ImageIcon className="mr-2" />
-                  Seleccionar imagen
-                </div>
-              )}
-            </div>
-            {imageError && (
-              <p className="text-red-500 text-sm mt-2">{imageError}</p>
-            )}
-          </div>
 
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Guardar
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            />
+          ) : (
+            <div className="flex items-center justify-center text-gray-500 p-6">
+              <ImageIcon className="mr-2" />
+              Seleccionar imagen
+            </div>
+          )}
+        </div>
+        {imageError && (
+          <p className="text-red-500 text-sm mt-2">{imageError}</p>
+        )}
+      </div>
+
+      <div className="flex justify-between">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting && (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          )}
+          Guardar
+        </Button>
+      </div>
+    </form>
   );
 }

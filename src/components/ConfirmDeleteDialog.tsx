@@ -29,8 +29,12 @@ export function ConfirmDeleteDialog({
     try {
       setIsDeleting(true);
       await onConfirm();
-      toast.success(`Eliminado correctamente`, {
-        description: `${itemName} ha sido eliminado con éxito.`,
+      toast.success("Eliminado correctamente", {
+        description: (
+          <span className="">
+            {itemName} ha sido eliminado con éxito.
+          </span>
+        ),
       });
       onClose();
     } catch (error) {
