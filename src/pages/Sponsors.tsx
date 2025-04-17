@@ -8,7 +8,6 @@ import SponsorCard from "@/components/sponsors/SponsorCard";
 import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
-import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -50,19 +49,16 @@ export default function Sponsors() {
   const handleAddSponsor = () => {
     setSponsorsUpdated((prev) => prev + 1);
     setIsSponsorModalOpen(false);
-    toast.success("Auspiciador agregado correctamente");
   };
 
   const handleUpdateSponsor = () => {
     setSponsorsUpdated((prev) => prev + 1);
     setSelectedSponsor(null);
     setIsUpdateModalOpen(false);
-    toast.success("Auspiciador actualizado correctamente");
   };
 
   const handleDeleteSponsor = useCallback(() => {
     setSponsorsUpdated((prev) => prev + 1);
-    toast.success("Auspiciador eliminado correctamente");
   }, []);
 
   const openUpdateModal = (sponsor: SponsorType) => {
@@ -89,18 +85,18 @@ export default function Sponsors() {
       ) {
         return false;
       }
-  
+
       if (
         activeCategory !== "all" &&
         sponsor.categoria?.toLowerCase() !== activeCategory
       ) {
         return false;
       }
-  
+
       if (!searchTerm) return true;
-  
+
       const term = searchTerm.toLowerCase();
-  
+
       return (
         sponsor.nombre?.toLowerCase().includes(term) ||
         sponsor.descripcionIdioma?.toLowerCase().includes(term) ||
@@ -207,7 +203,7 @@ export default function Sponsors() {
           </Button>
         </div>
       </div>
-{/* 
+{/*
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
         {loading && loadingSkeletons}
         {!loading && filteredSponsors.length === 0 && emptyState}
@@ -304,7 +300,7 @@ export default function Sponsors() {
       )}
 
       <Dialog
-              
+
               open={isUpdateModalOpen && !!selectedSponsor}
               onOpenChange={(open) => {
                 if (!open) {
@@ -316,19 +312,18 @@ export default function Sponsors() {
               }}
             >
 
-      
-       
+
+
        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
        {selectedSponsor && (
             <UpdateSponsorModal
               sponsor={selectedSponsor}
               onUpdate={handleUpdateSponsor}
-              open={isUpdateModalOpen}
               onClose={() => setIsUpdateModalOpen(false)}
-              
+
             />
             )}
-          </DialogContent> 
+          </DialogContent>
       </Dialog>
     </div>
   );
