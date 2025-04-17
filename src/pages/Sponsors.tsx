@@ -89,18 +89,18 @@ export default function Sponsors() {
       ) {
         return false;
       }
-  
+
       if (
         activeCategory !== "all" &&
         sponsor.categoria?.toLowerCase() !== activeCategory
       ) {
         return false;
       }
-  
+
       if (!searchTerm) return true;
-  
+
       const term = searchTerm.toLowerCase();
-  
+
       return (
         sponsor.nombre?.toLowerCase().includes(term) ||
         sponsor.descripcionIdioma?.toLowerCase().includes(term) ||
@@ -207,7 +207,7 @@ export default function Sponsors() {
           </Button>
         </div>
       </div>
-{/* 
+{/*
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
         {loading && loadingSkeletons}
         {!loading && filteredSponsors.length === 0 && emptyState}
@@ -304,7 +304,7 @@ export default function Sponsors() {
       )}
 
       <Dialog
-              
+
               open={isUpdateModalOpen && !!selectedSponsor}
               onOpenChange={(open) => {
                 if (!open) {
@@ -316,19 +316,18 @@ export default function Sponsors() {
               }}
             >
 
-      
-       
+
+
        <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
        {selectedSponsor && (
             <UpdateSponsorModal
               sponsor={selectedSponsor}
               onUpdate={handleUpdateSponsor}
-              open={isUpdateModalOpen}
               onClose={() => setIsUpdateModalOpen(false)}
-              
+
             />
             )}
-          </DialogContent> 
+          </DialogContent>
       </Dialog>
     </div>
   );
