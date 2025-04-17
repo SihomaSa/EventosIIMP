@@ -8,7 +8,6 @@ import SponsorCard from "@/components/sponsors/SponsorCard";
 import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
-import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -50,19 +49,16 @@ export default function Sponsors() {
   const handleAddSponsor = () => {
     setSponsorsUpdated((prev) => prev + 1);
     setIsSponsorModalOpen(false);
-    toast.success("Auspiciador agregado correctamente");
   };
 
   const handleUpdateSponsor = () => {
     setSponsorsUpdated((prev) => prev + 1);
     setSelectedSponsor(null);
     setIsUpdateModalOpen(false);
-    toast.success("Auspiciador actualizado correctamente");
   };
 
   const handleDeleteSponsor = useCallback(() => {
     setSponsorsUpdated((prev) => prev + 1);
-    toast.success("Auspiciador eliminado correctamente");
   }, []);
 
   const openUpdateModal = (sponsor: SponsorType) => {
