@@ -216,6 +216,43 @@ blockquote::after {
   scrollbar-width: none;
 }
 
+.toast-item {
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.toast-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.toast-container [data-sonner-toast][data-type="success"] {
+  background-color: white !important;
+  color: #065f46 !important;
+  border-left: 4px solid #10b981 !important;
+}
+
+.toast-container [data-sonner-toast][data-type="error"] {
+  background-color: white !important;
+  color: #b91c1c !important;
+  border-left: 4px solid #ef4444 !important;
+}
+
+.toast-container [data-sonner-toast][data-type="warning"] {
+  background-color: white !important;
+  color: #92400e !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.toast-container [data-sonner-toast][data-type="info"] {
+  background-color: white !important;
+  color: #1e40af !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
 .grid-auto-fit {
   grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
 }
