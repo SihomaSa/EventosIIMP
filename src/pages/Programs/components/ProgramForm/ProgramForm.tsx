@@ -243,7 +243,7 @@ const ProgramForm: FC<Props> = ({
             className="block mb-2 font-medium flex items-center gap-2"
           >
             <MessageSquare size={16} className="text-primary" />
-            Descripción del programa <span className="text-red-500">*</span>
+            Título del programa <span className="text-red-500">*</span>
           </Label>
           <div className="space-y-2">
             <Textarea

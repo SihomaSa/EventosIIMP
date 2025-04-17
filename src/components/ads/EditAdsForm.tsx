@@ -41,22 +41,116 @@ export default function EditAdsModal({
   onAdd: () => void;
   onClose: () => void;
 }) {
-  const { selectedEvent } = useEventStore();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = useForm<AdFormValues>({
-    resolver: zodResolver(adSchema),
-    defaultValues: {
-      foto: undefined,
-      url: "",
-      idioma: "2",
-    },
-  });
+
+	const { selectedEvent } = useEventStore();
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+		setValue,
+		watch,
+	} = useForm<AdFormValues>({
+		resolver: zodResolver(adSchema),
+		defaultValues: {
+			foto: undefined,
+			url: "",
+			idioma: "2",
+		},
+	});
+
+	const [preview, setPreview] = useState<string | null>(null);
+	const [fileName, setFileName] = useState<string | null>(null);
+
+	const handleLanguageChange = (value: LanguageType) => {
+		setValue("idioma", value, { shouldValidate: true });
+	};
+
+	const onSubmit = async (data: AdFormValues) => {
+		const toastId = toast.loading("Procesando publicidad...");
+
+		try {
+		  if (!selectedEvent) {
+			throw new Error("No hay evento seleccionado");
+		  }
+
+		  // 🔥 Ahora usa `fileToBase64` que ya optimiza SVG antes de convertirlo
+		  const base64Image = await fileToBase64(data.foto);
+
+		  const adData = {
+			evento: String(selectedEvent.idEvent),
+			foto: base64Image,
+			url: data.url,
+			idioma: data.idioma,
+		  };
+
+		  await createAd(adData);
+
+		  toast.success("Publicidad creada exitosamente!", { id: toastId });
+		  onAdd();
+		  reset();
+		  onClose();
+
+		} catch (error) {
+		  console.error("Error en el proceso:", {
+			error,
+			inputData: { ...data, foto: "[BASE64_REDUCIDO]" }
+		  });
+
+		  toast.error(
+			error instanceof Error
+			  ? error.message
+			  : "Error inesperado al procesar",
+			{ id: toastId }
+		  );
+		}
+	  };
+
+
+	return (
+		<Card>
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+				<h2 className="text-xl">Agregar Nueva Publicidad</h2>
+				{/* URL */}
+				<div>
+					<Label htmlFor="url" className="mb-2">
+						Enlace
+					</Label>
+					<Input id="url" {...register("url")} />
+					{errors.url && (
+						<p className="text-red-500 text-sm">{errors.url.message}</p>
+					)}
+				</div>
+				{/* Imagen */}
+				<ImageInput
+					onChange={(file) => setValue("foto", file, { shouldValidate: true })}
+					preview={preview}
+					fileName={fileName}
+					setPreview={setPreview}
+					setFileName={setFileName}
+				/>
+				{/* Idioma */}
+				<div>
+					<Label htmlFor="idioma" className="mb-2">
+						Idioma
+					</Label>
+					<RadioGroup
+						onValueChange={handleLanguageChange}
+						value={watch("idioma")}
+					>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="1" id="EN" />
+							<Label htmlFor="EN">Inglés</Label>
+						</div>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="2" id="SP" />
+							<Label htmlFor="SP">Español</Label>
+						</div>
+					</RadioGroup>
+					{errors.idioma && (
+						<p className="text-red-500 text-sm">{errors.idioma.message}</p>
+					)}
+				</div>
 
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);

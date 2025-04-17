@@ -159,46 +159,70 @@ export default function UpdateSponsorModal({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Descripción */}
-      <div>
-        <Label htmlFor="descripcion">Descripción</Label>
-        <Input
-          id="descripcion"
-          {...register("descripcion")}
-          disabled={isSubmitting}
-        />
-        {errors.descripcion && (
-          <p className="text-red-500 text-sm">
-            {errors.descripcion.message}
-          </p>
-        )}
-      </div>
 
-      {/* URL */}
-      <div>
-        <Label htmlFor="url">Enlace</Label>
-        <Input id="url" {...register("url")} disabled={isSubmitting} />
-        {errors.url && (
-          <p className="text-red-500 text-sm">{errors.url.message}</p>
-        )}
-      </div>
-
-      {/* Idioma */}
-      <div>
-        <Label>Idioma</Label>
-        <RadioGroup
-          onValueChange={handleLanguageChange}
-          value={watch("idioma")}
-          disabled={isSubmitting}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="1" id="EN" />
-            <Label htmlFor="EN">Inglés</Label>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+        <DialogTitle className="text-xl font-semibold">Editar Auspiciador</DialogTitle>
+          <DialogDescription>
+            Actualiza los detalles del auspiciador y guarda los cambios.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} 
+        className="space-y-7 p-4">
+          {/* Descripción */}
+          <div>
+            <Label 
+              htmlFor="descripcion"
+              className="mb-2 font-bold"
+            >
+              Descripción</Label>
+            <Input
+              id="descripcion"
+              {...register("descripcion")}
+              disabled={isSubmitting}
+            />
+            {errors.descripcion && (
+              <p className="text-red-500 text-sm">
+                {errors.descripcion.message}
+              </p>
+            )}
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="2" id="SP" />
-            <Label htmlFor="SP">Español</Label>
+
+          {/* URL */}
+          <div>
+            <Label htmlFor="url"
+             className="mb-2 font-bold"
+            >Enlace</Label>
+            <Input id="url" {...register("url")} disabled={isSubmitting} />
+            {errors.url && (
+              <p className="text-red-500 text-sm">{errors.url.message}</p>
+            )}
+          </div>
+
+          {/* Idioma */}
+          <div>
+            <Label className="mb-2 font-bold"
+            
+            >Idioma</Label>
+            <RadioGroup
+              onValueChange={handleLanguageChange}
+              value={watch("idioma")}
+              disabled={isSubmitting}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="1" id="EN" />
+                <Label htmlFor="EN">Inglés</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="2" id="SP" />
+                <Label htmlFor="SP">Español</Label>
+              </div>
+            </RadioGroup>
+            {errors.idioma && (
+              <p className="text-red-500 text-sm">{errors.idioma.message}</p>
+            )}
+
           </div>
         </RadioGroup>
         {errors.idioma && (
@@ -206,41 +230,42 @@ export default function UpdateSponsorModal({
         )}
       </div>
 
-      {/* Categoría con Select */}
-      <div>
-        <Label>Categoría</Label>
-        <Controller
-          name="categoria"
-          control={control}
-          render={({ field }) => (
-            <Select
-              {...field}
-              disabled={loading || isSubmitting}
-              onValueChange={field.onChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione una categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Categoría</SelectLabel>
-                  {filteredCategories.map((cat) => (
-                    <SelectItem
-                      key={cat.idCategoriaAus}
-                      value={String(cat.idCategoriaAus)}
-                    >
-                      {cat.descripcion}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {loading && (
-          <div className="flex items-center text-sm text-muted-foreground mt-1">
-            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-            Cargando categorías...
+
+          {/* Categoría */}
+          <div>
+            <Label htmlFor="categoria"
+             className="mb-2 font-bold"
+            
+            >Categoría</Label>
+            <Controller
+              name="categoria"
+              control={control}
+              render={({ field }) => (
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isSubmitting}
+                  className="grid grid-cols-3 gap-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="1" id="oro" />
+                    <Label htmlFor="oro">ORO</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="2" id="plata" />
+                    <Label htmlFor="plata">PLATA</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="3" id="cobre" />
+                    <Label htmlFor="cobre">COBRE</Label>
+                  </div>
+                </RadioGroup>
+              )}
+            />
+            {errors.categoria && (
+              <p className="text-red-500 text-sm">{errors.categoria.message}</p>
+            )}
+        
           </div>
         )}
         {errors.categoria && (
@@ -248,32 +273,19 @@ export default function UpdateSponsorModal({
         )}
       </div>
 
-      {/* Imagen */}
-      <div>
-        <Label htmlFor="foto">Imagen</Label>
-        <Input
-          id="foto"
-          type="file"
-          accept="image/*"
-          onChange={onFileChange}
-          disabled={isSubmitting}
-          className="hidden"
-        />
-        <div
-          onClick={() =>
-            !isSubmitting && document.getElementById("foto")?.click()
-          }
-          className={`bg-gray-50 border border-gray-200 rounded-lg p-4 ${
-            !isSubmitting
-              ? "cursor-pointer hover:bg-gray-100"
-              : "opacity-70"
-          } transition-colors`}
-        >
-          {imagePreview ? (
-            <img
-              src={imagePreview}
-              alt="Vista previa"
-              className="w-full h-auto rounded-lg max-h-[200px] object-contain"
+          {/* Imagen */}
+          <div>
+            <Label htmlFor="foto"
+            className="mb-2 font-bold"
+            >Imagen</Label>
+            <Input
+              id="foto"
+              type="file"
+              accept="image/*"
+              onChange={onFileChange}
+              disabled={isSubmitting}
+              className="hidden"
+
             />
           ) : (
             <div className="flex items-center justify-center text-gray-500 p-6">

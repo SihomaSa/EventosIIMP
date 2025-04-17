@@ -2,7 +2,10 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import dotenv from "dotenv";
 
+// Carga el archivo .env correspondiente al modo (ej. .env.environment, .env.production)
+dotenv.config({ path: `.env.${process.env.MODE}` });
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [react(), tailwindcss()],

@@ -8,6 +8,7 @@ import { useTheme } from "@/Contexts/themeContext";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 // import { NewEventType } from "@/types/createEvent";
 
 const eventSchema = z.object({
@@ -39,18 +40,36 @@ export default function EventList() {
     formState: { errors },
   } = useForm<NewEventType>({ resolver: zodResolver(eventSchema) });
 
+  // useEffect(() => {
+  //   const loadEvents = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "https://4obqc2mba3.execute-api.us-east-1.amazonaws.com/web/event"
+  //       ); // Reemplaza con tu URL real
+  //       if (!response.ok) throw new Error("Error al obtener eventos");
+
+  //       const data: EventType[] = await response.json();
+  //       setEvents(data);
+  //       //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //     } catch (err) {
+  //       setError("Error al cargar los eventos");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadEvents();
+  // }, []);
   useEffect(() => {
     const loadEvents = async () => {
       try {
-        const response = await fetch(
-          "https://4obqc2mba3.execute-api.us-east-1.amazonaws.com/web/event"
-        ); // Reemplaza con tu URL real
+        const response = await fetch(import.meta.env.VITE_EVENTS_GET); // Reemplaza con tu URL real
         if (!response.ok) throw new Error("Error al obtener eventos");
-
         const data: EventType[] = await response.json();
         setEvents(data);
         //eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
+       
         setError("Error al cargar los eventos");
       } finally {
         setLoading(false);
@@ -59,6 +78,7 @@ export default function EventList() {
 
     loadEvents();
   }, []);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -152,7 +172,7 @@ export default function EventList() {
 			    //  onClick={() => setShowForm(!showForm)}
 				style={{ color: "var(--color-stone-400)", borderColor: "var(--color-stone-400)" }}
 				>
-        <h3 className="text-lg font-semibold">Agregar Evento</h3>
+        <h3 className="text-lg font-semibold">Agregar Nuevo Evento</h3>
         <Plus size={50} />
       </div>
       {showForm && (
@@ -222,3 +242,4 @@ export default function EventList() {
     </div>
   );
 }
+

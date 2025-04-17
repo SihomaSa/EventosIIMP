@@ -122,8 +122,8 @@ export default function EditPressNoteForm({
       <div className="flex items-center justify-between p-4 border-b mb-6">
         <DialogTitle className="text-xl font-semibold">
         {tipoprensa === 2
-            ? "Agregar Boletin"
-            : "Agregar Nota de Prensa"}
+            ? "Agregar Nuevo Boletin"
+            : "Agregar Nueva Nota de Prensa"}
         </DialogTitle>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
