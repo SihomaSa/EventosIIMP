@@ -1,4 +1,4 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm} from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SponsorType, UpdateSponsorRequestType } from "@/types/sponsorTypes";
@@ -6,15 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { updateSponsor } from "@/components/services/sponsorsService";
@@ -39,6 +32,7 @@ interface UpdateSponsorModalProps {
   sponsor: SponsorType;
   idEvento?: string;
   onUpdate: () => void;
+  open: boolean,
 }
 
 export default function UpdateSponsorModal({
@@ -46,6 +40,7 @@ export default function UpdateSponsorModal({
   sponsor,
   idEvento = "1",
   onUpdate,
+  open,
 }: UpdateSponsorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
     sponsor.foto || null
@@ -62,7 +57,7 @@ export default function UpdateSponsorModal({
     formState: { errors },
     setValue,
     watch,
-    control,
+  
   } = useForm<SponsorFormValues>({
     resolver: zodResolver(sponsorSchema),
     defaultValues: {
@@ -95,6 +90,7 @@ export default function UpdateSponsorModal({
   const filteredCategories = sponsorCategories.filter(
     (cat) => cat.idIdioma === idiomaSeleccionado
   );
+
 
   useEffect(() => {
     if (sponsor) {
@@ -159,11 +155,14 @@ export default function UpdateSponsorModal({
   };
 
   return (
-
+    
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
+        <div className="flex items-center justify-between p-4 border-b">
+
         <DialogTitle className="text-xl font-semibold">Editar Auspiciador</DialogTitle>
+        </div>
           <DialogDescription>
             Actualiza los detalles del auspiciador y guarda los cambios.
           </DialogDescription>
@@ -202,76 +201,58 @@ export default function UpdateSponsorModal({
 
           {/* Idioma */}
           <div>
-            <Label className="mb-2 font-bold"
-            
-            >Idioma</Label>
-            <RadioGroup
-              onValueChange={handleLanguageChange}
-              value={watch("idioma")}
-              disabled={isSubmitting}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="1" id="EN" />
-                <Label htmlFor="EN">Inglés</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="2" id="SP" />
-                <Label htmlFor="SP">Español</Label>
-              </div>
-            </RadioGroup>
-            {errors.idioma && (
-              <p className="text-red-500 text-sm">{errors.idioma.message}</p>
-            )}
-
+        <Label>Idioma</Label>
+        <RadioGroup
+          onValueChange={handleLanguageChange}
+          value={watch("idioma")}
+          disabled={isSubmitting}
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="1" id="EN" />
+            <Label htmlFor="EN">Inglés</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="2" id="SP" />
+            <Label htmlFor="SP">Español</Label>
           </div>
         </RadioGroup>
         {errors.idioma && (
           <p className="text-red-500 text-sm">{errors.idioma.message}</p>
         )}
       </div>
-
-
           {/* Categoría */}
           <div>
-            <Label htmlFor="categoria"
-             className="mb-2 font-bold"
-            
-            >Categoría</Label>
-            <Controller
-              name="categoria"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isSubmitting}
-                  className="grid grid-cols-3 gap-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="oro" />
-                    <Label htmlFor="oro">ORO</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="2" id="plata" />
-                    <Label htmlFor="plata">PLATA</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="3" id="cobre" />
-                    <Label htmlFor="cobre">COBRE</Label>
-                  </div>
-                </RadioGroup>
-              )}
-            />
-            {errors.categoria && (
-              <p className="text-red-500 text-sm">{errors.categoria.message}</p>
-            )}
-        
+            <Select>
+          <SelectTrigger>
+                <SelectValue placeholder="Seleccione una categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Categoría</SelectLabel>
+                  {filteredCategories.map((cat) => (
+                    <SelectItem
+                      key={cat.idCategoriaAus}
+                      value={String(cat.idCategoriaAus)}
+                    >
+                      {cat.descripcion}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+         
+      
+        {loading && (
+          <div className="flex items-center text-sm text-muted-foreground mt-1">
+            <Loader2 className="animate-spin mr-2 h-4 w-4" />
+            Cargando categorías...
           </div>
         )}
         {errors.categoria && (
           <p className="text-red-500 text-sm">{errors.categoria.message}</p>
         )}
       </div>
+
 
           {/* Imagen */}
           <div>
@@ -285,15 +266,31 @@ export default function UpdateSponsorModal({
               onChange={onFileChange}
               disabled={isSubmitting}
               className="hidden"
-
             />
-          ) : (
-            <div className="flex items-center justify-center text-gray-500 p-6">
-              <ImageIcon className="mr-2" />
-              Seleccionar imagen
-            </div>
-          )}
-        </div>
+              <div
+                onClick={() =>
+                  !isSubmitting && document.getElementById("foto")?.click()
+                }
+                className={`bg-gray-50 border border-gray-200 rounded-lg p-4 ${
+                  !isSubmitting
+                    ? "cursor-pointer hover:bg-gray-100"
+                    : "opacity-70"
+                } transition-colors`}
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Vista previa"
+                    className="w-full h-auto rounded-lg max-h-[200px] object-contain"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center text-gray-500 p-6">
+                    <ImageIcon className="mr-2" />
+                    Seleccionar imagen
+                  </div>
+                )}
+
+              </div>
         {imageError && (
           <p className="text-red-500 text-sm mt-2">{imageError}</p>
         )}
@@ -311,5 +308,9 @@ export default function UpdateSponsorModal({
         </Button>
       </div>
     </form>
+      </DialogContent>
+    </Dialog> 
+    
   );
 }
+

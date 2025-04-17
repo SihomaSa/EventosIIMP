@@ -45,7 +45,7 @@ export default function EditSponsorModal({
   onClose,
 }:  {
 	onAdd: () => void;
-  open: boolean,
+ 
 	onClose: () => void;
 }) {
   const { selectedEvent } = useEventStore();
