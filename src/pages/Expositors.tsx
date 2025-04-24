@@ -63,8 +63,15 @@ export default function Expositors() {
     setIsUpdateModalOpen(true);
   }, []);
 
+  // const handleRefresh = useCallback(() => {
+  //   fetchExpositors();
+  // }, [fetchExpositors]);
   const handleRefresh = useCallback(() => {
-    fetchExpositors();
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    fetchExpositors().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
   }, [fetchExpositors]);
 
   const filteredExpositors = useMemo(() => {

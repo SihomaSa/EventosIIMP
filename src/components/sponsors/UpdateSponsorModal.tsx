@@ -90,8 +90,6 @@ export default function UpdateSponsorModal({
   const filteredCategories = sponsorCategories.filter(
     (cat) => cat.idIdioma === idiomaSeleccionado
   );
-
-
   useEffect(() => {
     if (sponsor) {
       setValue("url", sponsor.url);
@@ -99,8 +97,8 @@ export default function UpdateSponsorModal({
       setValue("descripcion", sponsor.nombre);
       setImagePreview(sponsor.foto || null);
       setValue("categoria", String(sponsor.idCategoria || ""));
-    }
-  }, [sponsor, setValue]);
+     }
+   }, [sponsor, setValue]); 
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -118,8 +116,25 @@ export default function UpdateSponsorModal({
       setFotoUpdated((prev) => prev + 1);
     }
   };
-
+  const CATEGORY_MAPPING: Record<string, { en: number; es: number }> = {
+    "1": { en: 4, es: 1 },  // ORO ↔ GOLD
+    "2": { en: 5, es: 2 },  // PLATA ↔ SILVER
+    "3": { en: 6, es: 3 },  // COBRE ↔ COPPER
+    "4": { en: 4, es: 1 },  // GOLD ↔ ORO
+    "5": { en: 5, es: 2 },  // SILVER ↔ PLATA
+    "6": { en: 6, es: 3 },  // COPPER ↔ COBRE
+  };
   const handleLanguageChange = (value: "1" | "2") => {
+    const currentCategory = watch("categoria");
+    
+    if (currentCategory) {
+      const mapping = CATEGORY_MAPPING[currentCategory];
+      if (mapping) {
+        const newCategoryId = value === "1" ? mapping.en : mapping.es;
+        setValue("categoria", String(newCategoryId), { shouldValidate: true });
+      }
+    }
+    
     setValue("idioma", value, { shouldValidate: true });
   };
 
@@ -153,7 +168,7 @@ export default function UpdateSponsorModal({
       setIsSubmitting(false);
     }
   };
-
+ 
   return (
     
     <Dialog open={open} onOpenChange={onClose}>
@@ -222,8 +237,13 @@ export default function UpdateSponsorModal({
       </div>
           {/* Categoría */}
           <div>
-            <Select>
-          <SelectTrigger>
+            <Label htmlFor="categoria">Categoría</Label>
+            <Select
+              value={watch("categoria")}
+              onValueChange={(value) => setValue("categoria", value, { shouldValidate: true })}
+              disabled={isSubmitting || loading}
+            >
+              <SelectTrigger>
                 <SelectValue placeholder="Seleccione una categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -240,18 +260,17 @@ export default function UpdateSponsorModal({
                 </SelectGroup>
               </SelectContent>
             </Select>
-         
-      
-        {loading && (
-          <div className="flex items-center text-sm text-muted-foreground mt-1">
-            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-            Cargando categorías...
+            
+            {loading && (
+              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                Cargando categorías...
+              </div>
+            )}
+            {errors.categoria && (
+              <p className="text-red-500 text-sm">{errors.categoria.message}</p>
+            )}
           </div>
-        )}
-        {errors.categoria && (
-          <p className="text-red-500 text-sm">{errors.categoria.message}</p>
-        )}
-      </div>
 
 
           {/* Imagen */}
@@ -313,4 +332,3 @@ export default function UpdateSponsorModal({
     
   );
 }
-

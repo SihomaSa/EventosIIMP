@@ -9,6 +9,7 @@ import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type LanguageTab = "all" | "en" | "sp";
@@ -22,9 +23,9 @@ export default function Sponsors() {
   const [sponsorsUpdated, setSponsorsUpdated] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
-  const [activeCategory] = useState("all");
+  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
 
   const fetchSponsors = useCallback(async () => {
     try {
@@ -66,8 +67,15 @@ export default function Sponsors() {
     setIsUpdateModalOpen(true);
   };
 
+  // const handleRefresh = useCallback(() => {
+  //   fetchSponsors();
+  // }, [fetchSponsors]);
   const handleRefresh = useCallback(() => {
-    fetchSponsors();
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    fetchSponsors().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
   }, [fetchSponsors]);
 
   //Language filter
@@ -203,11 +211,91 @@ export default function Sponsors() {
           </Button>
         </div>
       </div>
-{/*
+
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
-        {loading && loadingSkeletons}
-        {!loading && filteredSponsors.length === 0 && emptyState}
-        {!loading && filteredSponsors.length > 0 && (
+  {!loading && (
+    <div className="mb-6">
+      <Tabs
+        defaultValue="all"
+        value={activeLanguage}
+        onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
+        className="w-full"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div className="flex items-center text-gray-800">
+            <Globe size={18} className="text-primary mr-2 flex-shrink-0" />
+            <h2 className="text-lg font-medium">Filtrar por idioma y categoría</h2>
+          </div>
+
+         
+
+          <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
+            <TabsTrigger
+              value="all"
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+            >
+              Todos ({sponsors.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="en"
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+            >
+              Inglés ({getLanguageCount("EN")})
+            </TabsTrigger>
+            <TabsTrigger
+              value="sp"
+              className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+            >
+              Español ({getLanguageCount("SP")})
+            </TabsTrigger>
+          </TabsList>
+         
+          {/* Selector de categorías mejorado */}
+          <Select
+  value={activeCategory}
+  onValueChange={(value) => setActiveCategory(value)}
+>
+  <SelectTrigger className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm">
+    <SelectValue placeholder="Todas las categorías" />
+  </SelectTrigger>
+  <SelectContent className="focus:text-primary focus:bg-primary/10">
+    <SelectGroup>
+      <SelectItem value="all" className="focus:text-primary focus:bg-primary/10">Todas las categorías</SelectItem>
+      {activeLanguage === "en" && (
+        <>
+          <SelectItem value="gold" className="focus:text-primary focus:bg-primary/10">GOLD</SelectItem>
+          <SelectItem value="silver" className="focus:text-primary focus:bg-primary/10">SILVER</SelectItem>
+          <SelectItem value="copper" className="focus:text-primary focus:bg-primary/10">COPPER</SelectItem>
+        </>
+      )}
+      {activeLanguage === "sp" && (
+        <>
+          <SelectItem value="oro" className="focus:text-primary focus:bg-primary/10">ORO</SelectItem>
+          <SelectItem value="plata" className="focus:text-primary focus:bg-primary/10">PLATA</SelectItem>
+          <SelectItem value="cobre" className="focus:text-primary focus:bg-primary/10">COBRE</SelectItem>
+        </>
+      )}
+      {activeLanguage === "all" && (
+        <>
+          <SelectItem value="gold" className="focus:text-primary focus:bg-primary/10">GOLD</SelectItem>
+          <SelectItem value="silver" className="focus:text-primary focus:bg-primary/10">SILVER</SelectItem>
+          <SelectItem value="copper" className="focus:text-primary focus:bg-primary/10">COPPER</SelectItem>
+          <SelectItem value="oro" className="focus:text-primary focus:bg-primary/10">ORO</SelectItem>
+          <SelectItem value="plata" className="focus:text-primary focus:bg-primary/10">PLATA</SelectItem>
+          <SelectItem value="cobre" className="focus:text-primary focus:bg-primary/10">COBRE</SelectItem>
+        </>
+      )}
+    </SelectGroup>
+  </SelectContent>
+</Select>
+        </div>
+        
+
+        <TabsContent
+          value={activeLanguage}
+          className="mt-0 pt-4 pb-1 flex flex-col"
+        >
+          {filteredSponsors.length === 0 && emptyState}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredSponsors.map((sponsor) => (
               <SponsorCard
@@ -218,68 +306,13 @@ export default function Sponsors() {
               />
             ))}
           </div>
-        )}
-      </div> */}
-      <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
-        {!loading && (
-          <div className="mb-6">
-            <Tabs
-              defaultValue="all"
-              value={activeLanguage}
-              onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
-              className="w-full"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <div className="flex items-center text-gray-800">
-                  <Globe
-                    size={18}
-                    className="text-primary mr-2 flex-shrink-0"
-                  />
-                  <h2 className="text-lg font-medium">Filtrar por idioma</h2>
-                </div>
-                <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
-                  <TabsTrigger
-                    value="all"
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-                  >
-                    Todos ({sponsors.length})
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="en"
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-                  >
-                    Inglés ({getLanguageCount("EN")})
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="sp"
-                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
-                  >
-                    Español ({getLanguageCount("SP")})
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent
-                value={activeLanguage}
-                className="mt-0 pt-4 pb-1 flex flex-col"
-              >
-                {" "}
-                {filteredSponsors.length === 0 && emptyState}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredSponsors.map((sponsor) => (
-                    <SponsorCard
-                    key={sponsor.idSponsor}
-                    sponsor={sponsor}
-                    onEdit={() => openUpdateModal(sponsor)}
-                    onDelete={handleDeleteSponsor}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-        {loading && loadingSkeletons}
-      </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )}
+  {loading && loadingSkeletons}
+</div>
+
 
 
       <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">

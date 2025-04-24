@@ -1,22 +1,7 @@
 import { FC, useState, useCallback, useEffect } from "react";
-import {
-  Plus,
-  AlertTriangle,
-  Loader2,
-  CalendarIcon,
-  Languages,
-  Info,
-} from "lucide-react";
+import {Plus,AlertTriangle,Loader2,CalendarIcon,Languages,Info,} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,} from "@/components/ui/dialog";
 import { format, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { Label } from "@/components/ui/label";
@@ -25,10 +10,7 @@ import ProgramForm from "../../pages/Programs/components/ProgramForm/ProgramForm
 import useProgramForm from "../../pages/Programs/components/ProgramForm/hooks/useProgramFrom";
 import ProgramsService from "../../pages/Programs/services/ProgramsService";
 import { ProgramForm as ProgramFormType } from "../../pages/Programs/components/ProgramForm/types/ProgramForm";
-import {
-  ProgramCategory,
-  ProgramDetail,
-} from "../../pages/Programs/types/Program";
+import { ProgramCategory, ProgramDetail,} from "../../pages/Programs/types/Program";
 import { useEventStore } from "@/stores/eventStore";
 import { toast } from "sonner";
 

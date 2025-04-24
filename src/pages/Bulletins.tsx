@@ -71,8 +71,15 @@ export default function Bulletins() {
     setIsUpdateModalOpen(true);
   }, []);
 
+  // const handleRefresh = useCallback(() => {
+  //   fetchPressNotes();
+  // }, [fetchPressNotes]);
   const handleRefresh = useCallback(() => {
-    fetchPressNotes();
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    fetchPressNotes().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
   }, [fetchPressNotes]);
 
   // Helper function to get the count of notes by language

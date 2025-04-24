@@ -6,6 +6,7 @@ const {
   VITE_PROGRAMS_GET,
   VITE_PROGRAMS_POST,
   VITE_PROGRAMS_PUT,
+  VITE_PROGRAMS_DELETE,
   VITE_PROGRAMS_DETAIL_DELETE,
   VITE_TYPE_PROGRAMS_GET,
 } = import.meta.env;
@@ -15,6 +16,7 @@ const getApiUrl = (endpoint: string, id?: string | number): string => {
     GET: VITE_PROGRAMS_GET,
     POST: VITE_PROGRAMS_POST,
     PUT: VITE_PROGRAMS_PUT,
+    DELETE: VITE_PROGRAMS_DELETE,
     DELETE_DETAIL: VITE_PROGRAMS_DETAIL_DELETE,
     GET_TYPES: VITE_TYPE_PROGRAMS_GET,
   }[endpoint];
@@ -56,8 +58,8 @@ const ProgramsService = {
     if (!res.ok) throw new Error("Error al actualizar el programa");
   },
 
-  deleteProgram: async (id: number) => {
-    const res = await fetch(`${getApiUrl("DELETE")}/${id}`, {
+  deleteProgram: async (idPrograma: number) => {
+    const res = await fetch(getApiUrl("DELETE",idPrograma), {
       method: "DELETE",
     });
     if (!res.ok) throw new Error("Error al eliminar el programa");
@@ -69,7 +71,20 @@ const ProgramsService = {
     });
     if (!res.ok) throw new Error("Error al eliminar el detalle del programa");
   },
-};
 
+  deleteDetailOrFullProgram: async (
+    idPrograma: number,
+    idProDetalle: number,
+    totalActividades: number
+  ) => {
+    // Primero elimina el detalle
+    await ProgramsService.deleteProgramDetail(idProDetalle);
+  
+    // Si era la única actividad, también elimina el programa
+    if (totalActividades === 1) {
+      await ProgramsService.deleteProgram(idPrograma);
+    }
+  },
+};
 export default ProgramsService;
 
