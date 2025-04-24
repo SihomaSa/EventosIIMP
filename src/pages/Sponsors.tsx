@@ -9,7 +9,7 @@ import UpdateSponsorModal from "@/components/sponsors/UpdateSponsorModal";
 import EditSponsorForm from "@/components/sponsors/EditSponsorForm";
 import { getSponsors } from "@/components/services/sponsorsService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type LanguageTab = "all" | "en" | "sp";
