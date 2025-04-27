@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Card } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 import { ImageInput } from "../ImageInput";
-import { toast } from "sonner";
 import { useEventStore } from "@/stores/eventStore";
 import { createExpositor } from "../services/expositorsService";
 import { fileToBase64 } from "@/utils/fileToBase64";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import { LanguageType } from "@/types/languageTypes";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { toast } from "sonner";
+
 import {
   Loader2,
   Upload,
@@ -21,12 +24,16 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 
+
 // Zod Schema for Expositor
 const ExpositorSchema = z.object({
   nombres: z.string().min(1, "El nombre es obligatorio"),
   apellidos: z.string().min(1, "El apellido es obligatorio"),
   especialidad: z.string().min(1, "La especialidad es obligatoria"),
   hojaDeVida: z.string().min(1, "La hoja de vida es obligatoria"),
+  descripcionIdioma: z.enum(["1", "2"], {
+      message: "Selecciona un idioma válido",
+    }),
   foto: z
     .instanceof(File)
     .refine(
@@ -59,6 +66,7 @@ export default function EditExpositorForm({
     formState: { errors },
     reset,
     setValue,
+    watch
   } = useForm<ExpositorFormValues>({
     resolver: zodResolver(ExpositorSchema),
     defaultValues: {
@@ -66,31 +74,35 @@ export default function EditExpositorForm({
       apellidos: "",
       especialidad: "",
       hojaDeVida: "",
+      descripcionIdioma: "2",
       foto: undefined,
     },
   });
-
+   const handleLanguageChange = (value: LanguageType) => {
+      setValue("descripcionIdioma", value, { shouldValidate: true });
+    };
   const onSubmit = async (data: ExpositorFormValues) => {
+      const toastId = toast.loading("Procesando conferencista...");
+      try {
     if (!selectedEvent) {
-      toast.error("No hay un evento seleccionado");
-      return;
+      throw new Error("No hay un evento seleccionado");
+      
     }
-
-    try {
-      setIsSubmitting(true);
       const base64Image = await fileToBase64(data.foto);
+
       const expositorData = {
         evento: String(selectedEvent.idEvent),
         nombres: data.nombres,
         apellidos: data.apellidos,
         especialidad: data.especialidad,
         hojaDeVida: data.hojaDeVida,
+        descripcionIdioma: data.descripcionIdioma,
         foto: base64Image,
       };
 
       await createExpositor(expositorData);
 
-      toast.success("Conferencista creado exitosamente");
+      toast.success("Conferencista creado exitosamente", { id: toastId });
       reset();
       onAdd();
       onClose();
@@ -108,13 +120,9 @@ export default function EditExpositorForm({
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between p-4 border-b mb-6">
-        <DialogTitle className="text-xl font-semibold">
-          Agregar Nuevo Conferencista
-        </DialogTitle>
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+    <Card>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4">
+      <h2 className="text-xl">Agregar Nueva Conferencista</h2>
         <div className="space-y-2">
           <Label
             htmlFor="nombres"
@@ -171,6 +179,29 @@ export default function EditExpositorForm({
             <p className="text-red-500 text-sm">{errors.especialidad.message}</p>
           )}
         </div>
+
+        {/* Idioma */}
+				<div>
+					<Label htmlFor="descripcionIdioma" className="mb-2">
+						Idioma
+					</Label>
+					<RadioGroup
+						onValueChange={handleLanguageChange}
+						value={watch("descripcionIdioma")}
+					>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="1" id="EN" />
+							<Label htmlFor="EN">Inglés</Label>
+						</div>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="2" id="SP" />
+							<Label htmlFor="SP">Español</Label>
+						</div>
+					</RadioGroup>
+					{errors.descripcionIdioma && (
+						<p className="text-red-500 text-sm">{errors.descripcionIdioma.message}</p>
+					)}
+				</div>
 
         <div className="space-y-2">
           <Label
@@ -240,6 +271,6 @@ export default function EditExpositorForm({
           </Button>
         </div>
       </form>
-    </div>
+      </Card>
   );
 }

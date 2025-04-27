@@ -310,6 +310,7 @@ export default function Ads() {
                   </TabsTrigger>
                 </TabsList>
               </div>
+              
               <TabsContent
                 value={activeLanguage}
                 className="mt-0 pt-4 pb-1 flex flex-col"

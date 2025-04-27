@@ -1,50 +1,47 @@
 import { useState } from "react";
-import { Edit, Trash2, User, Award, FileText } from "lucide-react";
+import { Edit, User, Award, FileText, Globe } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { deleteExpositor } from "../services/expositorsService";
-import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import DeleteAlert from "../DeleteAlert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 interface ExpositorCardProps {
-  idAuthor: number;
+  idAutor: number;
   nombres: string;
   apellidos: string;
   especialidad: string;
   hojaDeVida: string;
+  descripcionIdioma: string;
   foto: string;
   openUpdateModal: () => void;
   onDelete: () => void;
 }
 
 export default function ExpositorCard({
-  idAuthor,
+  idAutor,
   nombres,
   apellidos,
   especialidad,
   hojaDeVida,
+  descripcionIdioma,
   foto,
   openUpdateModal,
   onDelete,
 }: ExpositorCardProps) {
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async () => {
+  const deleteSelectedExpositor = async (idAutor: string) => {
     try {
-      setIsDeleting(true);
-      await deleteExpositor(idAuthor);
+      
+      await deleteExpositor(idAutor);
       onDelete();
-      return Promise.resolve();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Error al eliminar el conferencista");
-      console.error(err);
-      return Promise.reject(err);
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
+      console.error(error)
     }
   };
 
@@ -52,10 +49,11 @@ export default function ExpositorCard({
     <>
       <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
         <CardHeader className="p-0">
+          {/* imagen */}
         <div className="relative w-full aspect-[4/4] overflow-hidden rounded-t-lg bg-white">
              <img 
              src={foto}
-              alt={`expositor ${idAuthor}`}
+              alt={`expositor ${idAutor}`}
               className="w-full h-full object-cover object-top"
             />
              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
@@ -63,6 +61,9 @@ export default function ExpositorCard({
                   <div className="flex items-center justify-between">
                         <h3 className="text-white font-semibold mt-1 line-clamp-2">
                 {nombres} {apellidos}
+                <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
+								{descripcionIdioma}
+							</span>
               </h3>
             </div>
           </div>
@@ -73,14 +74,14 @@ export default function ExpositorCard({
             {/* Nombres */}
             <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
               <Label
-                htmlFor={`nombres-${idAuthor}`}
+                htmlFor={`nombres-${idAutor}`}
                 className="text-xs font-medium flex items-center gap-1 text-primary truncate"
               >
                 <User size={14} className="text-primary flex-shrink-0" />
                 <span className="truncate">Nombres</span>
               </Label>
               <Input
-                id={`nombres-${idAuthor}`}
+                id={`nombres-${idAutor}`}
                 value={nombres}
                 disabled
                 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
@@ -90,14 +91,14 @@ export default function ExpositorCard({
             {/* Apellidos */}
             <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
               <Label
-                htmlFor={`apellidos-${idAuthor}`}
+                htmlFor={`apellidos-${idAutor}`}
                 className="text-xs font-medium flex items-center gap-1 text-primary truncate"
               >
                 <User size={14} className="text-primary flex-shrink-0" />
                 <span className="truncate">Apellidos</span>
               </Label>
               <Input
-                id={`apellidos-${idAuthor}`}
+                id={`apellidos-${idAutor}`}
                 value={apellidos}
                 disabled
                 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
@@ -107,31 +108,47 @@ export default function ExpositorCard({
             {/* Especialidad */}
             <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
               <Label
-                htmlFor={`especialidad-${idAuthor}`}
+                htmlFor={`especialidad-${idAutor}`}
                 className="text-xs font-medium flex items-center gap-1 text-primary truncate"
               >
                 <Award size={14} className="text-primary flex-shrink-0" />
                 <span className="truncate">Especialidad</span>
               </Label>
               <Input
-                id={`especialidad-${idAuthor}`}
+                id={`especialidad-${idAutor}`}
                 value={especialidad}
                 disabled
                 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
               />
             </div>
+            {/* Language */}
+						<div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
+							<Label 
+								htmlFor="descripcionIdioma"
+								className="text-xs font-medium flex items-center gap-1 text-primary truncate"
+							  >
+								<Globe size={14} className="text-primary flex-shrink-0" />
+								<span className="truncate">Idioma</span>
+							</Label>
+								<Input
+								 id="descripcionIdioma"
+								 value={descripcionIdioma}
+								 disabled
+								 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
+							   />
+						</div>
 
             {/* Hoja de Vida */}
             <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
               <Label
-                htmlFor={`hojaDeVida-${idAuthor}`}
+                htmlFor={`hojaDeVida-${idAutor}`}
                 className="text-xs font-medium flex items-center gap-1 text-primary truncate"
               >
                 <FileText size={14} className="text-primary flex-shrink-0" />
                 <span className="truncate">Hoja de Vida</span>
               </Label>
               <Input
-                id={`hojaDeVida-${idAuthor}`}
+                id={`hojaDeVida-${idAutor}`}
                 value={hojaDeVida}
                 disabled
                 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
@@ -140,39 +157,24 @@ export default function ExpositorCard({
           </div>
         </CardContent>
         <CardFooter className="px-3 py-2! bg-gray-50 border-t border-gray-100 flex justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsDeleteDialogOpen(true)}
-            disabled={isDeleting}
-            className="cursor-pointer text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 flex items-center gap-1 transition-colors duration-200"
-          >
-            <Trash2 size={14} />
-            <span className="truncate">Eliminar</span>
-          </Button>
-          <Button
-            size="sm"
-            onClick={openUpdateModal}
-            className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
-          >
-            <Edit size={14} />
-            <span className="truncate">Editar</span>
-          </Button>
-        </CardFooter>
+            <DeleteAlert 
+                      id={String(idAutor)}
+                      name="la publicidad" 
+                      deleteMethod={() => deleteSelectedExpositor(String(idAutor))} 
+                      />
+                    <Button
+                      size="sm"
+                      className="cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center gap-1 transition-colors duration-200"
+                      onClick={(event) => {
+                        event.preventDefault(); // Previene la recarga de la página
+                        openUpdateModal();
+                      }}
+                          >
+                      <Edit size={14} />
+                      <span className="truncate">Editar</span>
+                    </Button>
+                  </CardFooter>
       </Card>
-
-      <ConfirmDeleteDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleDelete}
-        itemName={`el conferencista "${nombres} ${apellidos}"`}
-      />
-
-      {error && (
-        <div className="bg-red-50 text-red-500 p-2 mt-2 rounded-lg border border-red-200 text-sm">
-          {error}
-        </div>
-      )}
     </>
   );
 }

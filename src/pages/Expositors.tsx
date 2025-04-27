@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { ExpositorType } from "@/types/expositorTypes";
-import { Plus, RefreshCw, Search, Newspaper } from "lucide-react";
+import { Plus, RefreshCw, Search, Newspaper, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,9 @@ import ExpositorCard from "@/components/expositors/ExpositorCard";
 import UpdateExpositorModal from "@/components/expositors/UpdateExpositorModal";
 import EditExpositorForm from "@/components/expositors/EditExpositorForm";
 import { getExpositors } from "@/components/services/expositorsService";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+type LanguageTab = "all" | "en" | "sp";
 
 export default function Expositors() {
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
@@ -22,6 +24,7 @@ export default function Expositors() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleTimeString());
+  const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
 
   const fetchExpositors = useCallback(async () => {
     try {
@@ -43,29 +46,31 @@ export default function Expositors() {
     fetchExpositors();
   }, [expositorsUpdated, fetchExpositors]);
 
-  const handleAddExpositor = useCallback(() => {
+  const handleAddExpositor = () => {
     setExpositorsUpdated((prev) => prev + 1);
     setIsExpositorModalOpen(false);
-  }, []);
+  };
 
-  const handleUpdateExpositor = useCallback(() => {
+  const handleUpdateExpositor = () => {
+    setLoading(true); 
     setExpositorsUpdated((prev) => prev + 1);
     setSelectedExpositor(null);
     setIsUpdateModalOpen(false);
-  }, []);
+  };
 
-  const handleDeleteExpositor = useCallback(() => {
+  const handleDeleteExpositor = () => {
     setExpositorsUpdated((prev) => prev + 1);
-  }, []);
+  };
 
-  const openUpdateModal = useCallback((expositor: ExpositorType) => {
+  const openUpdateModal = (expositor: ExpositorType) => {
     setSelectedExpositor(expositor);
     setIsUpdateModalOpen(true);
-  }, []);
+  };
 
   // const handleRefresh = useCallback(() => {
   //   fetchExpositors();
   // }, [fetchExpositors]);
+
   const handleRefresh = useCallback(() => {
     setLoading(true);         // Mostrar skeletons
     setIsRefreshing(true);    // Animar botón
@@ -74,41 +79,68 @@ export default function Expositors() {
     });
   }, [fetchExpositors]);
 
+  const getLanguageCount = useCallback(
+    (language: string) => {
+      return expositors.filter((note) => note.prefijoIdioma === language).length;
+    },
+    [expositors]
+  );
+
   const filteredExpositors = useMemo(() => {
-    if (!searchTerm) return expositors;
-
-    const term = searchTerm.toLowerCase();
-
-    return expositors.filter((expositor) =>
-      `${expositor.nombres} ${expositor.apellidos} ${expositor.especialidad}`
+    return expositors.filter((expositor) => {
+      // Filtrar por idioma primero
+      if (
+        activeLanguage !== "all" &&
+        expositor.prefijoIdioma.toLowerCase() !== activeLanguage
+      ) {
+        return false;
+      }
+  
+      // Luego filtrar por término de búsqueda
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+  
+      return `${expositor.nombres} ${expositor.apellidos} ${expositor.especialidad}`
         .toLowerCase()
-        .includes(term)
-    );
-  }, [expositors, searchTerm]);
+        .includes(term);
+        return true;
+    });
+  }, [expositors, searchTerm, activeLanguage]);
+  
 
-  const emptyState = useMemo(() => {
-    const hasSearch = searchTerm.trim().length > 0;
-    return (
+  const emptyState = useMemo(() => (
       <div className="flex flex-col items-center justify-center py-12 text-center text-gray-600">
         <Newspaper size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold mb-2">
-          {hasSearch ? "No se encontraron conferencistas" : "Aún no hay conferencistas registrados"}
+        <h3 className="text-lg font-medium text-gray-700 mb-2">
+          No hay conferencista
         </h3>
-        <p className="text-sm mb-4">
-          {hasSearch ? "Intenta con otro término de búsqueda" : "Agrega un nuevo conferencista para comenzar."}
+        <p className="text-gray-500 max-w-md mb-6">
+          {searchTerm
+            ? "No se encontraron notas de prensa con ese término de búsqueda"
+            : activeLanguage !== "all"
+            ? `No hay notas de prensa en ${
+                activeLanguage === "en" ? "inglés" : "español"
+              }`
+            : "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
         </p>
-        <Button onClick={() => setIsExpositorModalOpen(true)} className="cursor-pointer bg-primary hover:bg-primary/90">
+       
+        <Button 
+          onClick={() => setIsExpositorModalOpen(true)} 
+          className="cursor-pointer bg-primary hover:bg-primary/90">
           <Plus size={16} className="mr-1" /> Agregar conferencista
         </Button>
       </div>
-    );
-  }, [searchTerm]);
+    
+  ), [searchTerm, activeLanguage]);
 
   const loadingSkeletons = useMemo(
     () => (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div key={`skeleton-${i}`} className="border shadow-sm rounded-lg overflow-hidden h-full flex flex-col">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="border shadow-sm rounded-lg overflow-hidden h-full flex flex-col"
+          >
             {/* Image header with gradient overlay */}
             <div className="relative w-full h-44">
               <Skeleton className="absolute inset-0 rounded-t-lg bg-primary/30" />
@@ -154,13 +186,16 @@ export default function Expositors() {
     ),
     []
   );
-
+  if (error) return <p className="text-red-500">{error}</p>;
   return (
     <div className="p-0 xl:p-6 flex flex-col">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Conferencistas</h1>
-        <p className="text-gray-500 mt-1">Administre todas los conferencistas del evento</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Gestión de Conferencistas</h1>
+        <p className="text-gray-500 mt-1">
+          Administre todas los conferencistas del evento</p>
       </div>
+
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div className="relative w-full md:w-72">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
@@ -195,6 +230,7 @@ export default function Expositors() {
           </Button>
         </div>
       </div>
+       {/* Mensaje error */}
       {error && (
         <div className="bg-red-50 text-red-500 p-4 mb-6 rounded-lg border border-red-200 flex items-center">
           <svg
@@ -212,21 +248,61 @@ export default function Expositors() {
           {error}
         </div>
       )}
+
       <div className="bg-gray-50 rounded-xl p-4 md:p-6 border border-gray-200 min-h-[70vh]">
         {!loading && (
           <div className="mb-6">
-            <Tabs defaultValue="all" className="w-full">
-              <TabsContent value="all" className="mt-0 pt-4 pb-1 flex flex-col">
+            <Tabs 
+                defaultValue="all" 
+                value={activeLanguage}
+                onValueChange={(value) => setActiveLanguage(value as LanguageTab)}
+                className="w-full"
+            >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div className="flex items-center text-gray-800">
+                  <Globe
+                    size={18}
+                    className="text-primary mr-2 flex-shrink-0"
+                  />
+                  <h2 className="text-lg font-medium">Filtrar por idioma</h2>
+                </div>
+                <TabsList className="bg-gray-100 p-0.5 w-full sm:w-auto grid grid-cols-3">
+                  <TabsTrigger
+                    value="all"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Todos ({expositors.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="en"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Inglés ({getLanguageCount("EN")})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="sp"
+                    className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm px-4 py-1.5 rounded-sm"
+                  >
+                    Español ({getLanguageCount("SP")})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent 
+                value={activeLanguage}
+                className="mt-0 pt-4 pb-1 flex flex-col">
+                  {" "}
                 {filteredExpositors.length === 0 && emptyState}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filteredExpositors.map((expositor) => (
                     <ExpositorCard
                       key={expositor.idAutor}
-                      idAuthor={expositor.idAutor ?? 0}
+                      idAutor={expositor.idAutor}
                       nombres={expositor.nombres}
                       apellidos={expositor.apellidos}
                       especialidad={expositor.especialidad}
                       hojaDeVida={expositor.hojaVida}
+                      descripcionIdioma={expositor.descripcionIdioma}
                       foto={expositor.foto}
                       openUpdateModal={() => openUpdateModal(expositor)}
                       onDelete={handleDeleteExpositor}
@@ -239,19 +315,24 @@ export default function Expositors() {
         )}
         {loading && loadingSkeletons}
       </div>
+
       <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
         <span>
           {!loading && filteredExpositors.length > 0
             ? `Mostrando ${filteredExpositors.length} ${
                 filteredExpositors.length === 1
-                  ? "Conferencista"
-                  : "Conferencistas"
+                  ? "Conferencista": "Conferencistas"
+              }${
+                activeLanguage !== "all"
+                  ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : ""
               }`
             : ""}
         </span>
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
+      {isExpositorModalOpen && (
       <Dialog open={isExpositorModalOpen} onOpenChange={setIsExpositorModalOpen}>
         <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
           <EditExpositorForm
@@ -259,34 +340,23 @@ export default function Expositors() {
             onAdd={handleAddExpositor}
           />
         </DialogContent>
-      </Dialog>
-
+      </Dialog> 
+      )}
+      
+      {isUpdateModalOpen && selectedExpositor && (
       <Dialog
-        open={isUpdateModalOpen && !!selectedExpositor}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsUpdateModalOpen(false);
-            setTimeout(() => {
-              setSelectedExpositor(null);
-            }, 100);
-          }
-        }}
-      >
+        open={isUpdateModalOpen}
+        onOpenChange={setIsUpdateModalOpen}>
         <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
-          {selectedExpositor && (
             <UpdateExpositorModal
               expositor={selectedExpositor}
               onUpdate={handleUpdateExpositor}
-              onClose={() => {
-                setIsUpdateModalOpen(false);
-                setTimeout(() => {
-                  setSelectedExpositor(null);
-                }, 100);
-              }}
+              open={isUpdateModalOpen}
+              onClose={() => setIsUpdateModalOpen(false)}
             />
-          )}
         </DialogContent>
       </Dialog>
+    )}
     </div>
   );
 }

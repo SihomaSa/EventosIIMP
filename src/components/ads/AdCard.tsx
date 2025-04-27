@@ -25,6 +25,7 @@ export default function AdCard({
 	openUpdateModal,
 	onDelete,
 }: AdCardProps) {
+	
 
 	const [error, setError] = useState<string | null>(null);
 	

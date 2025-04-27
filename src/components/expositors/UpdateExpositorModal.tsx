@@ -1,119 +1,153 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ExpositorType,
-} from "@/types/expositorTypes";
+import {ExpositorType, UpdateExpositorRequestType} from "@/types/expositorTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateExpositor } from "../services/expositorsService";
-import {
-  User,
-  Award,
-  FileText,
-  Image as ImageIcon,
-  Upload,
-  Loader2,
-} from "lucide-react";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import {User,Award,FileText} from "lucide-react";
+import { LanguageType } from "@/types/languageTypes";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { useState, useEffect } from "react";
+import { fileToBase64 } from "@/utils/fileToBase64";
+import { ImageIcon } from "lucide-react";
+import {Dialog, DialogContent, DialogHeader, DialogTitle,DialogDescription} from "../ui/dialog";
 
 const expositorSchema = z.object({
   nombres: z.string().min(1, "El nombre es obligatorio"),
   apellidos: z.string().min(1, "El apellido es obligatorio"),
   especialidad: z.string().min(1, "La especialidad es obligatoria"),
   hojaDeVida: z.string().min(1, "La hoja de vida es obligatoria"),
-  foto: z.string().optional(),
+  descripcionIdioma: z.enum(["1", "2"], {
+    message: "Selecciona un idioma válido",
+  }),
+  foto: z.instanceof(File).optional(),
 });
 
 type ExpositorFormValues = z.infer<typeof expositorSchema>;
 
 interface UpdateExpositorModalProps {
+ 
   onClose: () => void;
   expositor: ExpositorType;
   onUpdate: () => void;
+  open: boolean;
 }
 
 export default function UpdateExpositorModal({
   onClose,
   expositor,
   onUpdate,
+  open,
 }: UpdateExpositorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
-    expositor.foto || null
+    typeof expositor.foto === "string" ? expositor.foto : null
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fotoUpdated, setFotoUpdated] = useState(0);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<ExpositorFormValues>({
     resolver: zodResolver(expositorSchema),
     defaultValues: {
+      foto: undefined,
       nombres: expositor.nombres,
       apellidos: expositor.apellidos,
       especialidad: expositor.especialidad,
       hojaDeVida: expositor.hojaVida,
-      foto: expositor.foto,
+      descripcionIdioma: expositor.prefijoIdioma === "EN" ? "1" : "2",
+      
     },
   });
+  useEffect(() => {
+      if (expositor) {
+        console.log("Cargando datos en el formulario:", expositor);
+        setValue("nombres", expositor.nombres);
+        setValue("apellidos", expositor.apellidos);
+        setValue("especialidad", expositor.especialidad);
+        setValue("hojaDeVida", expositor.hojaVida);
+        setValue("descripcionIdioma", expositor.prefijoIdioma === "EN" ? "1" : "2");
+        
+        setImagePreview(expositor.foto || null);
+      }
+  }, [expositor, setValue]);
+
+  const [imageError, setImageError] = useState<string | null>(null); // ✅ Error del archivo
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setValue("foto", base64String, { shouldValidate: true });
-        setImagePreview(URL.createObjectURL(file));
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 1024 * 1024) {
+        setImageError("La imagen excede el tamaño máximo permitido de 1MB.");
+        setValue("foto", undefined); // Limpia el valor del form
+        setImagePreview(null); // Limpia la vista previa
+        event.target.value = ""; // Resetea el input
+        return;
+      }
+      setImageError(null); // Limpia errores anteriores
+      setImagePreview(URL.createObjectURL(file));
+      setValue("foto", file, { shouldValidate: true });
+      setFotoUpdated((prev) => prev + 1);
     }
+  };
+
+  const handleLanguageChange = (value: LanguageType) => {
+    setValue("descripcionIdioma", value, { shouldValidate: true });
   };
 
   const onSubmit = async (data: ExpositorFormValues) => {
     try {
-      setIsSubmitting(true);
-      const isPhotoChanged = data.foto !== expositor.foto;
-
-      await updateExpositor({
+      console.log("Datos antes de enviar:", data);
+     
+       const formFoto =
+        fotoUpdated !== 0 && data.foto
+         ? await fileToBase64(data.foto)
+         : expositor.foto;
+     
+        const editExpositor: UpdateExpositorRequestType={
+        foto: formFoto,
         nombres: data.nombres,
         apellidos: data.apellidos,
         especialidad: data.especialidad,
         hojaDeVida: data.hojaDeVida,
+        descripcionIdioma: data.descripcionIdioma,
         idAuthor: String(expositor.idAutor),
-        ...(isPhotoChanged && { foto: data.foto }),
-      });
+      };
+      console.log("Actualizando publicidad con:", editExpositor);
+      await updateExpositor(editExpositor);
 
       onUpdate();
       onClose();
+      setImagePreview(null);
     } catch (error) {
       console.error("Error al actualizar expositor:", error);
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between p-4 border-b mb-6">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
         <DialogTitle className="text-xl font-semibold">
           Editar Conferencista
         </DialogTitle>
-      </div>
-      <form
-        onSubmit={(e) => {
-          handleSubmit(onSubmit)(e);
-        }}
-        className="flex flex-col gap-6"
+      <DialogDescription>
+            Actualiza los detalles de la conferencista y guarda los cambios.
+          </DialogDescription>
+        </DialogHeader>
+      <form onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4 p-4"
       >
-        <div className="space-y-2">
+        <div>
           <Label
             htmlFor="nombres"
-            className="flex items-center gap-2 text-gray-700"
+           className="mb-2 font-bold"
           >
             <User size={16} className="text-primary" />
             Nombres <span className="text-red-500">*</span>
@@ -131,10 +165,10 @@ export default function UpdateExpositorModal({
           )}
         </div>
 
-        <div className="space-y-2">
+        <div>
           <Label
             htmlFor="apellidos"
-            className="flex items-center gap-2 text-gray-700"
+            className="mb-2 font-bold"
           >
             <User size={16} className="text-primary" />
             Apellidos <span className="text-red-500">*</span>
@@ -152,10 +186,10 @@ export default function UpdateExpositorModal({
           )}
         </div>
 
-        <div className="space-y-2">
+        <div>
           <Label
             htmlFor="especialidad"
-            className="flex items-center gap-2 text-gray-700"
+            className="mb-2 font-bold"
           >
             <Award size={16} className="text-primary" />
             Especialidad <span className="text-red-500">*</span>
@@ -174,11 +208,30 @@ export default function UpdateExpositorModal({
             </p>
           )}
         </div>
+        <div>
+            <Label className="mb-2 font-bold">Idioma</Label>
+            <RadioGroup
+              onValueChange={handleLanguageChange}
+              value={watch("descripcionIdioma")}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="1" id="EN" />
+                <Label htmlFor="EN">Inglés</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="2" id="SP" />
+                <Label htmlFor="SP">Español</Label>
+              </div>
+            </RadioGroup>
+            {errors.descripcionIdioma && (
+              <p className="text-red-500 text-sm">{errors.descripcionIdioma.message}</p>
+            )}
+          </div>
 
-        <div className="space-y-2">
+        <div>
           <Label
             htmlFor="hojaDeVida"
-            className="flex items-center gap-2 text-gray-700"
+            className="mb-2 font-bold"
           >
             <FileText size={16} className="text-primary" />
             Hoja de Vida <span className="text-red-500">*</span>
@@ -196,71 +249,47 @@ export default function UpdateExpositorModal({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label
-            htmlFor="foto"
-            className="flex items-center gap-2 text-gray-700"
-          >
-            <ImageIcon size={16} className="text-primary" />
-            Imagen <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="foto"
-            type="file"
-            accept="image/*"
-            onChange={onFileChange}
-            className="hidden"
-          />
-          <div
-            onClick={() => document.getElementById('foto')?.click()}
-            className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
-          >
-            {imagePreview ? (
-              <img
-                src={imagePreview}
-                alt="Vista previa"
-                className="w-full h-auto rounded-lg"
-              />
-            ) : (
-              <div className="flex items-center justify-center text-gray-500">
-                <ImageIcon className="mr-2" />
-                Seleccionar imagen
-              </div>
+        <div>
+            <Label htmlFor="foto" className="mb-2 font-bold">
+              Imagen
+            </Label>
+            <Input
+              id="foto"
+              type="file"
+              accept="image/*"
+              onChange={onFileChange}
+              className="hidden"
+            />
+            <div
+              onClick={() => document.getElementById("foto")?.click()}
+              className="bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Vista previa"
+                  className="w-full h-auto rounded-lg max-h-[200px] object-contain"
+                />
+              ) : (
+                <div className="flex items-center justify-center text-gray-500 p-6">
+                  <ImageIcon className="mr-2" />
+                  Seleccionar imagen
+                </div>
+              )}
+            </div>
+            {imageError && (
+              <p className="text-red-500 text-sm mt-2">{imageError}</p>
             )}
           </div>
-          {errors.foto && (
-            <p className="text-red-500 text-sm mt-2">{errors.foto.message}</p>
-          )}
-        </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Guardar
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-    </div>
+          <div className="flex justify-between">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit">Guardar</Button>
+          </div>
+        </form>
+      </DialogContent>
+      </Dialog>
   );
 }
