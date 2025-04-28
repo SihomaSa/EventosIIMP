@@ -10,10 +10,12 @@ import EditAdsForm from "@/components/ads/EditAdsForm";
 import { getAds } from "@/components/services/adsService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
 
 type LanguageTab = "all" | "en" | "sp";
 
 export default function Ads() {
+  const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [ads, setAds] = useState<AdType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,13 @@ export default function Ads() {
     try {
       setIsRefreshing(true);
       const data = await getAds();
-      setAds(data || []);
+      
+      // Filtrar ads por el evento seleccionado
+      const filteredData = selectedEvent 
+        ? (data || []).filter(ad => ad.idEvento === selectedEvent.idEvent)
+        : data || [];
+      
+      setAds(filteredData);
       if (error) setError(null);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
@@ -42,7 +50,7 @@ export default function Ads() {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error]);
+  }, [error, selectedEvent]); // Añade selectedEvent como dependencia
 
   useEffect(() => {
     fetchAds();
@@ -117,7 +125,9 @@ export default function Ads() {
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Newspaper size={48} className="text-gray-300 mb-4" />
         <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No hay publicidad
+          {selectedEvent 
+            ? `No hay publicidad para ${selectedEvent.des_event}`
+            : "No hay publicidad"}
         </h3>
         <p className="text-gray-500 max-w-md mb-6">
           {searchTerm
@@ -126,7 +136,9 @@ export default function Ads() {
             ? `No hay notas de prensa en ${
                 activeLanguage === "en" ? "inglés" : "español"
               }`
-            : "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
+            : selectedEvent
+            ? `Aún no hay publicidades disponibles para este evento.`
+            : "Seleccione un evento para ver sus publicidades o agregue nuevas."}
         </p>
         <Button
           onClick={() => setIsadsModalOpen(true)}
@@ -137,7 +149,7 @@ export default function Ads() {
         </Button>
       </div>
     ),
-    [searchTerm, activeLanguage]
+    [searchTerm, activeLanguage, selectedEvent]
   );
   // Updated loadingSkeletons to match PressCard design
   const loadingSkeletons = useMemo(
@@ -212,7 +224,9 @@ export default function Ads() {
           Gestión de Publicidades
         </h1>
         <p className="text-gray-500 mt-1">
-          Administre todas las publicidades del evento
+          {selectedEvent 
+            ? `Administrando publicidades para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus publicidades"}
         </p>
       </div>
 
@@ -345,10 +359,11 @@ export default function Ads() {
               }${
                 activeLanguage !== "all"
                   ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
                   : ""
               }`
             : ""}
-
         </span>
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>

@@ -12,7 +12,8 @@ interface ExpositorCardProps {
   nombres: string;
   apellidos: string;
   especialidad: string;
-  hojaDeVida: string;
+  hojaVida: string;
+ 
   descripcionIdioma: string;
   foto: string;
   openUpdateModal: () => void;
@@ -24,7 +25,8 @@ export default function ExpositorCard({
   nombres,
   apellidos,
   especialidad,
-  hojaDeVida,
+  hojaVida,
+ 
   descripcionIdioma,
   foto,
   openUpdateModal,
@@ -48,27 +50,29 @@ export default function ExpositorCard({
   return (
     <>
       <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
-        <CardHeader className="p-0">
-          {/* imagen */}
+      <CardHeader className="p-0">
+        {/* imagen */}
         <div className="relative w-full aspect-[4/4] overflow-hidden rounded-t-lg bg-white">
-             <img 
-             src={foto}
-              alt={`expositor ${idAutor}`}
-              className="w-full h-full object-cover object-top"
-            />
-             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
-                <div className="absolute bottom-0 left-0 p-3 w-full">
-                  <div className="flex items-center justify-between">
-                        <h3 className="text-white font-semibold mt-1 line-clamp-2">
+          <img 
+            src={foto}
+            alt={`expositor ${idAutor}`}
+            className="w-full h-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
+          <div className="absolute bottom-0 left-0 p-3 w-full">
+            <div className="flex items-center justify-between">
+              {/* Nombres y Apellidos a la izquierda */}
+              <h3 className="text-white font-semibold mt-1 line-clamp-2">
                 {nombres} {apellidos}
-                <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
-								{descripcionIdioma}
-							</span>
               </h3>
+              {/* Idioma a la derecha */}
+              <span className="px-2 py-1 bg-primary text-white text-xs rounded-md">
+                {descripcionIdioma}
+              </span>
             </div>
           </div>
-          </div>
-        </CardHeader>
+        </div>
+      </CardHeader>
         <CardContent className="p-3 bg-white flex-grow">
           <div className="flex flex-col w-full gap-2">
             {/* Nombres */}
@@ -141,15 +145,15 @@ export default function ExpositorCard({
             {/* Hoja de Vida */}
             <div className="w-full group bg-gray-50 p-2 rounded-md border border-gray-200 hover:border-primary/30 transition-colors duration-200">
               <Label
-                htmlFor={`hojaDeVida-${idAutor}`}
+                htmlFor={`hojaVida-${idAutor}`}
                 className="text-xs font-medium flex items-center gap-1 text-primary truncate"
               >
                 <FileText size={14} className="text-primary flex-shrink-0" />
                 <span className="truncate">Hoja de Vida</span>
               </Label>
               <Input
-                id={`hojaDeVida-${idAutor}`}
-                value={hojaDeVida}
+                id={`hojaVida-${idAutor}`}
+                value={hojaVida}
                 disabled
                 className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
               />

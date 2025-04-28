@@ -26,7 +26,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #ffffff; /* Asegurar fondo blanco en <body> */
-}
+  background-color: #ffffff;
+} 
+
 
 

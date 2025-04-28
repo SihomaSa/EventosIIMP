@@ -19,7 +19,7 @@ const NavItem = memo(function NavItem({
       to={to}
       className={({ isActive }) =>
         `flex items-center p-2 rounded-md transition ${
-          isActive ? "bg-amber-800 text-white" : "hover:bg-amber-950 text-white"
+          isActive ? "bg-white text-black" : " text-white"   // hover:bg-white
         } ${isCollapsed ? "justify-center" : "space-x-3"}`
       }
       title={isCollapsed ? label : undefined}

@@ -1,25 +1,26 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {ExpositorType, UpdateExpositorRequestType} from "@/types/expositorTypes";
+import { ExpositorType, UpdateExpositorRequestType } from "@/types/expositorTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateExpositor } from "../services/expositorsService";
-import {User,Award,FileText} from "lucide-react";
+import { User, Award, FileText } from "lucide-react";
 import { LanguageType } from "@/types/languageTypes";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { useState, useEffect } from "react";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { ImageIcon } from "lucide-react";
-import {Dialog, DialogContent, DialogHeader, DialogTitle,DialogDescription} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { toast } from "sonner";
 
 const expositorSchema = z.object({
   nombres: z.string().min(1, "El nombre es obligatorio"),
   apellidos: z.string().min(1, "El apellido es obligatorio"),
   especialidad: z.string().min(1, "La especialidad es obligatoria"),
-  hojaDeVida: z.string().min(1, "La hoja de vida es obligatoria"),
+  hojaVida: z.string().min(1, "La hoja de vida es obligatoria"),
   descripcionIdioma: z.enum(["1", "2"], {
     message: "Selecciona un idioma válido",
   }),
@@ -29,7 +30,6 @@ const expositorSchema = z.object({
 type ExpositorFormValues = z.infer<typeof expositorSchema>;
 
 interface UpdateExpositorModalProps {
- 
   onClose: () => void;
   expositor: ExpositorType;
   onUpdate: () => void;
@@ -43,9 +43,9 @@ export default function UpdateExpositorModal({
   open,
 }: UpdateExpositorModalProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(
-    typeof expositor.foto === "string" ? expositor.foto : null
+    expositor.foto || null
   );
-  const [fotoUpdated, setFotoUpdated] = useState(0);
+  const [fotoUpdated, setFotoUpdated] = useState(false);
 
   const {
     register,
@@ -53,47 +53,49 @@ export default function UpdateExpositorModal({
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<ExpositorFormValues>({
     resolver: zodResolver(expositorSchema),
     defaultValues: {
-      foto: undefined,
       nombres: expositor.nombres,
       apellidos: expositor.apellidos,
       especialidad: expositor.especialidad,
-      hojaDeVida: expositor.hojaVida,
+      hojaVida: expositor.hojaVida,
       descripcionIdioma: expositor.prefijoIdioma === "EN" ? "1" : "2",
-      
+      foto: undefined,
     },
   });
-  useEffect(() => {
-      if (expositor) {
-        console.log("Cargando datos en el formulario:", expositor);
-        setValue("nombres", expositor.nombres);
-        setValue("apellidos", expositor.apellidos);
-        setValue("especialidad", expositor.especialidad);
-        setValue("hojaDeVida", expositor.hojaVida);
-        setValue("descripcionIdioma", expositor.prefijoIdioma === "EN" ? "1" : "2");
-        
-        setImagePreview(expositor.foto || null);
-      }
-  }, [expositor, setValue]);
 
-  const [imageError, setImageError] = useState<string | null>(null); // ✅ Error del archivo
+  useEffect(() => {
+    if (expositor) {
+      reset({
+        nombres: expositor.nombres,
+        apellidos: expositor.apellidos,
+        especialidad: expositor.especialidad,
+        hojaVida: expositor.hojaVida,
+        descripcionIdioma: expositor.prefijoIdioma === "EN" ? "1" : "2",
+      });
+      setImagePreview(expositor.foto || null);
+      setFotoUpdated(false);
+    }
+  }, [expositor, reset]);
+
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 1024 * 1024) {
         setImageError("La imagen excede el tamaño máximo permitido de 1MB.");
-        setValue("foto", undefined); // Limpia el valor del form
-        setImagePreview(null); // Limpia la vista previa
-        event.target.value = ""; // Resetea el input
+        setValue("foto", undefined);
+        setImagePreview(null);
+        event.target.value = "";
         return;
       }
-      setImageError(null); // Limpia errores anteriores
+      setImageError(null);
       setImagePreview(URL.createObjectURL(file));
       setValue("foto", file, { shouldValidate: true });
-      setFotoUpdated((prev) => prev + 1);
+      setFotoUpdated(true);
     }
   };
 
@@ -102,31 +104,44 @@ export default function UpdateExpositorModal({
   };
 
   const onSubmit = async (data: ExpositorFormValues) => {
+
+    const toastId = toast.loading("Actualizando conferencista...");
+    
     try {
-      console.log("Datos antes de enviar:", data);
-     
-       const formFoto =
-        fotoUpdated !== 0 && data.foto
-         ? await fileToBase64(data.foto)
-         : expositor.foto;
-     
-        const editExpositor: UpdateExpositorRequestType={
-        foto: formFoto,
+      let fotoBase64 = expositor.foto;
+      
+      if (fotoUpdated && data.foto) {
+        fotoBase64 = await fileToBase64(data.foto);
+      }
+
+      const updateData: UpdateExpositorRequestType = {
+        idAuthor: expositor.idAutor.toString(),
+        evento: expositor.idEvento.toString(),
         nombres: data.nombres,
         apellidos: data.apellidos,
         especialidad: data.especialidad,
-        hojaDeVida: data.hojaDeVida,
-        descripcionIdioma: data.descripcionIdioma,
-        idAuthor: String(expositor.idAutor),
+        hojaVida: data.hojaVida,
+        idIdioma: parseInt(data.descripcionIdioma, 10),
+        descripcionIdioma: data.descripcionIdioma === "1" ? ("EN" as LanguageType) : ("ES" as LanguageType),
+        foto: fotoBase64 || "",
       };
-      console.log("Actualizando publicidad con:", editExpositor);
-      await updateExpositor(editExpositor);
 
+      await updateExpositor(updateData);
+      
+      toast.success("Conferencista actualizado exitosamente", { id: toastId });
       onUpdate();
       onClose();
-      setImagePreview(null);
     } catch (error) {
       console.error("Error al actualizar expositor:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al actualizar conferencista",
+        { id: toastId }
+      );
+    } finally {
+      setImagePreview(null);
+      setValue("foto", undefined);
+      setFotoUpdated(false);
+      setImageError(null);
     }
   };
 
@@ -134,85 +149,69 @@ export default function UpdateExpositorModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-        <DialogTitle className="text-xl font-semibold">
-          Editar Conferencista
-        </DialogTitle>
-      <DialogDescription>
+          <DialogTitle className="text-xl font-semibold">
+            Editar Conferencista
+          </DialogTitle>
+          <DialogDescription>
             Actualiza los detalles de la conferencista y guarda los cambios.
           </DialogDescription>
         </DialogHeader>
-      <form onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 p-4"
-      >
-        <div>
-          <Label
-            htmlFor="nombres"
-           className="mb-2 font-bold"
-          >
-            <User size={16} className="text-primary" />
-            Nombres <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="nombres"
-            {...register("nombres")}
-            placeholder="Introduce los nombres del conferencista"
-            className={
-              errors.nombres ? "border-red-500 focus:ring-red-500" : ""
-            }
-          />
-          {errors.nombres && (
-            <p className="text-red-500 text-sm">{errors.nombres.message}</p>
-          )}
-        </div>
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <Label htmlFor="nombres" className="flex items-center gap-2 mb-2">
+              <User size={16} className="text-primary" />
+              Nombres <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="nombres"
+              {...register("nombres")}
+              placeholder="Introduce los nombres del conferencista"
+              className={errors.nombres ? "border-red-500 focus:ring-red-500" : ""}
+            />
+            {errors.nombres && (
+              <p className="text-red-500 text-sm">{errors.nombres.message}</p>
+            )}
+          </div>
 
-        <div>
-          <Label
-            htmlFor="apellidos"
-            className="mb-2 font-bold"
-          >
-            <User size={16} className="text-primary" />
-            Apellidos <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="apellidos"
-            {...register("apellidos")}
-            placeholder="Introduce los apellidos del conferencista"
-            className={
-              errors.apellidos ? "border-red-500 focus:ring-red-500" : ""
-            }
-          />
-          {errors.apellidos && (
-            <p className="text-red-500 text-sm">{errors.apellidos.message}</p>
-          )}
-        </div>
+          <div>
+            <Label htmlFor="apellidos" className="flex items-center gap-2 mb-2">
+              <User size={16} className="text-primary" />
+              Apellidos <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="apellidos"
+              {...register("apellidos")}
+              placeholder="Introduce los apellidos del conferencista"
+              className={errors.apellidos ? "border-red-500 focus:ring-red-500" : ""}
+            />
+            {errors.apellidos && (
+              <p className="text-red-500 text-sm">{errors.apellidos.message}</p>
+            )}
+          </div>
 
-        <div>
-          <Label
-            htmlFor="especialidad"
-            className="mb-2 font-bold"
-          >
-            <Award size={16} className="text-primary" />
-            Especialidad <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="especialidad"
-            {...register("especialidad")}
-            placeholder="Introduce la especialidad del conferencista"
-            className={
-              errors.especialidad ? "border-red-500 focus:ring-red-500" : ""
-            }
-          />
-          {errors.especialidad && (
-            <p className="text-red-500 text-sm">
-              {errors.especialidad.message}
-            </p>
-          )}
-        </div>
-        <div>
-            <Label className="mb-2 font-bold">Idioma</Label>
+          <div>
+            <Label htmlFor="especialidad" className="flex items-center gap-2 mb-2">
+              <Award size={16} className="text-primary" />
+              Especialidad <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="especialidad"
+              {...register("especialidad")}
+              placeholder="Introduce la especialidad del conferencista"
+              className={errors.especialidad ? "border-red-500 focus:ring-red-500" : ""}
+            />
+            {errors.especialidad && (
+              <p className="text-red-500 text-sm">{errors.especialidad.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label className="mb-2">Idioma</Label>
             <RadioGroup
               onValueChange={handleLanguageChange}
               value={watch("descripcionIdioma")}
+              className="space-y-2"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="1" id="EN" />
@@ -228,29 +227,26 @@ export default function UpdateExpositorModal({
             )}
           </div>
 
-        <div>
-          <Label
-            htmlFor="hojaDeVida"
-            className="mb-2 font-bold"
-          >
-            <FileText size={16} className="text-primary" />
-            Hoja de Vida <span className="text-red-500">*</span>
-          </Label>
-          <Textarea
-            id="hojaDeVida"
-            {...register("hojaDeVida")}
-            placeholder="Introduce la hoja de vida del conferencista"
-            className={
-              errors.hojaDeVida ? "border-red-500 focus:ring-red-500" : ""
-            }
-          />
-          {errors.hojaDeVida && (
-            <p className="text-red-500 text-sm">{errors.hojaDeVida.message}</p>
-          )}
-        </div>
+          <div>
+            <Label htmlFor="hojaVida" className="flex items-center gap-2 mb-2">
+              <FileText size={16} className="text-primary" />
+              Hoja de Vida <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="hojaVida"
+              {...register("hojaVida")}
+              placeholder="Introduce la hoja de vida del conferencista"
+              className={errors.hojaVida ? "border-red-500 focus:ring-red-500" : ""}
+              rows={4}
+            />
+            {errors.hojaVida && (
+              <p className="text-red-500 text-sm">{errors.hojaVida.message}</p>
+            )}
+          </div>
 
-        <div>
-            <Label htmlFor="foto" className="mb-2 font-bold">
+          <div>
+            <Label htmlFor="foto" className="flex items-center gap-2 mb-2">
+              <ImageIcon size={16} className="text-primary" />
               Imagen
             </Label>
             <Input
@@ -290,6 +286,6 @@ export default function UpdateExpositorModal({
           </div>
         </form>
       </DialogContent>
-      </Dialog>
+    </Dialog>
   );
 }

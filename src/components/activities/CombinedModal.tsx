@@ -5,21 +5,9 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { LanguageType } from "@/types/languageTypes";
-import {
-  ActivityDetail,
-  ActivityType,
-  NewFieldTripRequest,
-  NewCourseRequest,
-  NewCoffeeBreakRequest,
-  NewLunchRequest,
-  NewExhibitionRibbonCuttingRequest,
-  NewClosingRequest,
-  NewOthersRequest,
-  NewCongressInaugurationRequest,
-  NewGratitudDinnerRequest,
-  NewMagisterialConferenceRequest,
-  NewRoundTableRequest,
-  ActivityTypeId,
+import {ActivityDetail,ActivityType,NewFieldTripRequest,NewCourseRequest,NewCoffeeBreakRequest,
+  NewLunchRequest,NewExhibitionRibbonCuttingRequest,NewClosingRequest,NewOthersRequest,NewCongressInaugurationRequest,
+  NewGratitudDinnerRequest,NewMagisterialConferenceRequest,NewRoundTableRequest,ActivityTypeId,
 } from "@/types/activityTypes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,37 +15,13 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { TimePicker } from "@/components/TimePicker";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  CalendarIcon,
-  Clock,
-  Loader2,
-  MapPin,
-  User,
-  Languages,
-  Info,
-  AlertCircle,
-} from "lucide-react";
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription,DialogFooter} from "@/components/ui/dialog";
+import { Popover,PopoverContent,PopoverTrigger} from "@/components/ui/popover";
+import {CalendarIcon,Clock, Loader2,MapPin, User, Languages,Info,AlertCircle} from "lucide-react";
 import { toast } from "sonner";
 import { useEventStore } from "@/stores/eventStore";
 import { cn } from "@/lib/utils";
-import {
-  createActivityDetail,
-  getActivityTypes,
-  updateActivityDetail,
-} from "@/components/services/activitiesServicec";
+import {createActivityDetail,getActivityTypes,updateActivityDetail} from "@/components/services/activitiesServicec";
 
 const MODAL_MODES = {
   DATE_SELECT: "DATE_SELECT",
