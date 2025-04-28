@@ -15,25 +15,18 @@ import { LanguageType } from "@/types/languageTypes";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { toast } from "sonner";
 
-import {
-  Loader2,
-  Upload,
-  User,
-  Award,
-  FileText,
-  Image as ImageIcon
-} from "lucide-react";
-
+import { Loader2, Upload,User, Award,FileText, Image as ImageIcon } from "lucide-react";
 
 // Zod Schema for Expositor
 const ExpositorSchema = z.object({
   nombres: z.string().min(1, "El nombre es obligatorio"),
   apellidos: z.string().min(1, "El apellido es obligatorio"),
   especialidad: z.string().min(1, "La especialidad es obligatoria"),
-  hojaDeVida: z.string().min(1, "La hoja de vida es obligatoria"),
-  descripcionIdioma: z.enum(["1", "2"], {
-      message: "Selecciona un idioma válido",
-    }),
+  hojaVida: z.string().min(1, "La hoja de vida es obligatoria"),
+  idIdioma: z.string().min(1, "El idioma es obligatorio"),
+  descripcionIdioma: z.enum(["1", "2"] as const, {
+    message: "Selecciona un idioma válido",
+  }),
   foto: z
     .instanceof(File)
     .refine(
@@ -45,6 +38,7 @@ const ExpositorSchema = z.object({
       }
     ),
 });
+
 
 type ExpositorFormValues = z.infer<typeof ExpositorSchema>;
 
@@ -73,7 +67,8 @@ export default function EditExpositorForm({
       nombres: "",
       apellidos: "",
       especialidad: "",
-      hojaDeVida: "",
+      hojaVida: "",
+      idIdioma: "1",
       descripcionIdioma: "2",
       foto: undefined,
     },
@@ -91,11 +86,12 @@ export default function EditExpositorForm({
       const base64Image = await fileToBase64(data.foto);
 
       const expositorData = {
-        evento: String(selectedEvent.idEvent),
+        idEvento: selectedEvent.idEvent,
         nombres: data.nombres,
         apellidos: data.apellidos,
         especialidad: data.especialidad,
-        hojaDeVida: data.hojaDeVida,
+        hojaVida: data.hojaVida,
+        idIdioma: data.idIdioma,
         descripcionIdioma: data.descripcionIdioma,
         foto: base64Image,
       };
@@ -213,12 +209,12 @@ export default function EditExpositorForm({
           </Label>
           <Textarea
             id="hojaDeVida"
-            {...register("hojaDeVida")}
+            {...register("hojaVida")}
             placeholder="Introduce la hoja de vida del conferencista"
-            className={errors.hojaDeVida ? "border-red-500 focus:ring-red-500" : ""}
+            className={errors.hojaVida ? "border-red-500 focus:ring-red-500" : ""}
           />
-          {errors.hojaDeVida && (
-            <p className="text-red-500 text-sm">{errors.hojaDeVida.message}</p>
+          {errors.hojaVida && (
+            <p className="text-red-500 text-sm">{errors.hojaVida.message}</p>
           )}
         </div>
 

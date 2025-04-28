@@ -10,10 +10,12 @@ import EditPressForm from "@/components/press/EditPressForm";
 import UpdatePressModal from "@/components/press/UpdatePressModal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+// import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
 
 type LanguageTab = "all" | "en" | "sp";
 
 export default function PressNotes() {
+  // const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [pressNotes, setPressNotes] = useState<PressNoteType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +35,12 @@ export default function PressNotes() {
     try {
       setIsRefreshing(true);
       const data = await getPressNotes();
+      
+      // const filteredData = selectedEvent 
+      // ? (data || []).filter(note => note.evento === selectedEvent.evento)
+      // : data || [];
+
+
       setPressNotes(
         data?.filter((pressnote) => pressnote.idTipPre === 1) || []
       );

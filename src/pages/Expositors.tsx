@@ -301,7 +301,7 @@ export default function Expositors() {
                       nombres={expositor.nombres}
                       apellidos={expositor.apellidos}
                       especialidad={expositor.especialidad}
-                      hojaDeVida={expositor.hojaVida}
+                      hojaVida={expositor.hojaVida}
                       descripcionIdioma={expositor.descripcionIdioma}
                       foto={expositor.foto}
                       openUpdateModal={() => openUpdateModal(expositor)}
