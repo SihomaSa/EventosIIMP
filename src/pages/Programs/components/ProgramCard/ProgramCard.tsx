@@ -1,26 +1,10 @@
 import { FC, useState } from "react";
 import { Program, ProgramCategory, ProgramDetail } from "../../types/Program";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import {Table,TableBody,TableCell,TableHead, TableHeader,TableRow,} from "@/components/ui/table";
 import { parseHourRange } from "./utils/parseHourRange";
 import { Button } from "@/components/ui/button";
-import {
-  Trash,
-  ChevronDown,
-  Clock,
-  Users,
-  Info,
-  ChevronUp,
-  Calendar,
-} from "lucide-react";
-// import EditTitleProgramDialog from "../../../../components/programs/EditTitleProgramDialog";
+import { Trash,ChevronDown, Clock,Users,Info,ChevronUp,Calendar} from "lucide-react";
 import ProgramsService from "../../services/ProgramsService";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -29,14 +13,12 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { toast } from "sonner";
 import AddProgramDialog from "../../../../components/programs/AddProgramDialog";
 import EditProgramDetailDialog from "../../../../components/programs/EditProgramDetailDialog";
-
 type AutorWithNumberId = {
   idAutor: number;
   nombres: string;
   apellidos: string;
   [key: string]: string | number;
 };
-
 // Define the Autor type with string id (for EditProgramDetailDialog)
 type AutorWithStringId = {
   idAutor: string;
@@ -44,15 +26,14 @@ type AutorWithStringId = {
   apellidos: string;
   [key: string]: string | number;
 };
-
 type Props = {
   program: Program;
   programDetail: ProgramDetail;
   programCategories: ProgramCategory[];
   date: string;
+  
   onDeleteSuccess?: () => void;
 };
-
 const ProgramCard: FC<Props> = ({
   program,
   programCategories,
@@ -91,6 +72,47 @@ const ProgramCard: FC<Props> = ({
     return category ? category.descripcion : `ID-${id}`;
   }
 
+  
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+  
+    try {
+      const currentDetail = program.detalles[0];
+      const totalActividades = currentDetail.detalleAdicional.length;
+  
+      // ✅ Aquí usas la función centralizada
+      await ProgramsService.deleteDetailOrFullProgram(
+        currentDetail.idPrograma,
+        itemToDelete.idProDetalle,
+        totalActividades
+      );
+  
+      // Mensaje dinámico
+      toast.success(
+        totalActividades === 1 ? "Programa eliminado" : "",
+        {
+          description:
+            totalActividades === 1
+              ? `El programa: "${itemToDelete.descripcionBody}" ha sido eliminado con éxito.`
+              : "Detalle eliminado exitosamente.",
+        }
+      );      
+  
+      // Actualizar vista
+      if (onDeleteSuccess) onDeleteSuccess();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      // toast.error("Error al eliminar", {
+      //   description:
+      //     "No se pudo eliminar el detalle o programa. Intente nuevamente.",
+      // });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  };
+  
+  
   const handleDeleteClick = (additional: {
     idProDetalle: number;
     descripcionBody: string;
@@ -101,35 +123,8 @@ const ProgramCard: FC<Props> = ({
     });
     setIsDeleteDialogOpen(true);
   };
-
-  const handleConfirmDelete = async () => {
-    if (!itemToDelete) return;
-
-    try {
-      // Use ProgramsService to delete the program detail
-      await ProgramsService.deleteProgramDetail(itemToDelete.idProDetalle);
-
-      // Optional callback for successful deletion
-      if (onDeleteSuccess) {
-        onDeleteSuccess();
-      }
-
-      // Additional feedback
-      toast.success("Detalle eliminado", {
-        description: `El detalle "${itemToDelete.descripcionBody}" ha sido eliminado exitosamente.`,
-      });
-    } catch (error) {
-      console.error("Error deleting program detail:", error);
-      toast.error("Error al eliminar", {
-        description:
-          "No se pudo eliminar el detalle del programa. Intente nuevamente.",
-      });
-    } finally {
-      setIsDeleteDialogOpen(false);
-      setItemToDelete(null);
-    }
-  };
-
+   
+  
   // Function to convert autor ids from number to string if needed
   const convertAutorIds = (
     autores: AutorWithNumberId[] | undefined | null
@@ -141,6 +136,14 @@ const ProgramCard: FC<Props> = ({
     }));
   };
 
+  function handleRefreshPrograms(): void {
+    if (onDeleteSuccess) {
+      onDeleteSuccess();
+    } else {
+      console.warn("onDeleteSuccess callback is not provided.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Action buttons outside the card */}
@@ -151,22 +154,13 @@ const ProgramCard: FC<Props> = ({
         itemName={`el programa: "${itemToDelete?.descripcionBody}"`}
       />
       <div className="flex flex-wrap gap-2 justify-start">
-        {/* {program.detalles[0] && (
-          <EditTitleProgramDialog
-            date={date}
-            programDetail={program.detalles[0]}
-            programCategories={programCategories}
-            onDeleteSuccess={onDeleteSuccess}
-          />
-        )} */}
         <AddProgramDialog
           programCategories={programCategories}
           date={date}
           programDetail={program.detalles[0]}
-          onDeleteSuccess={onDeleteSuccess}
+          onDeleteSuccess={handleRefreshPrograms}
         />
       </div>
-
       <Card className="overflow-hidden border-primary/20 shadow-sm py-0">
         {program.detalles.map((detalle) => (
           <div
@@ -298,7 +292,7 @@ const ProgramCard: FC<Props> = ({
                     {/* Time and Category with Toggle */}
                     <div className="flex items-start justify-between">
                       <div className="space-y-2 flex-1">
-                        <div className="flex items-center gap-2 bg-primary/5 px-2 py-1 rounded-md inline-block">
+                         <div className="flex items-center gap-2 bg-primary/5 px-2 py-1 rounded-md"> {/*flex items-center gap-2 bg-primary/5 px-2 py-1 rounded-md inline-block */}
                           <Clock
                             size={15}
                             className="text-primary flex-shrink-0"

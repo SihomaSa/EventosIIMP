@@ -47,7 +47,7 @@ export const updateExpositor = async (updatedExpositor: UpdateExpositorRequestTy
   return response.json();
 };
 
-export const deleteExpositor = async (expositorId: number): Promise<void> => {
+export const deleteExpositor = async (expositorId: string): Promise<void> => {
   const response = await fetch(getApiUrl("DELETE", expositorId), {
     method: "DELETE",
   });

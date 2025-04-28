@@ -64,30 +64,47 @@ export default function Expositors() {
     loadData();
   }, [loadData]);
 
-  // Function to refresh programs - used after adding a new program
   const handleRefreshPrograms = useCallback(async () => {
     try {
-      // Load programs
+      // Guardamos las fechas actuales ANTES del fetch
+      const previousDates = dates;
+  
+      // Obtenemos los nuevos programas
       const programs = await ProgramsService.getPrograms();
       setPrograms(programs);
-
-      // Extract and update dates
+  
+      // Extraemos las fechas únicas y ordenadas
       const uniqueDates = [
         ...new Set(programs.map((program) => program.fechaPrograma)),
       ].sort();
+  
       setDates(uniqueDates);
-
-      // If there was no selected date but now we have dates, select the first one
-      if (!selectedDate && uniqueDates.length > 0) {
-        setSelectedDate(uniqueDates[0]);
+  
+      // Verificamos si aún existe la fecha seleccionada
+      const stillHasPrograms = programs.some(
+        (program) => program.fechaPrograma === selectedDate
+      );
+  
+      // Identificamos si hay una nueva fecha (que no estaba antes)
+      const newlyCreatedDate = uniqueDates.find(
+        (date) => !previousDates.includes(date)
+      );
+  
+      // Seleccionamos la fecha recién creada, si existe
+      if (newlyCreatedDate) {
+        setSelectedDate(newlyCreatedDate);
+      } else if (!selectedDate || !stillHasPrograms) {
+        const fallbackDate = uniqueDates[0]; // Última fecha por defecto
+        setSelectedDate(fallbackDate);
       }
-
-      // Update last updated time
+  
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       console.error("Error refreshing programs:", err);
     }
-  }, [selectedDate]);
+  }, [selectedDate, dates]);
+  
+  
 
   // Filter programs by selected date and search term
   const filteredPrograms = useMemo(() => {
@@ -128,9 +145,16 @@ export default function Expositors() {
   }, [programs, selectedDate, searchTerm]);
 
   // Handle refresh button click
-  const handleRefresh = () => {
-    loadData();
-  };
+  // const handleRefresh = () => {
+  //   loadData();
+  // };
+  const handleRefresh = useCallback(() => {
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    loadData().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
+  }, [loadData]);
 
   // Loading state UI
   if (loading) {

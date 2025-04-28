@@ -1,22 +1,7 @@
 import { FC, useState, useCallback, useEffect } from "react";
-import {
-  Plus,
-  AlertTriangle,
-  Loader2,
-  CalendarIcon,
-  Languages,
-  Info,
-} from "lucide-react";
+import {Plus,AlertTriangle,Loader2,CalendarIcon,Languages,Info,} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog,DialogContent, DialogFooter,DialogHeader, DialogTitle,DialogTrigger, DialogDescription,} from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isValid } from "date-fns";
 import { es } from "date-fns/locale";

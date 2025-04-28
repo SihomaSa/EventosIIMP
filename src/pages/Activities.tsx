@@ -1,11 +1,11 @@
 import { FormEvent, useEffect, useState, useCallback, useMemo } from "react";
-import { CalendarDays, Plus, RefreshCw, Search } from "lucide-react";
+import { CalendarDays, Plus, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { getActivities } from "@/components/services/activitiesServicec";
 import { ActivityDay, ActivityDetail } from "../types/activityTypes";
 import ActivityDayCard from "@/components/activities/ActivityDayCard";
-import { Input } from "@/components/ui/input";
+
 import CombinedModal from "@/components/activities/CombinedModal";
 
 export default function Expositors() {
@@ -17,7 +17,7 @@ export default function Expositors() {
   const [initialDate, setInitialDate] = useState<string | null>(null);
   const [expositorsUpdated, setExpositorsUpdated] = useState(0);
   const [activities, setActivities] = useState<ActivityDay[] | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(
     new Date().toLocaleTimeString()
@@ -63,8 +63,16 @@ export default function Expositors() {
     event.preventDefault();
   }, []);
 
+  // const handleRefresh = useCallback(() => {
+  //   fetchActivities();
+  // }, [fetchActivities]);
+
   const handleRefresh = useCallback(() => {
-    fetchActivities();
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    fetchActivities().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
   }, [fetchActivities]);
 
   // Extract existing dates from activities for calendar disabling
@@ -193,7 +201,7 @@ export default function Expositors() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="relative w-full md:w-72">
+        {/* <div className="relative w-full md:w-72">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Buscar actividades..."
@@ -201,7 +209,7 @@ export default function Expositors() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8 bg-gray-50 border-gray-200 w-full"
           />
-        </div>
+        </div> */}
         <div className="flex gap-2 w-full md:w-auto">
           <Button
             variant="outline"
@@ -216,6 +224,8 @@ export default function Expositors() {
             />
             <span className="hidden md:inline">Actualizar</span>
           </Button>
+          </div>
+          <div className="flex gap-2 w-full md:w-auto">
           <Button
             size="sm"
             onClick={handleAddDate}
@@ -224,7 +234,7 @@ export default function Expositors() {
             <CalendarDays size={16} />
             <span>Agregar nueva fecha</span>
           </Button>
-        </div>
+          </div>
       </div>
 
       {error && (

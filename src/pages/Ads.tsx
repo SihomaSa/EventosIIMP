@@ -54,6 +54,7 @@ export default function Ads() {
   };
 
   const handleUpdateAd = () => {
+    setLoading(true); 
     setAdsUpdated((prev) => prev + 1);
     setSelectedAd(null);
     setIsUpdateModalOpen(false);
@@ -67,9 +68,18 @@ export default function Ads() {
     setSelectedAd(ad);
     setIsUpdateModalOpen(true);
   };
+  // const handleRefresh = useCallback(() => {
+  //   fetchAds();
+  // }, [fetchAds]);
   const handleRefresh = useCallback(() => {
-    fetchAds();
+    setLoading(true);         // Mostrar skeletons
+    setIsRefreshing(true);    // Animar botón
+    fetchAds().finally(() => {
+      setIsRefreshing(false); // Detener animación del botón
+    });
   }, [fetchAds]);
+  
+  
 
   // Helper function to get the count of notes by language
   const getLanguageCount = useCallback(
@@ -231,6 +241,7 @@ export default function Ads() {
             <span className="hidden md:inline">Actualizar</span>
           </Button>
         </div>
+       
         <div className="flex gap-2 w-full md:w-auto">
           <Button
             size="sm"
@@ -299,6 +310,7 @@ export default function Ads() {
                   </TabsTrigger>
                 </TabsList>
               </div>
+              
               <TabsContent
                 value={activeLanguage}
                 className="mt-0 pt-4 pb-1 flex flex-col"
@@ -336,6 +348,7 @@ export default function Ads() {
                   : ""
               }`
             : ""}
+
         </span>
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
