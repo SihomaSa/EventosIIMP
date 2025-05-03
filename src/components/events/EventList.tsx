@@ -82,7 +82,12 @@ export default function EventList() {
   };
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center">
+        <img
+          src="/img/LOGOS_iimp 7.svg"
+          alt="Logo de la empresa"
+          className="max-w-md text-white py-2"
+        />
       <Loader2 className="animate-spin text-primary" size={48} />
     </div>
   );
@@ -146,11 +151,14 @@ export default function EventList() {
 
       {!showForm && (
         <div 
-          className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+          className="bg-white text-primary rounded-lg p-4 border border-dashed border-primary flex flex-col items-center justify-center cursor-pointer"
           // onClick={() => setShowForm(true)}
+          style={{ color: "var(--color-stone-400)", borderColor: "var(--color-stone-400)" }}
+				
         >
-          <Plus size={50} className="text-gray-400 mb-2" />
+          
           <h3 className="text-lg font-semibold">Agregar Nuevo Evento</h3>
+          <Plus size={50} />
         </div>
       )}
 
