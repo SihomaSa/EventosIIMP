@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "../ui/card";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { NewBulletinRequestType } from "@/types/bulletinTypes";
-
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { createBulletin } from "../services/bulletinsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
@@ -26,6 +25,7 @@ const BulletinSchema = z.object({
 	idioma: z.enum(["1", "2"], {
 		message: "Selecciona un idioma válido",
 	}),
+	evento: z.string().min(1, "Se requiere un evento"),
 });
 
 // ✅ Tipo basado en Zod
@@ -34,11 +34,14 @@ type BulletinFormValues = z.infer<typeof BulletinSchema>;
 export default function EditBulletinForm({
 	onAdd,
 	onClose,
+	selectedEvent,
 }: {
 	onAdd: () => void;
 	onClose: () => void;
+	selectedEvent?: { idEvent: string; des_event: string };
 }) {
-	const { selectedEvent } = useEventStore();
+	const { selectedEvent: eventFromStore } = useEventStore();
+  	const currentEvent = selectedEvent || eventFromStore;
 	const {
 		register,
 		handleSubmit,
@@ -54,42 +57,60 @@ export default function EditBulletinForm({
 			url: "",
 			foto: undefined,
 			idioma: "2",
+			evento: currentEvent?.idEvent ? String(currentEvent.idEvent) : "",
 		},
 	});
 
 	const [preview, setPreview] = useState<string | null>(null);
 	const [fileName, setFileName] = useState<string | null>(null);
 
+
 	const handleLanguageChange = (value: LanguageType) => {
 		setValue("idioma", value, { shouldValidate: true });
 	};
-
-	const onSubmit = async (data: BulletinFormValues) => {
-		if (selectedEvent) {
-			try {
-				const base64Image = await fileToBase64(data.foto);
-				const newBulletin: NewBulletinRequestType = {
-					titulo: data.titulo,
-          subtitulo: "no mandar subtitulo",
-					fecha: new Date().toISOString().split("T")[0],
-					descripcion: data.descripcion,
-					url: data.url,
-					evento: String(selectedEvent.idEvent),
-					tipoprensa: "2",
-					foto: base64Image,
-					idioma: data.idioma,
-				};
-
-				await createBulletin(newBulletin);
-				toast("El boletín ha sido creada satisfactoriamente ✅");
-				onAdd();
-				reset();
-				onClose(); 
-				setPreview(null);
-			} catch (error) {
-				console.error("Error al convertir imagen", error);
-			}
+	useEffect(() => {
+		if (currentEvent) {
+		  setValue("evento", String(currentEvent.idEvent));
 		}
+	  }, [currentEvent, setValue]);
+	
+	
+	const onSubmit = async (data: BulletinFormValues) => {
+			const toastId = toast.loading("Procesando boletines...");
+		
+		if (!currentEvent) {
+			throw new Error("No hay un evento seleccionado");
+			return;
+		}
+		try {
+			
+			const base64Image = await fileToBase64(data.foto);
+			const newBulletin: NewBulletinRequestType = {
+			titulo: data.titulo,
+          	subtitulo: "no mandar subtitulo",
+			fecha: new Date().toISOString().split("T")[0],
+			descripcion: data.descripcion,
+			url: data.url,
+			evento: String(currentEvent.idEvent),
+			tipoprensa: "2",
+			foto: base64Image,
+			idioma: data.idioma,
+			};
+			await createBulletin(newBulletin);
+			toast.success("El boletín ha sido creada satisfactoriamente ✅", { id: toastId });
+			onAdd();
+			reset();
+			onClose(); 
+			setPreview(null);
+		} catch (error) {
+		  console.error("Error al convertir imagen",{
+		  error,
+		  inputData: { ...data, foto: "[BASE64_REDUCIDO]" },
+		});
+		toast.error( error instanceof Error ? error.message : "Error inesperado al procesar",
+			{ id: toastId }
+		  );
+		} 
 	};
 
 	return (

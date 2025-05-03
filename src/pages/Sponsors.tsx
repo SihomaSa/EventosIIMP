@@ -11,9 +11,12 @@ import { getSponsors } from "@/components/services/sponsorsService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
+import { toast } from "sonner";
 
 type LanguageTab = "all" | "en" | "sp";
 export default function Sponsors() {
+  const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [sponsors, setSponsors] = useState<SponsorType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,24 +33,47 @@ export default function Sponsors() {
   const fetchSponsors = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const data = await getSponsors();
+      setLoading(true);
+      setError(null);
+
+      const eventId = selectedEvent?.idEvent.toString();
+      const data = await getSponsors(eventId);
       setSponsors(data || []);
       setLastUpdated(new Date().toLocaleTimeString());
-      if (error) setError(null);
+      
     } catch (err) {
-      setError("Error al obtener los auspiciadores");
-      console.error(err);
+      let errorMessage = "Error al obtener los auspiciadores";
+    
+    if (err instanceof Error) {
+      errorMessage = err.message.includes('Failed to fetch')
+        ? "Error de conexión con el servidor. Verifique su conexión a internet."
+        : err.message;
+    }
+    
+    setError(errorMessage);
+    toast.error(errorMessage);
+    console.error('Error fetching ads:', err);
+    
+    // Opcional: Reintentar después de 5 segundos
+    const retryTimer = setTimeout(() => {
+      fetchSponsors();
+      clearTimeout(retryTimer);
+    }, 5000);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error]);
+  }, [selectedEvent]);
 
   useEffect(() => {
     fetchSponsors();
   }, [fetchSponsors, sponsorsUpdated]);
 
   const handleAddSponsor = () => {
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
     setSponsorsUpdated((prev) => prev + 1);
     setIsSponsorModalOpen(false);
   };
@@ -117,20 +143,30 @@ export default function Sponsors() {
   const emptyState = useMemo(() => (
     <div className="flex flex-col items-center justify-center py-12 text-center text-gray-600">
       <Newspaper size={48} className="text-gray-300 mb-4" />
-      <h3 className="text-lg font-semibold mb-2">
+      {/* <h3 className="text-lg font-semibold mb-2">
         {searchTerm.trim() ? "No se encontraron auspiciadores" : "Aún no hay auspiciadores registrados"}
-      </h3>
+      </h3> */}
+      <h3 className="text-lg font-medium text-gray-700 mb-2">
+          {selectedEvent 
+            ? `No hay auspiciadores para ${selectedEvent.des_event}`
+            : "No hay auspiciadores"}
+        </h3>
       <p className="text-sm mb-4">
-        {searchTerm.trim() ? "Intenta con otro término de búsqueda" : "Agrega un nuevo auspiciador para comenzar."}
+        {searchTerm.trim()
+          ? "Intenta con otro término de búsqueda" 
+            : selectedEvent
+              ? `Aún no hay publicidades disponibles para este evento.`
+              : "Seleccione un evento para ver sus publicidades o agregue nuevas."}
       </p>
       <Button
         onClick={() => setIsSponsorModalOpen(true)}
         className="cursor-pointer bg-primary hover:bg-primary/90"
       >
-        <Plus size={16} className="mr-1" /> Agregar auspiciador
+        <Plus size={16} className="mr-1" /> 
+        Agregar auspiciador
       </Button>
     </div>
-  ), [searchTerm]);
+  ), [searchTerm, selectedEvent]);
 
   const loadingSkeletons = useMemo(() => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -176,8 +212,15 @@ export default function Sponsors() {
   return (
     <div className="p-4 xl:p-6 flex flex-col">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Auspiciadores</h1>
-        <p className="text-gray-500 mt-1">Administre todos los auspiciadores del evento</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Gestión de Auspiciadores
+        </h1>
+        
+        <p className="text-gray-500 mt-1">
+          {selectedEvent 
+            ? `Administrando auspiciadores para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus auspiciadores"}
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -316,6 +359,17 @@ export default function Sponsors() {
 
 
       <div className="mt-4 text-sm text-gray-500 flex justify-between items-center">
+      <span>
+          {!loading && filteredSponsors.length > 0
+            ? `Mostrando ${filteredSponsors.length} ${
+                filteredSponsors.length === 1 ? "Auspiciador" : "Auspiciadores"
+              }${
+                selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
+                  : ""
+              }`
+            : ""}
+        </span>
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
@@ -323,9 +377,12 @@ export default function Sponsors() {
         <Dialog open={isSponsorModalOpen} onOpenChange={setIsSponsorModalOpen}>
         <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <EditSponsorForm
-             
               onClose={() => setIsSponsorModalOpen(false)}
               onAdd={handleAddSponsor}
+              selectedEvent={selectedEvent ? { 
+                idEvent: selectedEvent.idEvent.toString(),
+                des_event: selectedEvent.des_event
+              } : undefined}
             />
            </DialogContent>
       </Dialog>

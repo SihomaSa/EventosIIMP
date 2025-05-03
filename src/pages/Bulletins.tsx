@@ -10,10 +10,13 @@ import EditPressForm from "@/components/press/EditPressForm";
 import UpdatePressModal from "@/components/press/UpdatePressModal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useEventStore } from "../stores/eventStore"; 
+import { toast } from "sonner";
 
 type LanguageTab = "all" | "en" | "sp";
 
 export default function Bulletins() {
+  const {selectedEvent } = useEventStore();
   const [pressNotes, setPressNotes] = useState<PressNoteType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,39 +35,58 @@ export default function Bulletins() {
   const fetchPressNotes = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const data = await getPressNotes();
+      setLoading(true);
+      setError(null);
+      const eventId = selectedEvent?.idEvent.toString();
+      const data = await getPressNotes(eventId);
       setPressNotes(
         data?.filter((pressnote) => pressnote.idTipPre === 2) || []
       );
-      if (error) setError(null);
+      
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
-      setError("Error al obtener las boletines de prensa");
-      console.error(err);
+      let errorMessage = "Error al obtener las notas de prensa";
+      if (err instanceof Error) {
+        errorMessage = err.message.includes('Failed to fetch')
+          ? "Error de conexión con el servidor. Verifique su conexión a internet."
+          : err.message;
+      }
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error('Error fetching ads:', err);
+      // Opcional: Reintentar después de 5 segundos
+       const retryTimer = setTimeout(() => {
+      fetchPressNotes();
+      clearTimeout(retryTimer);
+    }, 5000);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error]);
+  }, [selectedEvent]);
 
   useEffect(() => {
     fetchPressNotes();
   }, [pressNotesUpdated, fetchPressNotes]);
 
-  const handleAddPressNote = useCallback(() => {
+  const handleAddPressNote = () => {
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
     setPressNotesUpdated((prev) => prev + 1);
     setIsAddModalOpen(false);
-  }, []);
+  };
 
-  const handleUpdatePressNote = useCallback(() => {
+  const handleUpdatePressNote = () => {
     setPressNotesUpdated((prev) => prev + 1);
     setSelectedPressNote(null);
     setIsUpdateModalOpen(false);
-  }, []);
+  };
 
-  const handleDeletePressNote = useCallback(() => {
+  const handleDeletePressNote = () => {
     setPressNotesUpdated((prev) => prev + 1);
-  }, []);
+  };
 
   const openUpdateModal = useCallback((pressNote: PressNoteType) => {
     setSelectedPressNote(pressNote);
@@ -122,8 +144,10 @@ export default function Bulletins() {
     () => (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Newspaper size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No hay boletines de prensa
+          <h3 className="text-lg font-medium text-gray-700 mb-2">
+          {selectedEvent 
+            ? `No hay boletines de prensa para ${selectedEvent.des_event}`
+            : "No hay boletines de prensa disponibles"}
         </h3>
         <p className="text-gray-500 max-w-md mb-6">
           {searchTerm
@@ -132,7 +156,9 @@ export default function Bulletins() {
             ? `No hay boletines de prensa en ${
                 activeLanguage === "en" ? "inglés" : "español"
               }`
-            : "Aún no hay boletines de prensa disponibles. Haga clic en el botón 'Agregar nueva boletines' para comenzar."}
+              : selectedEvent
+              ? `Aún no hay boletines de prensa disponibles para este evento.`
+              : "Seleccione un evento para ver sus boletines de prensa o agregue nuevas."}
         </p>
         <Button
           onClick={() => setIsAddModalOpen(true)}
@@ -143,7 +169,7 @@ export default function Bulletins() {
         </Button>
       </div>
     ),
-    [searchTerm, activeLanguage]
+    [searchTerm, activeLanguage, selectedEvent]
   );
 
   // Updated loadingSkeletons to match PressCard design
@@ -219,7 +245,9 @@ export default function Bulletins() {
           Gestión de boletines de prensa
         </h1>
         <p className="text-gray-500 mt-1">
-          Administre todos los boletines de prensa
+          {selectedEvent 
+            ? `Administrando todos los boletines de prensa para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus boletines de prensa."}
         </p>
       </div>
 
@@ -350,6 +378,8 @@ export default function Bulletins() {
               }${
                 activeLanguage !== "all"
                   ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
                   : ""
               }`
             : ""}
@@ -363,6 +393,10 @@ export default function Bulletins() {
             tipoprensa={2}
             onClose={() => setIsAddModalOpen(false)}
             onAdd={handleAddPressNote}
+            selectedEvent={selectedEvent ? { 
+              idEvent: selectedEvent.idEvent.toString(),
+              des_event: selectedEvent.des_event
+            } : undefined}
           />
         </DialogContent>
       </Dialog>

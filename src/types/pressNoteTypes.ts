@@ -1,4 +1,4 @@
-export interface PressNoteType {
+export interface PressNoteType {//GET
   idTipPre: number;
   idPrensa: number;
   titulo: string;
@@ -15,7 +15,8 @@ export interface PressNoteType {
   tipoprensa: number;
   ididioma: string;
 }
-export interface NewPressNoteType {
+export interface NewPressNoteType {//POST
+  evento: string;
   titulo: string;
   subtitulo: string;
   fecha: string;
@@ -24,7 +25,7 @@ export interface NewPressNoteType {
   foto: string;
   idioma: string;
 }
-export interface NewPressNoteRequestType {
+export interface NewPressNoteRequestType {//PUT
   titulo: string;
   fecha?: string;
   url: string;

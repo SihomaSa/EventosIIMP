@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
-import { PressNoteType } from "@/types/pressNoteTypes";
+import { PressNoteType, NewPressNoteRequestType } from "@/types/pressNoteTypes";
 import { cn } from "@/lib/utils";
 import {
   CalendarIcon,
@@ -121,10 +121,11 @@ export default function UpdatePressModal({
   const onSubmit = async (data: PressNoteFormValues) => {
     try {
       setIsSubmitting(true);
+      console.log("Datos antes de enviar:", data);
       const isPhotoChanged = data.foto !== pressNote.foto;
       const tipoprensa = pressNote.idTipPre;
 
-      await updatePressNote({
+      const editPressNote: NewPressNoteRequestType={
         evento: 1,
         idNews: pressNote.idPrensa,
         tipoprensa: tipoprensa,
@@ -133,8 +134,9 @@ export default function UpdatePressModal({
         titulo: data.titulo,
         ...(tipoprensa !== 2 && { fecha: data.fecha }),
         ...(isPhotoChanged && { foto: data.foto }),
-      });
-
+      };
+      console.log("Actualizando publicidad con:", editPressNote);
+      await updatePressNote(editPressNote);
       onUpdate();
 
       onClose();

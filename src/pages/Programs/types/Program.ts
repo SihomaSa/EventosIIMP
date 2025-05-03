@@ -5,7 +5,7 @@ export type Program = {
   descripcion?: string;
 };
 
-export type ProgramDetail = {
+export type ProgramDetail = { //GET
   descripcion: string;
   idPrograma: number;
   idEvento: number;

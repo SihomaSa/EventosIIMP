@@ -10,12 +10,14 @@ import EditPressForm from "@/components/press/EditPressForm";
 import UpdatePressModal from "@/components/press/UpdatePressModal";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-// import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
+import { useEventStore } from "../stores/eventStore"; 
+
+import { toast } from "sonner";
 
 type LanguageTab = "all" | "en" | "sp";
 
 export default function PressNotes() {
-  // const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
+  const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [pressNotes, setPressNotes] = useState<PressNoteType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,53 +33,91 @@ export default function PressNotes() {
     new Date().toLocaleTimeString()
   );
 
+  // const fetchPressNotes = useCallback(async () => {
+  //   try {
+  //     setIsRefreshing(true);
+  //     setLoading(true);
+  //     setError(null);
+      
+  //     const data = await getPressNotes();
+      
+  //     // const filteredData = selectedEvent 
+  //     // ? (data || []).filter(note => note.evento === selectedEvent.evento)
+  //     // : data || [];
+
+
+  //     setPressNotes(
+  //       data?.filter((pressnote) => pressnote.idTipPre === 1) || []
+  //     );
+  //     if (error) setError(null);
+  //     setLastUpdated(new Date().toLocaleTimeString());
+  //   } catch (err) {
+  //     setError("Error al obtener las notas de prensa");
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //     setIsRefreshing(false);
+  //   }
+  // }, [error]);
   const fetchPressNotes = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const data = await getPressNotes();
-      
-      // const filteredData = selectedEvent 
-      // ? (data || []).filter(note => note.evento === selectedEvent.evento)
-      // : data || [];
+      setLoading(true);
+      setError(null);
 
+      const eventId = selectedEvent?.idEvent.toString();
+      const data = await getPressNotes(eventId);
 
-      setPressNotes(
-        data?.filter((pressnote) => pressnote.idTipPre === 1) || []
-      );
-      if (error) setError(null);
+      setPressNotes(data|| [] );
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
-      setError("Error al obtener las notas de prensa");
-      console.error(err);
+      let errorMessage = "Error al obtener las notas de prensa";
+      if (err instanceof Error) {
+        errorMessage = err.message.includes('Failed to fetch')
+          ? "Error de conexión con el servidor. Verifique su conexión a internet."
+          : err.message;
+      }
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error('Error fetching ads:', err);
+      // Opcional: Reintentar después de 5 segundos
+       const retryTimer = setTimeout(() => {
+      fetchPressNotes();
+      clearTimeout(retryTimer);
+    }, 5000);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error]);
+  }, [selectedEvent]);
 
   useEffect(() => {
     fetchPressNotes();
   }, [pressNotesUpdated, fetchPressNotes]);
 
-  const handleAddPressNote = useCallback(() => {
+  const handleAddPressNote = () => {
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
     setPressNotesUpdated((prev) => prev + 1);
     setIsAddModalOpen(false);
-  }, []);
+  };
 
-  const handleUpdatePressNote = useCallback(() => {
+  const handleUpdatePressNote = () => {
     setPressNotesUpdated((prev) => prev + 1);
     setSelectedPressNote(null);
     setIsUpdateModalOpen(false);
-  }, []);
+  };
 
-  const handleDeletePressNote = useCallback(() => {
+  const handleDeletePressNote =() => {
     setPressNotesUpdated((prev) => prev + 1);
-  }, []);
+  };
 
-  const openUpdateModal = useCallback((pressNote: PressNoteType) => {
+  const openUpdateModal = (pressNote: PressNoteType) => {
     setSelectedPressNote(pressNote);
     setIsUpdateModalOpen(true);
-  }, []);
+  };
 
   // const handleRefresh = useCallback(() => {
   //   fetchPressNotes();
@@ -131,7 +171,9 @@ export default function PressNotes() {
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Newspaper size={48} className="text-gray-300 mb-4" />
         <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No hay notas de prensa
+          {selectedEvent 
+            ? `No hay notas de prensa para ${selectedEvent.des_event}`
+            : "No hay notas de prensa disponibles"}
         </h3>
         <p className="text-gray-500 max-w-md mb-6">
           {searchTerm
@@ -140,7 +182,10 @@ export default function PressNotes() {
             ? `No hay notas de prensa en ${
                 activeLanguage === "en" ? "inglés" : "español"
               }`
-            : "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
+              : selectedEvent
+            ? `Aún no hay notas de prensa disponibles para este evento.`
+            : "Seleccione un evento para ver sus notas de prensa o agregue nuevas."}
+        
         </p>
         <Button
           onClick={() => setIsAddModalOpen(true)}
@@ -151,7 +196,7 @@ export default function PressNotes() {
         </Button>
       </div>
     ),
-    [searchTerm, activeLanguage]
+    [searchTerm, activeLanguage, selectedEvent]
   );
 
   // Updated loadingSkeletons to match PressCard design
@@ -227,7 +272,9 @@ export default function PressNotes() {
           Gestión de Notas de Prensa
         </h1>
         <p className="text-gray-500 mt-1">
-          Administre todas las notas de prensa del evento
+          {selectedEvent 
+            ? `Administrando notas de prensa para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus notas de prensa."}
         </p>
       </div>
 
@@ -358,6 +405,8 @@ export default function PressNotes() {
               }${
                 activeLanguage !== "all"
                   ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
                   : ""
               }`
             : ""}
@@ -371,6 +420,10 @@ export default function PressNotes() {
             tipoprensa={1}
             onClose={() => setIsAddModalOpen(false)}
             onAdd={handleAddPressNote}
+            selectedEvent={selectedEvent ? { 
+              idEvent: selectedEvent.idEvent.toString(),
+              des_event: selectedEvent.des_event
+            } : undefined}
           />
         </DialogContent>
       </Dialog>

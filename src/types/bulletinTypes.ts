@@ -12,9 +12,11 @@ export interface BulletinType {//GET
     url: string;
     fecha: string;
     estado: number;
+    evento: string;
   }  
  
   export interface NewBulletinType {//POST
+    evento: string;
     titulo: string;
     subtitulo: string;
     fecha: string;

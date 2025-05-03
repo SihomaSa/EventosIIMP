@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import { AdType } from "../types/adTypes";
 import { Plus, RefreshCw, Newspaper, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-
 import AdCard from "@/components/ads/AdCard";
 import UpdateAdsModal from "@/components/ads/UpdateAdsModal";
 import EditAdsForm from "@/components/ads/EditAdsForm";
@@ -31,95 +31,92 @@ export default function Ads() {
   );
 
   const fetchAds = useCallback(async () => {
-    try {
-      setIsRefreshing(true);
-      const data = await getAds();
-      
-      // Filtrar ads por el evento seleccionado
-      const filteredData = selectedEvent 
-        ? (data || []).filter(ad => ad.idEvento === selectedEvent.idEvent)
-        : data || [];
-      
-      setAds(filteredData);
-      if (error) setError(null);
-      setLastUpdated(new Date().toLocaleTimeString());
-    } catch (err) {
-      setError("Error al obtener las publicidades");
-      console.error(err);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
+  try {
+    setIsRefreshing(true);
+    setLoading(true);
+    setError(null);
+    
+    const eventId = selectedEvent?.idEvent.toString();
+    const data = await getAds(eventId);
+    
+    setAds(data || []);
+    setLastUpdated(new Date().toLocaleTimeString());
+  } catch (err) {
+    let errorMessage = "Error al obtener las publicidades";
+    
+    if (err instanceof Error) {
+      errorMessage = err.message.includes('Failed to fetch')
+        ? "Error de conexión con el servidor. Verifique su conexión a internet."
+        : err.message;
     }
-  }, [error, selectedEvent]); // Añade selectedEvent como dependencia
+    
+    setError(errorMessage);
+    toast.error(errorMessage);
+    console.error('Error fetching ads:', err);
+    
+    // Opcional: Reintentar después de 5 segundos
+    const retryTimer = setTimeout(() => {
+      fetchAds();
+      clearTimeout(retryTimer);
+    }, 5000);
+  } finally {
+    setLoading(false);
+    setIsRefreshing(false);
+  }
+}, [selectedEvent]);
 
   useEffect(() => {
     fetchAds();
   }, [adsUpdated, fetchAds]);
 
   const handleadsAd = () => {
-    setAdsUpdated((prev) => prev + 1);
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
+    setAdsUpdated(prev => prev + 1);
     setIsadsModalOpen(false);
   };
 
   const handleUpdateAd = () => {
-    setLoading(true); 
-    setAdsUpdated((prev) => prev + 1);
+    setAdsUpdated(prev => prev + 1);
     setSelectedAd(null);
     setIsUpdateModalOpen(false);
   };
 
   const handleDeleteAd = () => {
-    setAdsUpdated((prev) => prev + 1);
+    setAdsUpdated(prev => prev + 1);
   };
 
   const openUpdateModal = (ad: AdType) => {
     setSelectedAd(ad);
     setIsUpdateModalOpen(true);
   };
-  // const handleRefresh = useCallback(() => {
-  //   fetchAds();
-  // }, [fetchAds]);
+
   const handleRefresh = useCallback(() => {
-    setLoading(true);         // Mostrar skeletons
-    setIsRefreshing(true);    // Animar botón
+    setLoading(true);
+    setIsRefreshing(true);
     fetchAds().finally(() => {
-      setIsRefreshing(false); // Detener animación del botón
+      setIsRefreshing(false);
     });
   }, [fetchAds]);
-  
-  
 
-  // Helper function to get the count of notes by language
   const getLanguageCount = useCallback(
-    (language: string) => {
-      return ads.filter((note) => note.prefijoIdioma === language).length;
-    },
+    (language: string) => ads.filter(ad => ad.prefijoIdioma === language).length,
     [ads]
   );
-  // Filtered press notes based on search term and selected language tab
-  const filteredAdds = useMemo(() => {
-    if (!ads) return [];
 
-    return ads.filter((note) => {
-      // First filter by language
-      if (
-        activeLanguage !== "all" &&
-        note.prefijoIdioma.toLowerCase() !== activeLanguage
-      ) {
+  const filteredAdds = useMemo(() => {
+    return ads.filter(ad => {
+      if (activeLanguage !== "all" && ad.prefijoIdioma.toLowerCase() !== activeLanguage) {
         return false;
       }
-
-      // Then filter by search term
       if (!searchTerm) return true;
-      const lowerSearchTerm = searchTerm.toLowerCase();
-
-      return (
-        note.prefijoIdioma &&
-        note.prefijoIdioma.toLowerCase().includes(lowerSearchTerm)
-      );
+      return ad.prefijoIdioma?.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [ads, searchTerm, activeLanguage]);
 
+  // const emptyState = useMemo(
   const emptyState = useMemo(
     () => (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -368,12 +365,17 @@ export default function Ads() {
         <span className="text-xs">Última actualización: {lastUpdated}</span>
       </div>
 
+      {/* Modals */}
       {isadsModalOpen && (
         <Dialog open={isadsModalOpen} onOpenChange={setIsadsModalOpen}>
           <DialogContent className="w-full max-w-md max-h-[90vh] overflow-y-auto">
             <EditAdsForm
               onClose={() => setIsadsModalOpen(false)}
               onAdd={handleadsAd}
+              selectedEvent={selectedEvent ? { 
+                idEvent: selectedEvent.idEvent.toString(),
+                des_event: selectedEvent.des_event
+              } : undefined}
             />
           </DialogContent>
         </Dialog>

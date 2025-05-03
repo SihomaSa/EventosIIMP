@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { ImageInput } from "@/components/ImageInput";
 import { createSponsor } from "@/components/services/sponsorsService";
 import { useEventStore } from "@/stores/eventStore";
@@ -36,19 +34,21 @@ const sponsorSchema = z.object({
 	idioma: z.enum(["1", "2"], {
 		message: "Selecciona un idioma válido",
 	}),
+  idEvento: z.string().min(1, "Se requiere un evento"),
 });
 
 type SponsorFormValues = z.infer<typeof sponsorSchema>;
 export default function EditSponsorModal({
   onAdd,
- 
   onClose,
+  selectedEvent,
 }:  {
 	onAdd: () => void;
- 
 	onClose: () => void;
+  selectedEvent?: { idEvent: string; des_event: string };
 }) {
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
 	const {
     register,
     handleSubmit,
@@ -65,6 +65,7 @@ export default function EditSponsorModal({
       categoria: "",
       idioma: "2",
       descripcion: "",
+      idEvento: currentEvent?.idEvent ? String(currentEvent.idEvent) : "",
     },
   });
   const [preview, setPreview] = useState<string | null>(null);
@@ -75,6 +76,9 @@ export default function EditSponsorModal({
 	const idiomaSeleccionado = watch("idioma");
 	// 🚀 Cargar categorías
 	useEffect(() => {
+    if (currentEvent) {
+      setValue("idEvento", String(currentEvent.idEvent));
+    }
 		(async () => {
 			try {
 				const data = await getSponsorCategories();
@@ -83,24 +87,21 @@ export default function EditSponsorModal({
 				setLoading(false);
 			}
 		})();
-	}, []);
+	}, [currentEvent, setValue]);
+
   const filteredCategories = sponsorCategories.filter(
 		(cat) => cat.idIdioma === idiomaSeleccionado
 	);
 
   const onSubmit = async (data: SponsorFormValues) => {
       const toastId = toast.loading("Procesando auspiciador...");
-
       try {
-        if (!selectedEvent) throw new Error("No hay evento seleccionado");
-
+        if (!currentEvent) throw new Error("No hay evento seleccionado");
         // 🔥 Ahora usa `fileToBase64` que ya optimiza SVG antes de convertirlo
         const base64Image = await fileToBase64(data.foto);
-
         const sponsorData = {
-
             descripcion: data.descripcion,
-            idEvento: String(selectedEvent.idEvent),
+            idEvento: String(currentEvent.idEvent),
             foto: base64Image,
             url: data.url,
             categoria: data.categoria,

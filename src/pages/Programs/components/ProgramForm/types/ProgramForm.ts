@@ -1,7 +1,7 @@
-export type ProgramForm = {
+export type ProgramForm = {//POST
   fechaPrograma: string;
   descripcionPro: string;
-  idEvento: number;
+  idEvento: number|string;
   idPrograma?: number;
   detalles?: {
     descripcionBody?: string;

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
 import { Languages, Globe } from "lucide-react";
 
+
 type Props = {
   programs: Program[];
   programCategories: ProgramCategory[];
@@ -19,10 +20,11 @@ const ProgramContainer: FC<Props> = ({
   programs,
   programCategories,
   selectedDate,
+  
   onRefreshPrograms,
 }) => {
   const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
-
+  
   const programsByLanguage = useMemo(() => {
     const programsForSelectedDate = programs.filter(
       (program) => program.fechaPrograma === selectedDate

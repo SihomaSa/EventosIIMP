@@ -25,9 +25,8 @@ const getApiUrl = (endpoint: string, id?: string | number): string => {
   return id ? `${baseUrl.replace(/\/$/, '')}/${id}` : baseUrl;
 };
 
-const ProgramsService = {
-  getPrograms: async () => {
-    const res = await fetch(getApiUrl("GET", "1"));
+const ProgramsService = { getPrograms: async (eventId: string = "1") => {
+    const res = await fetch(getApiUrl("GET", eventId));
     if (!res.ok) throw new Error("Error al obtener los programas");
     const data = await res.json();
     return data as Program[];

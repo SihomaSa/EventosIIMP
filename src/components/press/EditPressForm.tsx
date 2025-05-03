@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect  } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -30,6 +30,8 @@ import {
 import { cn } from "@/lib/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
 
+
+
 const PressNoteSchema = z.object({
   titulo: z.string().min(1, "El título es obligatorio"),
   url: z.string().url("Debe ser una URL válida"),
@@ -41,6 +43,7 @@ const PressNoteSchema = z.object({
     required_error: "La fecha es obligatoria",
     invalid_type_error: "Seleccione una fecha válida",
   }),
+  evento: z.string().min(1, "Se requiere un evento"),
 });
 
 type PressNoteFormValues = z.infer<typeof PressNoteSchema>;
@@ -49,12 +52,15 @@ export default function EditPressNoteForm({
   onAdd,
   onClose,
   tipoprensa,
+  selectedEvent,
 }: {
   onAdd: () => void;
   onClose: () => void;
   tipoprensa: number;
+  selectedEvent?: { idEvent: string; des_event: string };
 }) {
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,18 +82,26 @@ export default function EditPressNoteForm({
       foto: undefined,
       idioma: "2",
       fecha: new Date(),
+      evento: currentEvent?.idEvent ? String(currentEvent.idEvent) : "",
     },
   });
 
   const handleLanguageChange = (value: LanguageType) => {
     setValue("idioma", value, { shouldValidate: true });
   };
-
+  useEffect(() => {
+      if (currentEvent) {
+        setValue("evento", String(currentEvent.idEvent));
+      }
+    }, [currentEvent, setValue]);
+  
   const selectedLanguage = watch("idioma");
 
   const onSubmit = async (data: PressNoteFormValues) => {
-    if (!selectedEvent) {
-      toast.error("No hay un evento seleccionado");
+    const toastId = toast.loading("Procesando nota de prensa...");
+
+    if (!currentEvent) {
+      throw new Error("No hay un evento seleccionado");
       return;
     }
 
@@ -97,7 +111,7 @@ export default function EditPressNoteForm({
       const newPressNote: NewPressNoteRequestType = {
         titulo: data.titulo,
         url: data.url,
-        evento: String(selectedEvent.idEvent),
+        evento: String(currentEvent.idEvent),
         tipoprensa: tipoprensa === 2 ? 2 : 1,
         foto: base64Image,
         idioma: data.idioma,
@@ -105,13 +119,18 @@ export default function EditPressNoteForm({
       };
 
       await createPressNote(newPressNote);
-      toast.success("La nota de prensa ha sido creada satisfactoriamente");
+      toast.success("La nota de prensa ha sido creada satisfactoriamente", { id: toastId });
       reset();
       onAdd();
       onClose();
     } catch (error) {
-      console.error("Error al crear la nota de prensa", error);
-      toast.error("Error al crear la nota de prensa");
+      console.error("Error al crear la nota de prensa", {
+        error,
+        inputData: { ...data, foto: "[BASE64_REDUCIDO]" },
+      });
+      toast.error( error instanceof Error ? error.message : "Error inesperado al procesar",
+        { id: toastId }
+      );
     } finally {
       setIsSubmitting(false);
     }

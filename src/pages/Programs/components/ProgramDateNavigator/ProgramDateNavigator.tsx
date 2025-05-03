@@ -4,13 +4,16 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 type Props = {
   selectedDate: string | null;
+  
   setSelectedDate: (date: string | null) => void;
   dates: string[];
+
 };
 
 const ProgramDateNavigator: FC<Props> = ({
   dates,
   selectedDate,
+ 
   setSelectedDate,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

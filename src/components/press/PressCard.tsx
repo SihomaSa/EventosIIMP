@@ -51,11 +51,14 @@ export default function PressCard({
       : prefijo;
   };
 
-  const formatDateValue = (dateString: string): Date => {
-    // Use UTC time with a Z suffix to prevent timezone offset issues
-    return new Date(`${dateString}T12:00:00Z`);
+  const formatDateValue = (dateString: string): Date | null => {
+    if (!dateString) return null;
+    const date = new Date(`${dateString}T12:00:00Z`);
+    return isNaN(date.getTime()) ? null : date;
   };
 
+  const formattedDate = formatDateValue(pressNote.fecha);
+  
   return (
     <>
       <Card className="border shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col p-0 gap-0">
@@ -114,9 +117,11 @@ export default function PressCard({
                 </Label>
                 <Input
                   id={`fecha-${pressNote.idPrensa}`}
-                  value={format(formatDateValue(pressNote.fecha), "PPP", {
-                    locale: es,
-                  })}
+                  value={
+                    formattedDate
+                      ? format(formattedDate, "PPP", { locale: es })
+                      : ""
+                  }
                   disabled
                   className="bg-transparent border-0 text-sm p-0 h-6 focus:ring-0 shadow-none truncate"
                 />

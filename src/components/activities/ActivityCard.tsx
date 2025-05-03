@@ -16,7 +16,7 @@ export default function ActivityCard({ expositor, openUpdateModal }: ExpositorCa
       <CardContent>
       <img
 					src={expositor.foto}
-					alt={`publicidad ${expositor.idautor}`}
+					alt={`publicidad ${expositor.idAutor}`}
 					className="object-cover h-auto max-h-full rounded-md"
 				/>
         <form className="p-2 space-y-2">
@@ -34,7 +34,7 @@ export default function ActivityCard({ expositor, openUpdateModal }: ExpositorCa
           </div>
           <div>
             <Label htmlFor="hojavida">Hoja de Vida</Label>
-            <Input id="hojavida" value={expositor.hojavida} disabled className="bg-gray-100" />
+            <Input id="hojavida" value={expositor.hojaVida} disabled className="bg-gray-100" />
           </div>
           <div className="flex justify-between">
             <Button variant="outline" disabled>
