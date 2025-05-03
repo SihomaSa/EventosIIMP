@@ -1,33 +1,12 @@
 import { FC, useState, useEffect } from "react";
 import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import {Dialog,DialogContent,DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import {Select, SelectContent,  SelectItem,  SelectTrigger,SelectValue,} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertCircle,
-  Loader2,
-  Clock,
-  Languages,
-  Info,
-  Users,
-} from "lucide-react";
+import { AlertCircle, Loader2, Clock,Languages, Info,Users,} from "lucide-react";
 import { toast } from "sonner";
 import { ProgramCategory } from "../../pages/Programs/types/Program";
 import ProgramsService from "../../pages/Programs/services/ProgramsService";
@@ -57,7 +36,7 @@ type ProgramDetailForEdit = {
 
 type ProgramForEdit = {
   fechaPrograma: string;
-  idEvento: number;
+  idEvento: number | string;
   idPrograma: number;
   descripcionPro: string;
   detalles: ProgramDetailForEdit[];
@@ -69,6 +48,7 @@ type Props = {
   date: string;
   programDescription: string;
   programId: number;
+  selectedEvent?: { idEvent: string; des_event: string };
   onUpdateSuccess?: () => void;
 };
 
@@ -78,20 +58,21 @@ const EditProgramDetailDialog: FC<Props> = ({
   date,
   programDescription,
   programId,
+  selectedEvent,
   onUpdateSuccess,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
-
   const [formData, setFormData] = useState<ProgramDetailForEdit>({
     ...programDetail,
     // Ensure autores is always an array
     autores: programDetail.autores || [],
   });
 
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
 
   // Load expositors when dialog opens
   useEffect(() => {
@@ -107,6 +88,7 @@ const EditProgramDetailDialog: FC<Props> = ({
     if (isOpen) {
       loadExpositors();
     }
+    
   }, [isOpen]);
 
   // Reset the form when the dialog opens
@@ -168,7 +150,7 @@ const EditProgramDetailDialog: FC<Props> = ({
       setError(validationError);
       return;
     }
-    if (!selectedEvent) {
+    if (!currentEvent) {
       setError("No hay un evento seleccionado");
       return;
     }
@@ -178,7 +160,7 @@ const EditProgramDetailDialog: FC<Props> = ({
       // Prepare the full program object for update
       const programToUpdate: ProgramForEdit = {
         fechaPrograma: date,
-        idEvento: selectedEvent.idEvent,
+        idEvento: currentEvent.idEvent,
         descripcionPro: programDescription,
         idPrograma: programId,
         detalles: [

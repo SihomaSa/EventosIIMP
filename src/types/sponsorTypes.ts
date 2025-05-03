@@ -2,6 +2,7 @@ import { LanguageType } from "./languageTypes";
 
 export interface SponsorType { //GET
 	idSponsor: number;
+	idEvento: string | number;
 	prefijoIdioma: string;
 	foto: string;
 	categoria: string;

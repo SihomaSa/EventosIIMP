@@ -13,8 +13,8 @@ export type ActivityTypeMap = {
   10: NewMagisterialConferenceRequest;
   11: NewRoundTableRequest;
 };
-export interface ActivityDetail {
-  idActividad: number;
+export interface ActivityDetail {//GET
+  idActividad: number;  
   idDetalleAct: number;
   desTipoActividad: string;
   responsable?: string | null;
@@ -31,6 +31,7 @@ export interface ActivityDetail {
   idIdioma?: string;
   duracion?: string;
   fechaActividad?: string;
+  idEvento: number | string;
 }
 
 export interface ActivityDay {
@@ -151,13 +152,13 @@ export interface NewRoundTableRequest extends BaseActivityRequestType {
   horaFin: string;
   horaIni: string;
 }
-export interface NewActivityDet {
+export interface NewActivityDet { //POST
   fechaActividad: string; // formato "YYYY-MM-DD"
   idEvento: number;
   idTipoActividad: 2 | 1 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
   detalles: NewActivityRequest[];
 }
-export interface GenericActivityDet {
+export interface GenericActivityDet {//PUT
   fechaActividad: string; // formato "YYYY-MM-DD"
   idEvento: number;
   idTipoActividad: 2 | 1 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;

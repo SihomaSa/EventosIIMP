@@ -101,6 +101,7 @@ interface CombinedModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: () => void;
+  selectedEvent?: { idEvent: string; des_event: string };
   existingDates?: string[];
   editActivity?: ActivityDetail;
   initialDate?: string;
@@ -117,6 +118,7 @@ export default memo(function CombinedModal({
   isOpen,
   onClose,
   onAdd,
+  selectedEvent,
   existingDates = [],
   editActivity,
   initialDate,
@@ -143,7 +145,8 @@ export default memo(function CombinedModal({
   const [loading, setLoading] = useState(false);
   const [loadingTypes, setLoadingTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+    const currentEvent = selectedEvent || eventFromStore;
   const [fechaIniOpen, setFechaIniOpen] = useState(false);
   const [fechaFinOpen, setFechaFinOpen] = useState(false);
 
@@ -294,7 +297,7 @@ export default memo(function CombinedModal({
     return "";
   };
 
-  const formatDateValue = (value: string | undefined | null): string => {
+  const formatDateValue = useCallback((value: string | undefined | null): string => {
     if (!value) return "";
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return value;
@@ -308,10 +311,13 @@ export default memo(function CombinedModal({
       console.error("Failed to parse date value:", value, e);
     }
     return "";
-  };
+  }, []);
 
   useEffect(() => {
     const setupEditMode = () => {
+      if (currentEvent) {
+        setValue("evento", String(currentEvent.idEvent));
+      }
       if (
         isOpen &&
         mode === MODAL_MODES.ACTIVITY_EDIT &&
@@ -394,7 +400,7 @@ export default memo(function CombinedModal({
       }
     };
     setupEditMode();
-  }, [isOpen, mode, editActivity, setValue, activityTypesLoadedRef.current]);
+  }, [isOpen, mode, editActivity, setValue, formatDateValue,currentEvent]);
 
   const handleSelectActivity = useCallback(
     (value: number) => {
@@ -602,7 +608,7 @@ export default memo(function CombinedModal({
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      if (!selectedEvent || !activityType) return;
+      if (!currentEvent || !activityType) return;
 
       try {
         setLoading(true);
@@ -707,7 +713,7 @@ export default memo(function CombinedModal({
           await updateActivityDetail([
             {
               fechaActividad: initialDate,
-              idEvento: selectedEvent.idEvent,
+              idEvento: currentEvent.idEvent,
               idTipoActividad: localizedActivityTypeId,
               idActividad: editActivity.idActividad,
               detalles: [detalles],
@@ -719,7 +725,7 @@ export default memo(function CombinedModal({
           const newActivityDet = [
             {
               fechaActividad: selectedDate,
-              idEvento: selectedEvent.idEvent,
+              idEvento: currentEvent.idEvent,
               idTipoActividad: localizedActivityTypeId,
               detalles: [detalles],
             },
@@ -749,7 +755,7 @@ export default memo(function CombinedModal({
       }
     },
     [
-      selectedEvent,
+      currentEvent,
       activityType,
       mode,
       editActivity,

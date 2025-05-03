@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createAd } from "../services/adsService";
 import { useEventStore } from "@/stores/eventStore";
 import { fileToBase64 } from "@/utils/fileToBase64";
@@ -30,6 +30,7 @@ const adSchema = z.object({
   idioma: z.enum(["1", "2"], {
     message: "Selecciona un idioma válido",
   }),
+  evento: z.string().min(1, "Se requiere un evento"),
 });
 
 // ✅ Tipo basado en Zod
@@ -38,15 +39,18 @@ type AdFormValues = z.infer<typeof adSchema>;
 export default function EditAdsModal({
   onAdd,
   onClose,
+  selectedEvent,
 }: {
   onAdd: () => void;
   onClose: () => void;
+  selectedEvent?: { idEvent: string; des_event: string };
 }) {
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors},
     reset,
     setValue,
     watch,
@@ -56,6 +60,7 @@ export default function EditAdsModal({
       foto: undefined,
       url: "",
       idioma: "2",
+      evento: currentEvent?.idEvent ? String(currentEvent.idEvent) : "",
     },
   });
 
@@ -65,23 +70,28 @@ export default function EditAdsModal({
   const handleLanguageChange = (value: LanguageType) => {
     setValue("idioma", value, { shouldValidate: true });
   };
+  useEffect(() => {
+    if (currentEvent) {
+      setValue("evento", String(currentEvent.idEvent));
+    }
+  }, [currentEvent, setValue]);
 
   const onSubmit = async (data: AdFormValues) => {
     const toastId = toast.loading("Procesando publicidad...");
 
     try {
-      if (!selectedEvent) {
+      if (!currentEvent) {
         throw new Error("No hay evento seleccionado");
       }
 
-      // 🔥 Ahora usa `fileToBase64` que ya optimiza SVG antes de convertirlo
+      // 🔥 Ahora usa fileToBase64 que ya optimiza SVG antes de convertirlo
       const base64Image = await fileToBase64(data.foto);
 
       const adData = {
-        evento: String(selectedEvent.idEvent),
+        evento: String(currentEvent.idEvent),
         foto: base64Image,
         url: data.url,
-        idioma: data.idioma,
+        idioma: data.idioma
       };
 
       await createAd(adData);
@@ -160,3 +170,4 @@ export default function EditAdsModal({
 		</Card>
 	);
 }
+

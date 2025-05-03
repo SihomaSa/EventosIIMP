@@ -1,19 +1,8 @@
 import { Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import {Dialog,DialogContent, DialogFooter,DialogHeader, DialogTitle,DialogTrigger,DialogDescription,} from "@/components/ui/dialog";
 import { FC, useState } from "react";
-import {
-  ProgramCategory,
-  ProgramDetail,
-} from "../../pages/Programs/types/Program";
+import { ProgramCategory,ProgramDetail,} from "../../pages/Programs/types/Program";
 import { useEventStore } from "@/stores/eventStore";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -25,12 +14,14 @@ type Props = {
   programCategories: ProgramCategory[];
   programDetail: ProgramDetail;
   date: string;
+  selectedEvent?: { idEvent: string; des_event: string };
   onDeleteSuccess?: () => void;
 };
 
 const EditTitleProgramDialog: FC<Props> = ({
   programDetail,
   date,
+  selectedEvent,
   onDeleteSuccess,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +30,8 @@ const EditTitleProgramDialog: FC<Props> = ({
   const [description, setDescription] = useState(
     programDetail.descripcion || ""
   );
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
 
   // Reset the form when the dialog opens
   const handleDialogChange = (open: boolean) => {
@@ -59,7 +51,7 @@ const EditTitleProgramDialog: FC<Props> = ({
       );
       return;
     }
-    if (!selectedEvent) {
+    if (!currentEvent) {
       setError("No hay un evento seleccionado");
       return;
     }
@@ -70,7 +62,7 @@ const EditTitleProgramDialog: FC<Props> = ({
       // Send the update request
       await ProgramsService.updateProgram({
         fechaPrograma: date,
-        idEvento: selectedEvent.idEvent,
+        idEvento: currentEvent.idEvent,
         descripcionPro: description.trim(),
         idPrograma: programDetail.idPrograma,
       });

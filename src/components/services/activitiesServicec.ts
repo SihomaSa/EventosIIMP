@@ -34,8 +34,8 @@ export const getActivityTypes = async (): Promise<ActivityType[]> => {
 };
 
 // Obtener actividades
-export const getActivities = async (): Promise<ActivityDay[]> => {
-  const response = await fetch(getApiUrl("GET", "1"));
+export const getActivities = async (eventId: string = "1"): Promise<ActivityDay[]> => {
+  const response = await fetch(getApiUrl("GET", eventId));
   if (!response.ok) throw new Error("Error al obtener las actividades");
   return response.json();
 };

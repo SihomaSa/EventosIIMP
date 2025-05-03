@@ -8,8 +8,11 @@ import { Program, ProgramCategory } from "./Programs/types/Program";
 import ProgramDateNavigator from "./Programs/components/ProgramDateNavigator/ProgramDateNavigator";
 import ProgramContainer from "../components/programs/ProgramContainer";
 import NewProgramDialog from "../components/programs/NewProgramDialog";
+import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
+import { toast } from "sonner";
 
 export default function Expositors() {
+  const {selectedEvent } = useEventStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -26,14 +29,16 @@ export default function Expositors() {
   const loadData = useCallback(async () => {
     try {
       setIsRefreshing(true);
-
+      setLoading(true);
+      setError(null);
       // Load program categories
       const categories = await ProgramsService.getProgramCategories();
       setProgramCategories(categories);
 
       // Load programs
-      const programs = await ProgramsService.getPrograms();
-      setPrograms(programs);
+      const eventId = selectedEvent?.idEvent.toString();
+      const programs = await ProgramsService.getPrograms(eventId);
+      setPrograms(programs || []);
 
       // Extract unique dates
       const uniqueDates = [
@@ -46,18 +51,31 @@ export default function Expositors() {
         setSelectedDate(uniqueDates[0]);
       }
 
-      // Clear any previous errors
-      if (error) setError(null);
-
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
-      console.error("Error loading program data:", err);
-      setError("Error al cargar los datos del programa");
+      
+      let errorMessage = "Error al cargar los datos del programa";
+    
+    if (err instanceof Error) {
+      errorMessage = err.message.includes('Failed to fetch')
+        ? "Error de conexión con el servidor. Verifique su conexión a internet."
+        : err.message;
+    }
+    
+    setError(errorMessage);
+    toast.error(errorMessage);
+    console.error('Error fetching programs:', err);
+    
+    // Opcional: Reintentar después de 5 segundos
+    const retryTimer = setTimeout(() => {
+      loadData();
+      clearTimeout(retryTimer);
+    }, 5000);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error, selectedDate]);
+  }, [selectedDate, selectedEvent]);
 
   // Initial data load
   useEffect(() => {
@@ -190,8 +208,11 @@ export default function Expositors() {
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
           Programación del Evento
         </h1>
+        
         <p className="text-gray-500 mt-1">
-          Gestione toda la programación y horarios del evento
+          {selectedEvent 
+            ? `Gestione toda la programación y horarios del evento para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus programaciones"}
         </p>
       </div>
 
@@ -238,12 +259,18 @@ export default function Expositors() {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <CalendarDays size={48} className="text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-700 mb-2">
-              No hay programación disponible
-            </h3>
+          {selectedEvent 
+            ? `No hay programación disponible para ${selectedEvent.des_event}`
+            : "No hay programación"}
+        </h3>
             <p className="text-gray-500 max-w-md mb-6">
-              Aún no hay fechas programadas para este evento. Haga clic en el
-              botón 'Crear programa' para comenzar.
-            </p>
+          {searchTerm
+            ? "No hay programación disponible"
+            
+            : selectedEvent
+            ? `Aún no hay fechas programadas para este evento. Haga clic en el botón 'Crear programa' para comenzar.`
+            : "Seleccione un evento para ver sus programas o agregue nuevas."}
+        </p>
           </div>
         ) : (
           <div className="w-full overflow-x-auto">
@@ -251,6 +278,7 @@ export default function Expositors() {
               dates={dates}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
+             
             />
             {selectedDate && (
               <ProgramContainer
@@ -269,7 +297,11 @@ export default function Expositors() {
         <span>
           {selectedDate && filteredPrograms.length > 0
             ? `Mostrando ${filteredPrograms.length} ${
-                filteredPrograms.length === 1 ? "programa" : "programas"
+                filteredPrograms.length === 1 
+                ? "programa" 
+                : selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
+                  : ""
               }`
             : ""}
         </span>

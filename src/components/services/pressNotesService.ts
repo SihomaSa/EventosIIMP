@@ -36,11 +36,11 @@ export const createPressNote = async (newPressNote: NewPressNoteRequestType): Pr
   return response.json();
 };
 
-export const updatePressNote = async (newPressNote: NewPressNoteRequestType): Promise<PressNoteType> => {
+export const updatePressNote = async (editPressNote: NewPressNoteRequestType): Promise<PressNoteType> => {
   const response = await fetch(getApiUrl("PUT"), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newPressNote),
+    body: JSON.stringify(editPressNote),
   });
   if (!response.ok) throw new Error(`Error al actualizar anuncio (${response.status})`);
   return response.json();

@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { getActivities } from "@/components/services/activitiesServicec";
 import { ActivityDay, ActivityDetail } from "../types/activityTypes";
 import ActivityDayCard from "@/components/activities/ActivityDayCard";
-
 import CombinedModal from "@/components/activities/CombinedModal";
+import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
+import { toast } from "sonner";
+
 
 export default function Expositors() {
+  const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,18 +30,37 @@ export default function Expositors() {
   const fetchActivities = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const data = await getActivities();
-      setActivities(data);
-      if (error) setError(null);
+      setLoading(true);
+      setError(null);
+
+      const eventId = selectedEvent?.idEvent.toString();
+      const data = await getActivities(eventId);
+
+      setActivities(data || []);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
-      setError("Error al obtener las actividades");
-      console.error(err); // Using console.error instead of console.log for errors
+      let errorMessage = "Error al obtener las actividades";
+    
+      if (err instanceof Error) {
+        errorMessage = err.message.includes('Failed to fetch')
+          ? "Error de conexión con el servidor. Verifique su conexión a internet."
+          : err.message;
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error('Error fetching ads:', err);
+      
+      // Opcional: Reintentar después de 5 segundos
+      const retryTimer = setTimeout(() => {
+        fetchActivities();
+        clearTimeout(retryTimer);
+      }, 5000);
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [error]);
+  }, [selectedEvent]);
 
   // Only run effect when expositorsUpdated changes, not on every render
   useEffect(() => {
@@ -113,6 +135,7 @@ export default function Expositors() {
 
   // Open modal for adding a new date
   const handleAddDate = useCallback(() => {
+    
     setSelectedActivityToEdit(null);
     setInitialDate(null);
     setIsModalOpen(true);
@@ -120,10 +143,14 @@ export default function Expositors() {
 
   // Open modal for adding an activity to an existing date
   const handleAddActivity = useCallback((date: string) => {
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
     setSelectedActivityToEdit(null);
     setInitialDate(date);
     setIsModalOpen(true);
-  }, []);
+  }, [selectedEvent]);
 
   // Open modal for editing an activity
   const handleEditActivity = useCallback(
@@ -147,13 +174,18 @@ export default function Expositors() {
     () => (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <CalendarDays size={48} className="text-gray-300 mb-4" />
+        
         <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No hay actividades
+          {selectedEvent 
+            ? `No hay actividades para ${selectedEvent.des_event}`
+            : "No hay actividades"}
         </h3>
         <p className="text-gray-500 max-w-md mb-6">
           {searchTerm
             ? "No se encontraron actividades con ese término de búsqueda"
-            : "Aún no hay actividades programadas para este evento. Haga clic en el botón 'Agregar nueva fecha' para comenzar."}
+            : selectedEvent
+            ? `Aún no hay actividades programadas para este evento. Haga clic en el botón 'Agregar nueva fecha' para comenzar.`
+            : "Seleccione un evento para ver sus actividades o agregue nuevas."}
         </p>
         <Button
           onClick={handleAddDate}
@@ -164,7 +196,7 @@ export default function Expositors() {
         </Button>
       </div>
     ),
-    [searchTerm, handleAddDate]
+    [searchTerm, handleAddDate, selectedEvent]
   );
 
   // Memoize loading skeletons
@@ -195,8 +227,11 @@ export default function Expositors() {
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
           Actividades del Evento
         </h1>
+       
         <p className="text-gray-500 mt-1">
-          Gestione todas las actividades y horarios del evento
+          {selectedEvent 
+            ? `Gestione todas las actividades y horarios del evento para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus actividades"}
         </p>
       </div>
 
@@ -294,6 +329,10 @@ export default function Expositors() {
           setExpositorsUpdated((prev) => prev + 1);
           handleCloseModal();
         }}
+        selectedEvent={selectedEvent ? { 
+                idEvent: selectedEvent.idEvent.toString(),
+                des_event: selectedEvent.des_event
+              } : undefined}
         existingDates={existingDates}
         editActivity={selectedActivityToEdit || undefined}
         initialDate={initialDate || undefined}

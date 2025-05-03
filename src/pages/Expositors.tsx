@@ -10,10 +10,13 @@ import UpdateExpositorModal from "@/components/expositors/UpdateExpositorModal";
 import EditExpositorForm from "@/components/expositors/EditExpositorForm";
 import { getExpositors } from "@/components/services/expositorsService";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { useEventStore } from "../stores/eventStore"; // Importa el store de eventos
 
 type LanguageTab = "all" | "en" | "sp";
 
 export default function Expositors() {
+  const {selectedEvent } = useEventStore(); // Obtiene el evento seleccionado
   const [expositors, setExpositors] = useState<ExpositorType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,26 +30,54 @@ export default function Expositors() {
   const [activeLanguage, setActiveLanguage] = useState<LanguageTab>("all");
 
   const fetchExpositors = useCallback(async () => {
-    try {
-      setIsRefreshing(true);
-      const data = await getExpositors();
-      setExpositors(data);
-      if (error) setError(null);
-      setLastUpdated(new Date().toLocaleTimeString());
-    } catch (err) {
-      setError("Error al obtener los conferencistas");
-      console.error(err);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
+  try {
+    setIsRefreshing(true);
+    setLoading(true);
+    setError(null);
+
+    const eventId = selectedEvent?.idEvent.toString();
+    const data = await getExpositors(eventId);
+
+    if (!Array.isArray(data)) {
+      console.error("getExpositors no devolvió un arreglo:", data);
+      setError("Los datos recibidos no son válidos.");
+      setExpositors([]);
+      return;
     }
-  }, [error]);
+
+    setExpositors(data);
+    setLastUpdated(new Date().toLocaleTimeString());
+  } catch (err) {
+    let errorMessage = "Error al obtener los conferencistas";
+    if (err instanceof Error) {
+      errorMessage = err.message.includes("Failed to fetch")
+        ? "Error de conexión con el servidor. Verifique su conexión a internet."
+        : err.message;
+    }
+
+    setError(errorMessage);
+    toast.error(errorMessage);
+    console.error("Error fetching expositors:", err);
+
+    const retryTimer = setTimeout(() => {
+      fetchExpositors();
+      clearTimeout(retryTimer);
+    }, 5000);
+  } finally {
+    setLoading(false);
+    setIsRefreshing(false);
+  }
+}, [selectedEvent]);
 
   useEffect(() => {
     fetchExpositors();
   }, [expositorsUpdated, fetchExpositors]);
 
   const handleAddExpositor = () => {
+    if (!selectedEvent) {
+      toast.error("Por favor seleccione un evento primero");
+      return;
+    }
     setExpositorsUpdated((prev) => prev + 1);
     setIsExpositorModalOpen(false);
   };
@@ -87,6 +118,7 @@ export default function Expositors() {
   );
 
   const filteredExpositors = useMemo(() => {
+    if (!Array.isArray(expositors)) return [];
     return expositors.filter((expositor) => {
       // Filtrar por idioma primero
       if (
@@ -112,16 +144,21 @@ export default function Expositors() {
       <div className="flex flex-col items-center justify-center py-12 text-center text-gray-600">
         <Newspaper size={48} className="text-gray-300 mb-4" />
         <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No hay conferencista
+          {selectedEvent 
+            ? `No hay conferencista para ${selectedEvent.des_event}`
+            : "No hay conferencista"}
         </h3>
         <p className="text-gray-500 max-w-md mb-6">
           {searchTerm
-            ? "No se encontraron notas de prensa con ese término de búsqueda"
+            ? "No se encontraron conferencistas con ese término de búsqueda"
             : activeLanguage !== "all"
-            ? `No hay notas de prensa en ${
+            ? `No hay conferencistas en ${
                 activeLanguage === "en" ? "inglés" : "español"
               }`
-            : "Aún no hay notas de prensa disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar."}
+            : selectedEvent
+            ? `Aún no hay conferencistas disponibles. Haga clic en el botón 'Agregar nueva nota' para comenzar.`
+            : "Seleccione un evento para ver sus conferencistas o agregue nuevas."}
+        
         </p>
        
         <Button 
@@ -131,7 +168,7 @@ export default function Expositors() {
         </Button>
       </div>
     
-  ), [searchTerm, activeLanguage]);
+  ), [searchTerm, activeLanguage, selectedEvent]);
 
   const loadingSkeletons = useMemo(
     () => (
@@ -192,8 +229,11 @@ export default function Expositors() {
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
           Gestión de Conferencistas</h1>
-        <p className="text-gray-500 mt-1">
-          Administre todas los conferencistas del evento</p>
+          <p className="text-gray-500 mt-1">
+          {selectedEvent 
+            ? `Administrando todas los conferencistas para: ${selectedEvent.des_event}`
+            : "Seleccione un evento para administrar sus conferencistas"}
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 mb-6 justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -325,6 +365,8 @@ export default function Expositors() {
               }${
                 activeLanguage !== "all"
                   ? ` en ${activeLanguage === "en" ? "inglés" : "español"}`
+                  : selectedEvent
+                  ? ` para ${selectedEvent.des_event}`
                   : ""
               }`
             : ""}
@@ -338,6 +380,10 @@ export default function Expositors() {
           <EditExpositorForm
             onClose={() => setIsExpositorModalOpen(false)}
             onAdd={handleAddExpositor}
+            selectedEvent={selectedEvent ? { 
+              idEvent: selectedEvent.idEvent.toString(),
+              des_event: selectedEvent.des_event
+            } : undefined}
           />
         </DialogContent>
       </Dialog> 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Card } from "@/components/ui/card";
@@ -37,6 +37,7 @@ const ExpositorSchema = z.object({
         message: "Debe seleccionar un archivo válido (JPEG, PNG o SVG)",
       }
     ),
+  idEvento: z.string().min(1, "Se requiere un evento"),
 });
 
 
@@ -45,11 +46,14 @@ type ExpositorFormValues = z.infer<typeof ExpositorSchema>;
 export default function EditExpositorForm({
   onAdd,
   onClose,
+  selectedEvent,
 }: {
   onAdd: () => void;
   onClose: () => void;
+  selectedEvent?: { idEvent: string; des_event: string };
 }) {
-  const { selectedEvent } = useEventStore();
+  const { selectedEvent: eventFromStore } = useEventStore();
+  const currentEvent = selectedEvent || eventFromStore;
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,11 +75,18 @@ export default function EditExpositorForm({
       idIdioma: "1",
       descripcionIdioma: "2",
       foto: undefined,
+      idEvento: currentEvent?.idEvent ? String(currentEvent.idEvent) : "",
     },
   });
    const handleLanguageChange = (value: LanguageType) => {
       setValue("descripcionIdioma", value, { shouldValidate: true });
     };
+    useEffect(() => {
+        if (currentEvent) {
+          setValue("idEvento", String(currentEvent.idEvent));
+        }
+      }, [currentEvent, setValue]);
+      
   const onSubmit = async (data: ExpositorFormValues) => {
       const toastId = toast.loading("Procesando conferencista...");
       try {
@@ -86,7 +97,7 @@ export default function EditExpositorForm({
       const base64Image = await fileToBase64(data.foto);
 
       const expositorData = {
-        idEvento: selectedEvent.idEvent,
+        idEvento: Number(selectedEvent.idEvent),
         nombres: data.nombres,
         apellidos: data.apellidos,
         especialidad: data.especialidad,
