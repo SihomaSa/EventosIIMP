@@ -35,8 +35,8 @@ export default function Expositors() {
     setLoading(true);
     setError(null);
 
-    const eventId = selectedEvent?.idEvent.toString();
-    const data = await getExpositors(eventId);
+    
+    const data = await getExpositors();
 
     if (!Array.isArray(data)) {
       console.error("getExpositors no devolvió un arreglo:", data);
@@ -67,7 +67,7 @@ export default function Expositors() {
     setLoading(false);
     setIsRefreshing(false);
   }
-}, [selectedEvent]);
+}, []);
 
   useEffect(() => {
     fetchExpositors();
@@ -109,7 +109,6 @@ export default function Expositors() {
       setIsRefreshing(false); // Detener animación del botón
     });
   }, [fetchExpositors]);
-
   const getLanguageCount = useCallback(
     (language: string) => {
       return expositors.filter((note) => note.prefijoIdioma === language).length;
