@@ -109,7 +109,6 @@ export default function Expositors() {
       setIsRefreshing(false); // Detener animación del botón
     });
   }, [fetchExpositors]);
-
   const getLanguageCount = useCallback(
     (language: string) => {
       return expositors.filter((note) => note.prefijoIdioma === language).length;
